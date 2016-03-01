@@ -1,0 +1,12 @@
+{
+  "networks": [
+    {"name": "FI_MUNI","ip": "192.3.3.4","prefix": "10","maxHosts": 0},
+    {"name": "PEF_MUNI","ip": "192.1.5.2","prefix": "10","maxHosts": 0},
+    {"name": "FSPS_MUNI","ip": "10.3.2.5","prefix": "12","maxHosts": 0}
+  ],
+  "routes": [
+    {"name": "connect_router1_router2","source": "FI_MUNI","target": "PEF_MUNI","bandwidth": "200"},
+    {"name": "router1_router3","source": "FSPS_MUNI","target": "FI_MUNI","bandwidth": "400"},
+    {"name": "router2_router3","source": "PEF_MUNI","target": "FSPS_MUNI","bandwidth": "500"}
+  ]
+}

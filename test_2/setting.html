@@ -6,19 +6,7 @@
     <title>DP_v1</title>
     <script src="//d3js.org/d3.v3.min.js" charset="utf-8"></script>
     <link href="bootstrap/css/bootstrap.min.css" rel="stylesheet" media="screen">
-    <script src="source/main.js" type="text/javascript"></script>
-    <style>
-        .node {
-          stroke: #000;
-          fill: #ccc;
-          stroke-width: .5px;
-        }
-
-        .link {
-          stroke: #9ecae1;
-          stroke-width: 1.5px;
-        }
-    </style>
+    <script src="source/main.js"></script>
 </head>
 <body>
     <div class="navbar navbar-inverse navbar-fixed-top">
@@ -33,9 +21,9 @@
                 <a class="brand" href="index.html">DP v1</a>
                 <div class="nav-collapse collapse">
                     <ul class="nav">
-                        <li class="active"><a href="index.html">Topology map</a></li>
+                        <li><a href="index.html">Topology map</a></li>
                         <li><a href="graph.html">Graph</a></li>
-                        <li><a href="setting.html">Setting</a></li>
+                        <li class="active"><a href="setting.html">Setting</a></li="active">
                         <li><a href="about.html">About</a></li>
                     </ul>
                 </div>
@@ -44,20 +32,8 @@
 
         <!-- Obsah stranky -->
         <div class="container">
-            <h1>Topology map</h1>
-            <p>Zde bude canvas s topologickou mapou</p>
-            <div id="d3_graph" style="border: 1px solid black;"></div>
-            <script type="text/javascript">
-                var width = document.getElementById('d3_graph').offsetWidth;
-                var height = 600;
-                var id = "#d3_graph";
-
-                d3.select(id).attr("width", width).attr("height", height);
-
-                var my_graph = new Graph(id, width, height);
-                my_graph.create_graph();
-
-            </script>
+            <h1>Nastaveni</h1>
+            <p>nastaveni grafu</p>
         </div>
     </div>
 </body>
