@@ -18,6 +18,10 @@
           stroke: #9ecae1;
           stroke-width: 1.5px;
         }
+
+        .graph {
+            border: 1px solid black;
+        }
     </style>
 </head>
 <body>
@@ -46,9 +50,9 @@
         <div class="container">
             <h1>Topology map</h1>
             <p>Zde bude canvas s topologickou mapou</p>
-            <div id="d3_graph" style="border: 1px solid black;"></div>
+            <svg id="d3_graph" class="graph"></svg>
             <script type="text/javascript">
-                var width = document.getElementById('d3_graph').offsetWidth;
+                var width = 800;//document.getElementById('d3_graph').getBoundingClientRect().width;
                 var height = 600;
                 var id = "#d3_graph";
 
