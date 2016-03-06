@@ -1,0 +1,48 @@
+﻿<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js" /> </script>
+    <title>REST API</title>
+    <script>
+        $(document).ready(function() { 
+            var host = "192.168.51.145";
+            $.ajax({ 
+                type: "POST", 
+                url: "https://"+host+"/resources/oAuth/token", 
+                data: { "username" : "admin", 
+                    "password" : "admin", 
+                    "client_id" : "invea-tech", 
+                    "grant_type" : "password" 
+                }, 
+                
+                success: function(msg) { 
+                    token = msg.access_token; getResults(msg.access_token);
+                }, 
+                
+                error: function(a, b, err) { console.log(err ); },
+            });
+            function getResults(t) { 
+                $.ajax({ type: "GET", 
+                    url: "https://"+host+"/rest/fmc/analysis/chart", 
+                    headers: { "Authorization" : "bearer␣"+t }, 
+                    data: { search: JSON.stringify({ 
+                        "from": "2014-11-04␣00:05", 
+                        "to": "2014-11-04␣14:20", 
+                        "profile": "live", 
+                        "chart": { 
+                            "measure": "traffic", 
+                            "protocol": 1 
+                        } 
+                    }) 
+                    }, 
+                    success: function(msg) { 
+                        $("body").html(JSON.stringify(msg));
+                    },
+                    error: function (a, b, err) { console.log(err); },
+                });
+                }
+        });
+    </script>
+</head>
+<body>
+</body>
+</html>

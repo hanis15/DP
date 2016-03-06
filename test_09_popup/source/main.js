@@ -48,14 +48,12 @@ function Graph(id, width, height) {
             .enter().append("line")
             .attr("class", "link")
             .style("stroke-width", function (d) { return d.bandwidth / 100; })
-            .attr("title", function (d) { return d.name; })
-            .attr("id", function (d) { return d.name; });
-            //.on("mouseover", line_mouse_over)
-            //.on("mouseout", line_mouse_out);
+            .on("mouseover", line_mouse_over)
+            .on("mouseout", line_mouse_out);
 
 
-        //link.append("title")
-        //    .text(function (d) { return d.name; });
+        link.append("title")
+            .text(function (d) { return d.name; });
 
         node = svg.selectAll(".node")
             .data(data.networks)
@@ -70,36 +68,6 @@ function Graph(id, width, height) {
                 return d.name;
             });
 
-        $("svg line").qtip({
-            content: {
-                title: function (event, api) {
-                    return api.elements.target.attr("title");
-                },
-                text: function (event, api) {
-                    $.get({
-                        url: 'data.html' // Use href attribute as URL
-                    })
-                    .then(function (content) {
-                        // Set the tooltip content upon successful retrieval
-                        api.set('content.text', content);
-                    }, function (xhr, status, error) {
-                        // Upon failure... set the tooltip content to error
-                        api.set('content.text', status + ': ' + error);
-                    });
-                    return "Lodaing :)...";
-                },
-            },
-            hide: 'unfocus',
-            position: {
-                my: 'left center',
-                at: 'right center',
-                adjust: {
-                    screen: true
-                }
-            },
-            style: 'qtip-wiki'
-        });
-
         force.on("tick", function () {
             link.attr("x1", function (d) { return d.source.x; })
                 .attr("y1", function (d) { return d.source.y; })
@@ -109,5 +77,13 @@ function Graph(id, width, height) {
             node.attr("cx", function (d) { return d.x; })
                 .attr("cy", function (d) { return d.y; });
         });
+
+        function line_mouse_out() {
+            Popup(0);
+        }
+
+        function line_mouse_over() {
+            Popup(1, "/subGraph.html");
+        }
     }
 }
