@@ -72,6 +72,7 @@ function Graph(id, width, height) {
 
         $("svg line").qtip({
             content: {
+                button: 'Close',
                 title: function (event, api) {
                     return api.elements.target.attr("title");
                 },
@@ -89,6 +90,7 @@ function Graph(id, width, height) {
                     return "Lodaing :)...";
                 },
             },
+            show: { solo: true },
             hide: 'unfocus',
             position: {
                 my: 'left center',
