@@ -62,7 +62,7 @@ function Graph(id, width, height) {
             .enter().append("circle")
             .attr("class", "node")
             .attr("r", 20)
-            .style("fill", function(d) { return "red"; })
+            .attr("fill", function(d) { return "red"; })
             .call(force.drag);
 
         node.append("title")

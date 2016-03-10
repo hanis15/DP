@@ -4,11 +4,11 @@ function GeoGraph(id, width, height) {
     this.create_graph = load_graph;
 
     function load_graph() {
-        
+        /*
         //Define map projection
         var projection = d3.geo.mercator()
-                               .translate([width / 2, height / 2])
-                               .scale([7000]);
+                                 //.translate([width/100, height/100]);
+                               .scale([00]);
 
         //Define path generator
         var path = d3.geo.path()
@@ -16,12 +16,12 @@ function GeoGraph(id, width, height) {
 
         //Create SVG element
         var svg = d3.select(id)
+                    .append("svg")
                     .attr("width", width)
                     .attr("height", height);
 
         //Load in GeoJSON data
-        d3.json("CZE.geo.json", function (json) {
-        //d3.json("cz-all.geo.json", function (json) {
+        d3.json("geoJSON.json", function (json) {
 
             //Bind data and create one path per GeoJSON feature
             svg.selectAll("path")
@@ -29,29 +29,12 @@ function GeoGraph(id, width, height) {
                .enter()
                .append("path")
                .attr("d", path)
-               .style("fill", "white")
-               .style("stroke", "black")
-               .attr("transform", "translate(-1900,7000)");
+               .style("fill", "steelblue")
+               .attr("transform", "translate(-800,200)");
 
         });
-        
-        // nacteni dat z "configu"
-        d3.json("json/geoJSON.json", function (json) {
-            //d3.json("cz-all.geo.json", function (json) {
-
-            //Bind data and create one path per GeoJSON feature
-            svg.selectAll("path")
-               .data(json.features)
-               .enter()
-               .append("path")
-               .attr("d", path)
-               .style("fill", "red")
-               .style("stroke", "black")
-               .attr("transform", "translate(-1900,7000)");
-
-        });
-        
-        //d3.json("json/geo_v1.json", parse_data);
+        */
+        d3.json("geo.json", parse_data);
     }
 
     function parse_data(error, data) {
@@ -81,7 +64,7 @@ function GeoGraph(id, width, height) {
         */
         force = d3.layout.force()
             .charge(10)
-            //.linkDistance(200)
+            .linkDistance(200)
             .size([width, height]);
 
         force
@@ -89,29 +72,18 @@ function GeoGraph(id, width, height) {
             .links(data.routes)
             .start();
 
-        //d3.select(id)
-        //.attr("viewbox", "48 16 2 2")
-        //.attr("preserveAspectRatio", "xMinYMin meet")
-        //.attr("preserveAspectRatio", "xMinYMid meet")
-        //.attr("width", width+"px")
-        //.attr("height", height + "px");
-        //.attr("style", "border: 1px solid black;");
-
-        svg = d3.select(id)
-            .append("svg")
-            .attr("viewbox", "45 15 5 2")
-            .attr("preserveAspectRatio", "xMinYMin meet");
-        //viewBox="0 0 900 600" preserveAspectRatio="xMinYMin meet"
-            //.attr("x", "0")
-            //.attr("y", "0")
-            //.attr("height", "100%")
-            //.attr("width", "100%");
+        svg = d3.select(id).append("svg")
+            .attr("viewbox", "400 100 500 200")
+            .attr("width", width)
+            .attr("height", height);
+            //.attr("style", "border: 1px solid black;");
 
         link = svg.selectAll(".link")
             .data(data.routes)
             .enter().append("line")
             .attr("class", "link")
-            .style("stroke-width", function (d) { return d.bandwidth / 100; });
+            .style("stroke-width", function (d) { return d.bandwidth / 100; })
+            .attr("title", function (d) { return d.name; });
             //.on("mouseover", line_mouse_over)
             //.on("mouseout", line_mouse_out);
 
@@ -123,9 +95,9 @@ function GeoGraph(id, width, height) {
             .data(data.networks)
             .enter().append("circle")
             .attr("class", "node")
-            .attr("r", 0.001)
-            //.attr("cx", function (d) { return d.longitude; })
-            //.attr("cy", function (d) { return d.latitude; })
+            .attr("r", 10)
+            .attr("cx", function (d) { return d.latitude * 10; })
+            .attr("cy", function (d) { return d.longitude * 10; })
             .style("fill", function (d) { return d.name == "FI_MUNI" ? "red" : "green"; });
             //.call(force.drag)
 
@@ -166,16 +138,14 @@ function GeoGraph(id, width, height) {
             style: 'qtip-wiki'
         });
 
-        var positions = data.routes.map(function (d) { return [d.longitude, d.latitude]; });
-
         force.on("tick", function () {
-            link.attr("x1", function (d) { return d.source.longitude; })
-                .attr("y1", function (d) { return d.source.latitude; })
-                .attr("x2", function (d) { return d.target.longitude; })
-                .attr("y2", function (d) { return d.target.latitude; });
+            link.attr("x1", function (d) { return d.source.latitude * 10; })
+                .attr("y1", function (d) { return d.source.longitude * 10; })
+                .attr("x2", function (d) { return d.target.latitude * 10; })
+                .attr("y2", function (d) { return d.target.longitude * 10; });
 
-            node.attr("cx", function (d) { return d.longitude; })
-                .attr("cy", function (d) { return d.latitude; });
+            node.attr("cx", function (d) { return d.latitude * 10; })
+                .attr("cy", function (d) { return d.longitude * 10; });
         });
     }
 }

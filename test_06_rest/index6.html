@@ -4,12 +4,12 @@
     <title>REST API</title>
     <script>
         $(document).ready(function() { 
-            var host = "192.168.51.145";
+            var host = "147.251.14.50";//"collector-devel.ics.muni.cz";//"192.168.51.145";// collector-devel.ics.muni.cz
             $.ajax({ 
                 type: "POST", 
                 url: "https://"+host+"/resources/oAuth/token", 
-                data: { "username" : "admin", 
-                    "password" : "admin", 
+                data: { "username" : "369513",// UCO
+                    "password" : "5Vuhojamaj",// sekundarni heslo
                     "client_id" : "invea-tech", 
                     "grant_type" : "password" 
                 }, 

@@ -5,7 +5,7 @@ function Graph(id, width, height) {
 
     function load_graph() {
 
-        d3.json("draft_v1.json", parse_data);
+        d3.json("test_07_subgraph/draft_v1.json", parse_data);
 
     }
 

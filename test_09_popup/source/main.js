@@ -83,7 +83,7 @@ function Graph(id, width, height) {
         }
 
         function line_mouse_over() {
-            Popup(1, "/subGraph.html");
+            Popup(1, "/test_09_popup/subGraph.html");
         }
     }
 }

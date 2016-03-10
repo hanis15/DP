@@ -75,22 +75,22 @@ function Graph(id, width, height) {
 
         function line_mouse_click() {
             //alert("Link: " + d3.select(this).text());
-            var sub_rectangle = d3.select(id).append("g")//.load("data.html");
-                .attr("id", "sub_graph");
-            /*
+            //var sub_rectangle = d3.select(id).append("g")//.load("data.html");
+            //    .attr("id", "sub_graph");
+            
             var sub_rectangle = d3.select(id).append("svg")//.load("data.html");
-                .attr("viewBox", this.getAttribute("x1")+" "+this.getAttribute("y1")+" 200 300")
+                .attr("viewBox", "0 0 200 300")
                 .attr("preserveAspectRatio", "XMinYMin meet")
                 .attr("width", 400)
                 .attr("height", 400)
                 .attr("style", "border: 1px solid black;")
                 .attr("id", "sub_graph");
-            */
+            
 
             d3.select("#d3_graph").attr("fill-opacity", "0.4");
 
 
-            var sub_graph = new Graph("#sub_graph", width, height).create_graph();
+            var sub_graph = new Graph("#sub_graph", width / 2, height / 2).create_graph();
 
             //var my_sub_graph = new subGraph(d3.select(this).text());
             //my_sub_graph.create_subGraph();

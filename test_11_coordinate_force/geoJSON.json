@@ -1,0 +1,90 @@
+{ "type": "FeatureCollection",
+    "features": [
+      {
+        "geometry": {
+          "type": "Point",
+          "coordinates": [ 49.2098611, 16.5990833 ]
+        },
+        "properties": {
+          "name": "FI_MUNI",
+          "ip": "192.3.3.4",
+          "prefix": "10"
+        },
+        "type": "Feature"
+      },
+      {
+        "geometry": {
+          "type": "Point",
+          "coordinates": [ 49.1933611, 16.5773889 ]
+        },
+        "properties": {
+          "name": "PEF_MUNI",
+          "ip": "192.1.5.2",
+          "prefix": "10"
+        },
+        "type": "Feature"
+      },
+      {
+        "geometry": {
+          "type": "Point",
+          "coordinates": [ 49.1784444, 16.5689167 ]
+        },
+        "properties": {
+          "name": "FSPS_MUNI",
+          "ip": "10.3.2.5",
+          "prefix": "12"
+        },
+        "type": "Feature"
+      },
+
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "LineString",
+          "coordinates": [
+            [ 49.2098611, 16.5990833 ],
+            [ 49.1933611, 16.5773889 ]
+          ]
+        },
+        "properties": {
+          "name": "connect_router1_router2",
+          "source": "FI_MUNI",
+          "target": "PEF_MUNI",
+          "bandwidth": "200"
+        }
+     },
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "LineString",
+          "coordinates": [
+            [ 49.1784444, 16.5689167 ],
+            [ 49.2098611, 16.5990833 ]
+          ]
+        },
+        "properties": {
+          "name": "router1_router3",
+          "source": "FSPS_MUNI",
+          "target": "FI_MUNI",
+          "bandwidth": "400"
+        }
+     },
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "LineString",
+          "coordinates": [
+            [ 49.1933611, 16.5773889 ],
+            [ 49.1784444, 16.5689167 ]
+          ]
+        },
+        "properties": {
+          "name": "router2_router3",
+          "source": "PEF_MUNI",
+          "target": "FSPS_MUNI",
+          "bandwidth": "500"
+        }
+     }
+
+  ]
+}
