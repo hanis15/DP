@@ -27,19 +27,19 @@
   ],
   "routes": [
     {
-      "name": "connect_router1_router2",
+      "name": "FI-PEF",
       "source": 1,
       "target": 2,
       "bandwidth": "200"
     },
     {
-      "name": "router1_router3",
+      "name": "FSPS-FI",
       "source": 0,
       "target": 1,
       "bandwidth": "400"
     },
     {
-      "name": "router2_router3",
+      "name": "PEF-FSPS",
       "source": 2,
       "target": 0,
       "bandwidth": "500"

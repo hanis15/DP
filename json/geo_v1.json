@@ -4,36 +4,42 @@
       "name": "FI_MUNI",
       "ip": "192.3.3.4",
       "prefix": "10",
-      "maxHosts": 0
+      "maxHosts": 0,
+      "latitude": 49.2098611,
+      "longitude": 16.5990833
     },
     {
       "name": "PEF_MUNI",
       "ip": "192.1.5.2",
       "prefix": "10",
-      "maxHosts": 0
+      "maxHosts": 0,
+      "latitude": 49.1933611,
+      "longitude": 16.5773889
     },
     {
       "name": "FSPS_MUNI",
       "ip": "10.3.2.5",
       "prefix": "12",
-      "maxHosts": 0
+      "maxHosts": 0,
+      "latitude": 49.1784444,
+      "longitude": 16.5689167
     }
   ],
   "routes": [
     {
-      "name": "connect_router1_router2",
+      "name": "FI-PEF",
       "source": 1,
       "target": 2,
       "bandwidth": "200"
     },
     {
-      "name": "router1_router3",
+      "name": "FSPS-FI",
       "source": 0,
       "target": 1,
       "bandwidth": "400"
     },
     {
-      "name": "router2_router3",
+      "name": "PEF-FSPS",
       "source": 2,
       "target": 0,
       "bandwidth": "500"
