@@ -6,9 +6,9 @@
  * Released under the MIT licenses
  * http://jquery.org/license
  *
- * Date: Tue Aug 11 2015 11:19 EDT-0400
+ * Date: Tue Sep 8 2015 12:02 EDT-0400
  * Plugins: svg
- * Styles: core
+ * Styles: core css3
  */
 /*global window: false, jQuery: false, console: false, define: false */
 
