@@ -34,12 +34,6 @@ function Graph(id, width, height) {
             .style("stroke-width", function (d) { return d.bandwidth / 100; })
             .attr("title", function (d) { return d.name; })
             .attr("id", function (d) { return d.name; });
-            //.on("mouseover", line_mouse_over)
-            //.on("mouseout", line_mouse_out);
-
-
-        //link.append("title")
-        //    .text(function (d) { return d.name; });
 
         node = svg.selectAll(".node")
             .data(data.networks)
@@ -60,6 +54,14 @@ function Graph(id, width, height) {
                 title: function (event, api) {
                     return api.elements.target.attr("title");
                 },
+                text: $('<iframe height="180" width="640" src="data.html" />')
+            },
+                /*{
+                button: 'Close',
+                title: function (event, api) {
+                    return api.elements.target.attr("title");
+                },
+                    /*
                 text: function (event, api) {
                     $.get({
                         url: 'data.html' // Use href attribute as URL
@@ -72,18 +74,22 @@ function Graph(id, width, height) {
                         api.set('content.text', status + ': ' + error);
                     });
                     return "Lodaing :)...";
-                },
-            },
+                }
+            },*/
             show: { solo: true },
             hide: 'unfocus',
             position: {
-                my: 'left center',
-                at: 'right center',
+                my: 'left top',
+                at: 'right top',
                 adjust: {
                     screen: true
                 }
             },
-            style: 'qtip-wiki'
+            style: {
+                classes: 'qtip-bootstrap',
+                width: 660,
+                height: 230
+            }
         });
 
         force.on("tick", function () {

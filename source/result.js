@@ -4,20 +4,19 @@ function Graph(id, width, height) {
     this.create_graph = load_graph;
 
     function load_graph() {
-
+        d3.selectAll("#sub_graph").remove();
         d3.json("Flowmon/example_result.json", parse_data);
-
     }
 
     function parse_data(error, data) {
         if (error) throw error;
 
-        d3.json("Flowmon/example_result.json", function (json) {
+        for (var count_result = 0; count_result < data.length; count_result++) {
             var x_data = [];
             var y_data = [];
-            for (var count = 0; count < json[3].values.length; count++) {
-                x_data.push(json[3].values[count][0]);
-                y_data.push(json[3].values[count][1]);
+            for (var count = 0; count < data[count_result].values.length; count++) {
+                x_data.push(data[count_result].values[count][0]);
+                y_data.push(data[count_result].values[count][1]);
             }
 
             var margin = { top: 40, right: 40, bottom: 40, left: 60 },
@@ -43,16 +42,18 @@ function Graph(id, width, height) {
                             .scale(y)
                             .orient("left");
 
-            var svgContainer = d3.select("#d3_graph")
-                                 .attr("width", graph_width + margin.left + margin.right)
-                                 .attr("height", graph_height + margin.top + margin.bottom)
-                                 .append("g")
-                                 .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+            var svgContainer = d3.select(id)
+                                    .append("svg")
+                                    .attr("id", "sub_graph")
+                                    .attr("width", graph_width + margin.left + margin.right)
+                                    .attr("height", graph_height + margin.top + margin.bottom)
+                                    .append("g")
+                                    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
             svgContainer.append("text")
                                 .attr("font-size", "20px")
                                 .attr("transform", "translate(20, -10)")
-                                .text(json[3].channel.name);
+                                .text(data[count_result].channel.name);
 
             var barGraph = svgContainer.append("rect")
                         .attr("width", graph_width)
@@ -68,12 +69,12 @@ function Graph(id, width, height) {
                                     .attr("class", "axis")
                                     .call(yAxis);
 
-            var barWidth = graph_width / json[3].values.length;
+            var barWidth = graph_width / data[count_result].values.length;
 
             var bar = svgContainer.selectAll("g")
-                  .data(y_data)
+                    .data(y_data)
                 .enter().append("g")
-                  .attr("transform", function (d, i) { return "translate(" + i * barWidth + ",0)"; });
+                    .attr("transform", function (d, i) { return "translate(" + i * barWidth + ",0)"; });
 
             bar.append("rect")
                 .attr("y", function (d) { return y(d); })
@@ -96,9 +97,8 @@ function Graph(id, width, height) {
                         screen: true
                     }
                 },
-                style: 'qtip-wiki'
+                style: 'dark'
             });
-        });
-
+        }
     }
 }
