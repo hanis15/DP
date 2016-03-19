@@ -20,7 +20,7 @@ function Graph(id, width, height) {
                 y_data.push(json[3].values[count][1]);
             }
 
-            var margin = { top: 40, right: 40, bottom: 40, left: 40 },
+            var margin = { top: 40, right: 40, bottom: 40, left: 60 },
             graph_width = width - margin.left - margin.right,
             graph_height = height - margin.top - margin.bottom;
 
@@ -28,15 +28,15 @@ function Graph(id, width, height) {
             // meritko osy x
             var x = d3.time.scale.utc()
                                 .domain([new Date(d3.min(x_data)), new Date(d3.max(x_data))])
-                                .range([0, width]);
+                                .range([0, graph_width]);
             //meritko osy y
             var y = d3.scale.linear()
                             .domain([0, d3.max(y_data)])
-                            .range([height, 0]);
+                            .range([graph_height, 0]);
             // osa x
             var xAxis = d3.svg.axis()
                             .scale(x)
-                            .ticks(5)
+                            .ticks(8)
                             .orient("bottom");
             // osa y
             var yAxis = d3.svg.axis()
@@ -44,52 +44,60 @@ function Graph(id, width, height) {
                             .orient("left");
 
             var svgContainer = d3.select("#d3_graph")
-                                 .attr("width", width + margin.left + margin.right)
-                                 .attr("height", height + margin.top + margin.bottom)
+                                 .attr("width", graph_width + margin.left + margin.right)
+                                 .attr("height", graph_height + margin.top + margin.bottom)
                                  .append("g")
                                  .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-            svgContainer.append("rect")
-                        .attr("width", width)
-                        .attr("height", height)
+            svgContainer.append("text")
+                                .attr("font-size", "20px")
+                                .attr("transform", "translate(20, -10)")
+                                .text(json[3].channel.name);
+
+            var barGraph = svgContainer.append("rect")
+                        .attr("width", graph_width)
+                        .attr("height", graph_height)
                         .style("fill", "white");
 
             var xGroupAxis = svgContainer.append("g")
                                     .attr("class", "axis")
-                                    .attr("transform", "translate(0," + height + ")")
+                                    .attr("transform", "translate(0," + graph_height + ")")
                                     .call(xAxis);
 
             var yGroupAxis = svgContainer.append("g")
                                     .attr("class", "axis")
                                     .call(yAxis);
 
-            var barWidth = width / json[3].values.length;
+            var barWidth = graph_width / json[3].values.length;
 
             var bar = svgContainer.selectAll("g")
-                  .data(json[3].values)
+                  .data(y_data)
                 .enter().append("g")
-                  .attr("transform", function (d, i) {
-                      return "translate(" + i * barWidth + ",0)";
-                  });
+                  .attr("transform", function (d, i) { return "translate(" + i * barWidth + ",0)"; });
 
             bar.append("rect")
-                .attr("y", function (d) {
-                    return y(d[1]);
-                })
-                .attr("height", function (d) {
-                    return height - y(d[1]);
-                })
-                .attr("width", barWidth - 1);
+                .attr("y", function (d) { return y(d); })
+                .attr("height", function (d) { return graph_height - y(d); })
+                .attr("title", function (d) { return d; })
+                .attr("width", barWidth)
+                .attr("class", "bar");
 
-            bar.append("text")
-                .attr("x", barWidth / 2)
-                .attr("y", function (d) {
-                    return y(d[1]) + 3;
-                })
-                .attr("dy", ".75em")
-                .text(function (d) {
-                    return d[1];
-                });
+            $(".bar").qtip({
+                content: {
+                    text: function (event, api) {
+                        return api.elements.target.attr("title");
+                    },
+                },
+                show: { solo: true },
+                position: {
+                    my: 'left center',
+                    at: 'right center',
+                    adjust: {
+                        screen: true
+                    }
+                },
+                style: 'qtip-wiki'
+            });
         });
 
     }
