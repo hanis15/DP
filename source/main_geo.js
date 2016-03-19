@@ -17,40 +17,94 @@ function GeoGraph(id, width, height) {
         //Create SVG element
         var svg = d3.select(id)
                     .attr("width", width)
-                    .attr("height", height);
+                    .attr("height", height)
+                    .append("g");
 
+        var g = svg.append("g");
+
+        var scale0 = (width - 1) / 2 / Math.PI;
+
+        svg.append("rect")
+                    .attr("class", "overlay")
+                    .attr("width", width)
+                    .attr("height", height);
+        
+        
+            
         //Load in GeoJSON data
         d3.json("CZE.geo.json", function (json) {
         //d3.json("cz-all.geo.json", function (json) {
+            /*
+            g.append("path")
+              .datum({ type: "Sphere" })
+              .attr("class", "sphere")
+              .attr("d", path);
+
 
             //Bind data and create one path per GeoJSON feature
-            svg.selectAll("path")
+            g.selectAll("path")
                .data(json.features)
                .enter()
                .append("path")
                .attr("d", path)
                .style("fill", "white")
-               .style("stroke", "black")
-               .attr("transform", "translate(-1900,7000)");
-
+               .style("stroke", "blue")
+               .attr("transform", "translate(-1900,7000)")
+               .attr("title", function (d) { return d.id; });
+            /*
+            $("path").qtip({
+                content: {
+                    button: 'Close',
+                    title: function (event, api) {
+                        return api.elements.target.attr("title");
+                    },
+                    text: function (event, api) {
+                        $.get({
+                            url: 'data.html' // Use href attribute as URL
+                        })
+                        .then(function (content) {
+                            // Set the tooltip content upon successful retrieval
+                            api.set('content.text', content);
+                        }, function (xhr, status, error) {
+                            // Upon failure... set the tooltip content to error
+                            api.set('content.text', status + ': ' + error);
+                        });
+                        return "Lodaing :)...";
+                    },
+                },
+                show: { solo: true },
+                hide: 'unfocus',
+                position: {
+                    my: 'left center',
+                    at: 'right center',
+                    adjust: {
+                        screen: true
+                    }
+                },
+                style: 'qtip-wiki'
+            });
+            */
         });
-        
+        /*
         // nacteni dat z "configu"
         d3.json("json/geoJSON.json", function (json) {
             //d3.json("cz-all.geo.json", function (json) {
 
             //Bind data and create one path per GeoJSON feature
-            svg.selectAll("path")
+            g.selectAll("path")
                .data(json.features)
                .enter()
                .append("path")
                .attr("d", path)
                .style("fill", "red")
-               .style("stroke", "black")
+               .style("stroke", "green")
                .attr("transform", "translate(-1900,7000)");
 
         });
+        */
         
+
+        d3.select(self.frameElement).style("height", height + "px");
         //d3.json("json/geo_v1.json", parse_data);
     }
 

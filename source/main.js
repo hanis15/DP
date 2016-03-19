@@ -1,21 +1,5 @@
 // JavaScript source code
 
-var popupWindow = null;
-function Popup(status, url) {
-    if (status != 0) {
-        if (popup != null) popup.focus();
-        else {
-            var popup = open(url, "popups", "width=800,height=400");
-            popupWindow = popup;
-        }
-    }
-    else {
-        if (popupWindow != null) {
-            popupWindow.close();
-        }
-    }
-}
-
 function Graph(id, width, height) {
     this.create_graph = load_graph;
 
