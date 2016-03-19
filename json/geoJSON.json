@@ -1,11 +1,10 @@
 {
   "type": "FeatureCollection",
-  "bbox": [ 48.0, 16.0, 50.0, 17.0],
     "features": [
       {
         "geometry": {
           "type": "Point",
-          "coordinates": [ 49.2098611, 16.5990833 ]
+          "coordinates": [ 49.2098611, 14.5990833 ]
         },
         "properties": {
           "name": "FI_MUNI",
@@ -17,7 +16,7 @@
       {
         "geometry": {
           "type": "Point",
-          "coordinates": [ 49.1933611, 16.5773889 ]
+          "coordinates": [ 49.1933611, 14.5773889 ]
         },
         "properties": {
           "name": "PEF_MUNI",
@@ -29,7 +28,7 @@
       {
         "geometry": {
           "type": "Point",
-          "coordinates": [ 49.1784444, 16.5689167 ]
+          "coordinates": [ 49.1784444, 14.5689167 ]
         },
         "properties": {
           "name": "FSPS_MUNI",
@@ -44,8 +43,8 @@
         "geometry": {
           "type": "LineString",
           "coordinates": [
-            [ 49.2098611, 16.5990833 ],
-            [ 49.1933611, 16.5773889 ]
+            [ 49.2098611, 14.5990833 ],
+            [ 49.1933611, 14.5773889 ]
           ]
         },
         "properties": {
@@ -60,8 +59,8 @@
         "geometry": {
           "type": "LineString",
           "coordinates": [
-            [ 49.1784444, 16.5689167 ],
-            [ 49.2098611, 16.5990833 ]
+            [ 49.1784444, 14.5689167 ],
+            [ 49.2098611, 14.5990833 ]
           ]
         },
         "properties": {
@@ -76,8 +75,8 @@
         "geometry": {
           "type": "LineString",
           "coordinates": [
-            [ 49.1933611, 16.5773889 ],
-            [ 49.1784444, 16.5689167 ]
+            [ 49.1933611, 14.5773889 ],
+            [ 49.1784444, 14.5689167 ]
           ]
         },
         "properties": {
