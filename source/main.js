@@ -4,7 +4,7 @@ function Graph(id, width, height) {
     this.create_graph = load_graph;
 
     function load_graph() {
-        d3.json("draft_v1.json", parse_data);
+        d3.json("json/draft_v1.json", parse_data);
     }
 
     function parse_data(error, data) {
