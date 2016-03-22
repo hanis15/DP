@@ -1,6 +1,8 @@
 // JavaScript source code
 
 function geo_Leaflet_graph(id, width, height) {
+    var mymap;
+    var zoom;
     this.create_map = load_graph;
     this.set_center = nastav_stred;
     this.set_data = nacti_data;
@@ -8,24 +10,39 @@ function geo_Leaflet_graph(id, width, height) {
     function nacti_data(data) {
         var json_data = jQuery.parseJSON(data);
 
+        mymap.remove();
+        new_map(json_data);
     }
 
     // nastavi stred mapy
     function nastav_stred(value) {
+        mymap.remove();
         if (value == 'cz') {
-
+            zoom = 7;
+            d3.json("json/cz_city.geo.json", parse_data);
+        }
+        else {
+            zoom = 13;
+            d3.json("json/brno_school.geo.json", parse_data);
         }
     }
 
     // vytvori mapu
     function load_graph() {
         
-        d3.json("json/brno_school.geo.json", parse_data);
+        zoom = 7;
+        error = null;
+        d3.json("json/cz_city.geo.json", parse_data);
     }
 
     function parse_data(error, data) {
         if (error) throw error;
         
+        new_map(data);
+        
+    }
+
+    function new_map(data) {
         var x_data = [];
         var y_data = [];
         for (var count = 0; count < data.features.length; count++) {
@@ -36,7 +53,7 @@ function geo_Leaflet_graph(id, width, height) {
         }
 
         // zobrazeni mapy s ohledem na souradnice bodu
-        var mymap = L.map(id).setView([d3.median(y_data), d3.median(x_data)], 13);
+        mymap = L.map(id).setView([d3.median(y_data), d3.median(x_data)], zoom);
 
         L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
             attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
@@ -56,6 +73,5 @@ function geo_Leaflet_graph(id, width, height) {
                 return L.circleMarker(latlng, geojsonMarkerOptions);
             }
         }).addTo(mymap);
-        
     }
 }
