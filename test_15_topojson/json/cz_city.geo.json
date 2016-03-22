@@ -1,0 +1,146 @@
+{
+  "type": "FeatureCollection",
+    "features": [
+      {
+        "geometry": {
+          "type": "Point",
+          "coordinates": [ 16.612972, 49.196153 ]
+        },
+        "properties": {
+          "name": "Brno"
+        },
+        "type": "Feature"
+      },
+      {
+        "geometry": {
+          "type": "Point",
+          "coordinates": [ 14.420251, 50.087442 ]
+        },
+        "properties": {
+          "name": "Praha"
+        },
+        "type": "Feature"
+      },
+      {
+        "geometry": {
+          "type": "Point",
+          "coordinates": [ 18.266226, 49.820100 ]
+        },
+        "properties": {
+          "name": "Ostrava"
+        },
+        "type": "Feature"
+      },
+      {
+        "geometry": {
+          "type": "Point",
+          "coordinates": [ 15.051385, 50.766528 ]
+        },
+        "properties": {
+          "name": "Liberec"
+        },
+        "type": "Feature"
+      },
+      {
+        "geometry": {
+          "type": "Point",
+          "coordinates": [ 14.479216, 48.975430 ]
+        },
+        "properties": {
+          "name": "Ceske Budejivoce"
+        },
+        "type": "Feature"
+      },
+
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "LineString",
+          "coordinates": [
+            [ 16.612972, 49.196153 ],
+            [ 14.420251, 50.087442 ]
+          ]
+        },
+        "properties": {
+          "name": "connect_Brno_Praha",
+          "source": "Brno",
+          "target": "Praha"
+        }
+     },
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "LineString",
+          "coordinates": [
+            [ 16.612972, 49.196153 ],
+            [ 18.266226, 49.820100 ]
+          ]
+        },
+        "properties": {
+          "name": "Brno_Ostrava",
+          "source": "Brno",
+          "target": "Ostrava"
+        }
+     },
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "LineString",
+          "coordinates": [
+            [ 18.266226, 49.820100 ],
+            [ 14.420251, 50.087442 ]
+          ]
+        },
+        "properties": {
+          "name": "Ostrava_Praha",
+          "source": "Ostrava",
+          "target": "Praha"
+        }
+      },
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "LineString",
+          "coordinates": [
+            [ 15.051385, 50.766528 ],
+            [ 14.420251, 50.087442 ]
+          ]
+        },
+        "properties": {
+          "name": "Liberec_Praha",
+          "source": "Liberec",
+          "target": "Praha"
+        }
+      },
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "LineString",
+          "coordinates": [
+            [ 14.479216, 48.975430 ],
+            [ 16.612972, 49.196153 ]
+          ]
+        },
+        "properties": {
+          "name": "CB_Brno",
+          "source": "Ceske budejovice",
+          "target": "Brno"
+        }
+      },
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "LineString",
+          "coordinates": [
+            [ 14.479216, 48.975430 ],
+            [ 14.420251, 50.087442 ]
+          ]
+        },
+        "properties": {
+          "name": "Ostrava_Praha",
+          "source": "Ceske budejovice",
+          "target": "Praha"
+        }
+     }
+  ]
+}
