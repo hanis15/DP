@@ -54,26 +54,6 @@ function Graph(id, width, height) {
                 },
                 text: $('<iframe height="180" width="640" src="data.html" />')
             },
-                /*{
-                button: 'Close',
-                title: function (event, api) {
-                    return api.elements.target.attr("title");
-                },
-                    /*
-                text: function (event, api) {
-                    $.get({
-                        url: 'data.html' // Use href attribute as URL
-                    })
-                    .then(function (content) {
-                        // Set the tooltip content upon successful retrieval
-                        api.set('content.text', content);
-                    }, function (xhr, status, error) {
-                        // Upon failure... set the tooltip content to error
-                        api.set('content.text', status + ': ' + error);
-                    });
-                    return "Lodaing :)...";
-                }
-            },*/
             show: { solo: true },
             hide: 'unfocus',
             position: {

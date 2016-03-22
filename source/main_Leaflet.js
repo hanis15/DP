@@ -2,11 +2,25 @@
 
 function geo_Leaflet_graph(id, width, height) {
     this.create_map = load_graph;
+    this.set_center = nastav_stred;
+    this.set_data = nacti_data;
+
+    function nacti_data(data) {
+        var json_data = jQuery.parseJSON(data);
+
+    }
+
+    // nastavi stred mapy
+    function nastav_stred(value) {
+        if (value == 'cz') {
+
+        }
+    }
 
     // vytvori mapu
     function load_graph() {
         
-        d3.json("json/geoJSON.json", parse_data);
+        d3.json("json/brno_school.geo.json", parse_data);
     }
 
     function parse_data(error, data) {

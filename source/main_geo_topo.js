@@ -5,6 +5,8 @@ function GeoGraph(id, width, height) {
     var main_svg_element;
     var path;
     var zoom;
+    var graticule;
+    var g;
     var current_type;       // uchovava posledni nastaveni (typ zobrazeni)
     this.create_graph = load_graph;
     this.set_type = set_projection;
@@ -14,7 +16,7 @@ function GeoGraph(id, width, height) {
         var json_data = jQuery.parseJSON(data);
 
         // zobrazeni dat z nacteneho JSON souboru
-        main_svg_element.selectAll("path")
+        main_svg_element.append("g").selectAll("path")
             .data(json_data.features)
             .enter()
             .append("path")
@@ -22,8 +24,7 @@ function GeoGraph(id, width, height) {
             .attr("class", "location")
             .style("fill", "red")
             .style("stroke", "green")
-            .style("stroke-width", "2")
-            .call(zoom);
+            .style("stroke-width", "2");
 
         $(".location").qtip({
             content: {
@@ -61,62 +62,72 @@ function GeoGraph(id, width, height) {
     function load_graph(type) {
         
         //Define map projection
-        if (type == 'cz') {
-            projection = d3.geo.mercator()
-                               .center([15.6, 50.1]) // musi se doplnit souradnice podle podkladu
-                               .scale([7000]);
-        }
-        else { // brno
-            projection = d3.geo.mercator()
-                               .center([16.6092500, 49.1949722])
-                               .scale([200000]);
-        }
+        projection = d3.geo.mercator()
+                           .scale((width + 1) / 2 / Math.PI)
+                           .translate([width / 2, height / 2])
+                           .precision(.1);
 
         //Define path generator
         path = d3.geo.path()
                         .projection(projection);
 
+        
         //Create SVG element
         main_svg_element = d3.select(id)
                     .attr("width", width)
-                    .attr("height", height)
-                    .append("g");
-        
+                    .attr("height", height);
+
+        scale0 = (width - 1) / 2 / Math.PI;
+
         zoom = d3.behavior.zoom()
-                            .translate([0, 0])
-                            .scale(1)
-                            .scaleExtent([1, 80])
-                            .on("zoom", zoomed);
-            
+            .translate([width / 2, height / 2])
+            .scale(scale0)
+            .scaleExtent([scale0, 800 * scale0])
+            .on("zoom", zoomed);
+
+        graticule = d3.geo.graticule();
+
+
+        g = main_svg_element.append("g");
+
         main_svg_element.append("rect")
-                    .attr("class", "overlay")
-                    .attr("width", width)
-                    .attr("height", height)
-                    .call(zoom);
+            .attr("class", "overlay")
+            .attr("width", width)
+            .attr("height", height);
 
-        if (type == 'cz') {
-            //Load in GeoJSON data
-            d3.json("json/CZE.geo.json", function (json) {
+        main_svg_element
+            .call(zoom)
+            .call(zoom.event);
 
-                //Bind data and create one path per GeoJSON feature
-                main_svg_element.selectAll("path")
-                   .data(json.features)
-                   .enter()
-                   .append("path")
-                   .attr("class", "location_area")
-                   .attr("d", path)
-                   .style("fill", "white")
-                   .style("stroke", "blue")
-                   .style("stroke-width", "1")
-                   .call(zoom)
-                   .attr("title", function (d) { return d.id; });
-            });
-        }
+        main_svg_element.append("path")
+                .datum(graticule)
+                .attr("class", "graticule")
+                .attr("d", path);
+
+        d3.json("json/world-110m.json", function (world) {
+            main_svg_element.insert("path", ".graticule")
+                            .datum(topojson.feature(world, world.objects.land))
+                            .attr("class", "land")
+                            .attr("d", path);
+
+            main_svg_element.insert("path", ".graticule")
+                            .datum(topojson.mesh(world, world.objects.countries, function (a, b) { return a !== b; }))
+                            .attr("class", "boundary")
+                            .attr("d", path);
+
+        });
             
         function zoomed() {
-            main_svg_element.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
-            main_svg_element.select(".location_area").style("stroke-width", 1.5 / d3.event.scale + "px");
-            main_svg_element.selectAll(".location").style("stroke-width", .5 / d3.event.scale + "px");
+            projection
+                .translate(zoom.translate())
+                .scale(zoom.scale());
+
+            main_svg_element.selectAll(".land")
+                .attr("d", path);
+            main_svg_element.selectAll(".boundary")
+                .attr("d", path);
+            main_svg_element.selectAll(".location")
+                .attr("d", path);
         }
 
         d3.select(self.frameElement).style("height", height + "px");
