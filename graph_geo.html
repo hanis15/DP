@@ -13,8 +13,17 @@
     
     <script src="source/main_geo.js" type="text/javascript"></script>
     <style>
-        .sphere {
-          fill: #fff;
+        .ui-tooltip, .qtip{
+	        position: absolute;
+	        left: -28000px;
+	        top: -28000px;
+	        display: none;
+ 
+	        max-width: 900px;
+	        min-width: 600px;
+ 
+	        font-size: 10.5px;
+	        line-height: 12px;
         }
         svg {
           background: #eee;
@@ -66,9 +75,11 @@
                 <div class="nav-collapse collapse">
                     <ul class="nav">
                         <li><a href="index.html">Topology map</a></li>
-                        <li class="active"><a href="graph.html">Graph</a></li>
-                        <li><a href="geoGraph.html">Graph - map</a></li>
-                        <li><a href="about.html">About</a></li>
+                        <li class="active"><a href="graph_geo.html" title="test">Graph - geoJson</a></li>
+                        <li><a href="graph_topo.html" title="test">Graph - topoJson</a></li>
+                        <li><a href="graph_leaflet.html">Graph - Leaflet</a></li>
+                        <li><a href="setting.html">Setting</a></li>
+                        <li><a href="about.html">About</a></li>                    
                     </ul>
                 </div>
             </div>
@@ -78,31 +89,25 @@
         <div class="container">
             <h1>Graph</h1>
             <hr />
-            <input type="file" id="file_input">
-            <input type="text" id="x1" title="x1">
-            <input type="text" id="y1">
-            <input type="text" id="x2">
-            <input type="number" id="y2">
-            <hr />
-            <p>Zde bude canvas s grafem a mapou + souradnice</p>
-            <svg id="geoCanvas" class="graph">
-                <!--
-                <g>
-                    <rect width="900" height="600"></rect>
-                    <circle r="0.05" title="svg_1" cy="16.5990833" cx="49.2098611" stroke-width="0.5" stroke="#F00" fill="#00f" />
-                    <circle r="0.01" title="svg_2" cy="16.5773889" cx="49.1933611" stroke-width="0.5" stroke="#004" fill="#f00" />
-                    <circle r="0.01" title="svg_3" cy="16.5689167" cx="49.1784444" stroke-width="0.5" stroke="#020" fill="#ff0" />
-                    <line title="svg_4" y2="16.5990833" x2="49.2098611" y1="16.5773889" x1="49.1933611" stroke-width="0.5" stroke="#000" fill="none" />
-                    <line title="svg_5" y2="16.5773889" x2="49.1933611" y1="16.5689167" x1="49.1784444" stroke-width="0.5" stroke="#000" fill="none" />
-                    <line title="svg_6" y2="16.5990833" x2="49.1784444" y1="16.5990833" x1="49.2098611" stroke-width="0.5" stroke="#000" fill="none" />
-                </g>
-                    -->
-            </svg>
-            <hr />
-            testuji 
-        </div>
-
-
+            <p>
+                Pozadi:
+                <input type="file" id="file_input">
+            </p>
+            <p>
+                GeoJSON:
+                <input type="file" id="file_input_goe_json">
+                <div id="option">
+                    Type:
+                    <select type='select' id='geo_option' title="Podklad" onchange='updateData(value);' style='color:steelblue;font-size:1.1em;'>
+                        <option value='cz' name='cz' selected='true'>Czech republic</option>
+                        <option value='brno' name='brno'>Brno</option>
+                    </select>
+                </div>
+            </p>
+        <hr />
+        <svg id="geoCanvas" class="graph"></svg>
+        <hr />
+    </div>
 
         <script>
             // nacteni obrazku
@@ -119,14 +124,36 @@
                         .css("background-size", "900px 600px");
                 }
             });
+
+            // nacteni GEOJSON
+            function readSingleFile(e) {
+                var file = e.target.files[0];
+                if (!file) {
+                    return;
+                }
+                var reader = new FileReader();
+                reader.onload = function(e) {
+                    var contents = e.target.result;
+                    my_graph.set_data(contents);
+                };
+                reader.readAsText(file);
+            }
+
+            document.getElementById('file_input_goe_json')
+                .addEventListener('change', readSingleFile, false);
+
             // nacteni grafu
             var id = "#geoCanvas";
             var width = 900;
             var height = 600;
+            var my_opt = document.getElementById("geo_option");
+
             var my_graph = new GeoGraph(id, width, height);
-            my_graph.create_graph();
+            my_graph.set_type(my_opt.options[my_opt.selectedIndex].value);
 
-
+            function updateData(value) {
+                my_graph.set_type(value);
+            }
         </script>
     </div>
 </body>
