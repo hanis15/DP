@@ -7,6 +7,8 @@ function setting() {
     this.add_node = insert_node;
     this.add_link = insert_link;
     this.create_geojson_file = create_file;
+    this.delete_node = delete_node;
+    this.delete_link = delete_link;
 
     function init() {
         // formular pro vkladani uzlu
@@ -64,6 +66,7 @@ function setting() {
         title.append("td").text("Name");
         title.append("td").text("Longitude");
         title.append("td").text("Latitude");
+        title.append("td").text("Smazat");
 
         // tabulka pro zobrazeni linek
         title_link = tables
@@ -75,6 +78,7 @@ function setting() {
              .append("tr");
         title_link.append("td").text("Source");
         title_link.append("td").text("Destination");
+        title_link.append("td").text("Smazat");
 
         // tlacitko pro vytvoreni exportu
         d3.select("#my_setting").append("hr");
@@ -94,7 +98,7 @@ function setting() {
         node = { name: name, lat: latitude, long: longitude };
         nodes.push(node);
 
-        $('#node_setting_result > tbody:last-child').append('<tr><td>' + name + '</td><td>' + longitude + '</td><td>' + latitude + '</td></tr>');
+        $('#node_setting_result > tbody:last-child').append('<tr id="'+name+'"><td>' + name + '</td><td>' + longitude + '</td><td>' + latitude + '</td><td align="center"><input type="submit" value="..." title="' + name + '" onclick="delete_node(this)"></td></tr>');
 
         update_list();
     }
@@ -109,7 +113,7 @@ function setting() {
         link = { source: source, dest: destination };
         links.push(link);
 
-        $('#link_setting_result > tbody:last-child').append('<tr><td>' + source + '</td><td>' + destination + '</td></tr>');
+        $('#link_setting_result > tbody:last-child').append('<tr id="' +source+'_'+destination+'"><td>' + source + '</td><td>' + destination + '</td><td align="center"><input type="submit" value="..." title="' + source + '_' + destination + '" onclick="delete_link(this)>"</td></tr>');
 
     }
 
@@ -154,5 +158,29 @@ function setting() {
         content += curr_node;
         content += ']}';    // end
         window.open('data:text/json;charset=utf-8,' + escape(content))
+    }
+
+    function delete_node(title) {
+        var count;
+        for (count = 0; count < nodes.length; count++) {
+            if (nodes[count].name == title) {
+                break;
+            }
+        }
+        nodes.splice(count, 1);
+        d3.select("#"+title).remove();
+        update_list();
+    }
+
+    function delete_link(title) {
+        var count;
+        for (count = 0; count < links.length; count++) {
+            if ((links[count].source + '_' + links[count].dest) == title) {
+                break;
+            }
+        }
+        links[count].splice(count, 1);
+        d3.select("#"+title).remove();
+        update_list();
     }
 }
