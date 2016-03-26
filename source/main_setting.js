@@ -30,39 +30,41 @@ function setting() {
 
     function init(id) {
         // formular pro vkladani uzlu
-        table_form = d3.select(id).append("table");
+
+        div_form = d3.select(id).append("div").style("height", "300px");
+        table_form = div_form.append("form").attr("id", "node_form").append("table");
         table_form.style("float", "left").attr("id", "input_form_node");
         // 0.radek
         table_form.append("tr").append("h3").text("Uzel");
         // 1.radek
         table_form.append("tr").append("td").attr("align", "right").append("p").text("Name node: ")
-                          .append("input").attr("id", "name_node").attr("type", 'text');
+                          .append("input").attr("id", "name_node").attr("name", "name_node").attr("type", 'text');
 
         // 2.radek
         table_form.append("tr").append("td").attr("align", "right").append("p").text("Longitude: ")
-                          .append("input").attr("id", "longitude").attr("type", 'text')
+                          .append("input").attr("id", "longitude").attr("name", "longitude").attr("type", 'text')
 
         // 3.radek
         table_form.append("tr").append("td").attr("align", "right").append("p").text("Latitude: ")
-                          .append("input").attr("id", "latitude").attr("type", 'text');
+                          .append("input").attr("id", "latitude").attr("name", "latitude").attr("type", 'text');
 
         // 4.radek
         table_form.append("tr").append("td").attr("align", "right")
                   .append("input").attr("type", "submit").attr("value", "Vlozit uzel")
-                  .attr("onclick", "geoSetting.getInstance().add_node();");
+                  .attr("onclick", "geoSetting.getInstance().add_node(this);");
 
         // formular pro vkladani linek
-        table_form = d3.select(id).append("table")
+        table_form = div_form.append("form").attr("id", "link_form").append("table")
         table_form.attr("id", "input_form_link");
         // 0.radek
         table_form.append("tr").append("h3").text("Linka");
         // 1.radek
         table_form.append("tr").append("td").attr("align", "right").append("p").text("Source: ")
-                  .append("select").attr("id", "source_list");
+                  .append("select").attr("id", "source_list").attr("name", "source_list");
 
         // 2.radek
         table_form.append("tr").append("td").attr("align", "right").append("p").text("Destination: ")
-                  .append("select").attr("id", "destination_list");
+                  .append("select").attr("id", "destination_list").attr("name", "destination_list");
 
         // 3.radek
         table_form.append("tr").attr("height", $('tr').eq(1).height()).append("td");
@@ -73,7 +75,7 @@ function setting() {
                   .attr("onclick", "geoSetting.getInstance().add_link();");
 
         d3.select(id).append("hr")
-        tables = d3.select(id).append("div");
+        tables = d3.select(id).append("div").attr("id", "tables_div");
 
         // tabulka pro zobrazeni uzlu
         title = tables
@@ -107,9 +109,56 @@ function setting() {
         d3.select(id).append("div")
              .append("input").attr("type", "submit").attr("value", "Vytvor soubor")
              .attr("onclick", "geoSetting.getInstance().create_geojson_file();");
+
+        $("#node_form").validate({
+            rules: {
+                name_node: "required",
+                latitude: {
+                    required: true,
+                    number: true
+                },
+                longitude: {
+                    required: true,
+                    number: true
+                }
+            },
+            messages: {
+                name_node: "Vlozte nazev",
+                latitude: {
+                    required: "Vlozte zemepisnou sirku",
+                    number: "Hodnota musi byt ciselna"
+                },
+                longitude: {
+                    required: "Vlozte zemepisnou delku",
+                    number: "Hodnota musi byt ciselna"
+                }
+            },
+            submitHandler: function (form) {
+                // do other things for a valid form
+                form.submit();
+            }
+        });
+        $("#link_form").validate({
+            rules: {
+                destination_list: "required",
+                source_list: "required"
+            },
+            messages: {
+                destination_list: "Vyberte cil",
+                source_list: "Vyberte zdroj"
+            },
+            submitHandler: function (form) {
+                // do other things for a valid form
+                form.submit();
+            }
+        });
+
     }
 
     function insert_node() {
+        if ($('#node_form').valid() == false) {
+            return;
+        }
         name = document.getElementById("name_node").value;
         latitude = document.getElementById("latitude").value;
         longitude = document.getElementById("longitude").value;
@@ -122,14 +171,24 @@ function setting() {
         nodes.push(node);
 
         $('#node_setting_result > tbody:last-child')
-            .append('<tr id="' + name + '"><td>' + name + '</td><td>' + longitude + '</td><td>'
-            + latitude + '</td><td align="center"><input type="submit" value="..." title="' + name
+            .append('<tr id="node_' + name + '"><td>' + name + '</td><td>' + longitude + '</td><td>'
+            + latitude + '</td><td align="center"><input type="submit" value="..." title="node_' + name
             + '" onclick="geoSetting.getInstance().delete_node(this.title);"></td></tr>');
+
+        if ($("#node_setting_result").height() > $("#link_setting_result").height()) {
+            d3.select("#tables_div").style("height", $("#node_setting_result").height() + "px");
+        }
+        else {
+            d3.select("#tables_div").style("height", $("#link_setting_result").height() + "px");
+        }
 
         update_list();
     }
 
     function insert_link() {
+        if ($('#link_form').valid() == false) {
+            return;
+        }
         source = document.getElementById("source_list").value;
         destination = document.getElementById("destination_list").value;
 
@@ -140,9 +199,15 @@ function setting() {
         links.push(link);
 
         $('#link_setting_result > tbody:last-child')
-            .append('<tr id="' + source + '_' + destination + '"><td>' + source + '</td><td>' + destination
-            + '</td><td align="center"><input type="submit" value="..." title="' + source + '_' + destination
+            .append('<tr id="link_' + source + '_' + destination + '"><td>' + source + '</td><td>' + destination
+            + '</td><td align="center"><input type="submit" value="..." title="link_' + source + '_' + destination
             + '" onclick="geoSetting.getInstance().delete_link(this.title);"></td></tr>');
+        if ($("#node_setting_result").height() > $("#link_setting_result").height()) {
+            d3.select("#tables_div").style("height", $("#node_setting_result").height() + "px");
+        }
+        else {
+            d3.select("#tables_div").style("height", $("#link_setting_result").height() + "px");
+        }
 
     }
 
@@ -212,19 +277,19 @@ function setting() {
     function delete_node(title) {
         var count;
         for (count = 0; count < nodes.length; count++) {
-            if (nodes[count].name == title) {
+            if (('node_' + nodes[count].name) == title) {
                 break;
             }
         }
         nodes.splice(count, 1);
-        d3.select("#"+title).remove();
+        d3.select("#" + title).remove();
         update_list();
     }
 
     function delete_link(title) {
         var count;
         for (count = 0; count < links.length; count++) {
-            if ((links[count].source + '_' + links[count].dest) == title) {
+            if (('link_' + links[count].source + '_' + links[count].dest) == title) {
                 break;
             }
         }
