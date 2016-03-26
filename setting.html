@@ -71,28 +71,10 @@
             <p>Zde se bude provadet konfigurace JSON s popisem mericich uzlu</p>
             <div id="my_setting"></div>
             <script>
-                var my_setting = new setting();
-                my_setting.initialize();
+                var id = "#my_setting";
+                setting = geoSetting.getInstance();
+                setting.initialize(id);
 
-                function add_to_node_table() {
-                    my_setting.add_node();
-                }
-
-                function add_to_link_table() {
-                    my_setting.add_link();
-                }
-
-                function create_file() {
-                    my_setting.create_geojson_file();
-                }
-
-                function delete_node(id) {
-                    my_setting.delete_node(id.title);
-                }
-
-                function delete_link(id) {
-                    my_setting.delete_link(id.title);
-                }
             </script>
 
         </div>

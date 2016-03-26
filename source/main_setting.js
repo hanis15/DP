@@ -1,4 +1,22 @@
 // JavaScript source code
+var geoSetting = (function () {
+    var instance;
+
+    function createInstance() {
+        var object = new setting();
+        return object;
+    }
+
+    return {
+        getInstance: function () {
+            if (!instance) {
+                instance = createInstance();
+            }
+            return instance;
+        }
+    };
+})();
+
 
 function setting() {
     var nodes = []; // seznam vsech uzlu
@@ -10,9 +28,9 @@ function setting() {
     this.delete_node = delete_node;
     this.delete_link = delete_link;
 
-    function init() {
+    function init(id) {
         // formular pro vkladani uzlu
-        table_form = d3.select("#my_setting").append("table");
+        table_form = d3.select(id).append("table");
         table_form.style("float", "left").attr("id", "input_form_node");
         // 0.radek
         table_form.append("tr").append("h3").text("Uzel");
@@ -29,10 +47,12 @@ function setting() {
                           .append("input").attr("id", "latitude").attr("type", 'text');
 
         // 4.radek
-        table_form.append("tr").append("td").attr("align", "right").append("input").attr("type", "submit").attr("value", "Vlozit uzel").attr("onclick", 'add_to_node_table()');
+        table_form.append("tr").append("td").attr("align", "right")
+                  .append("input").attr("type", "submit").attr("value", "Vlozit uzel")
+                  .attr("onclick", "geoSetting.getInstance().add_node();");
 
         // formular pro vkladani linek
-        table_form = d3.select("#my_setting").append("table")
+        table_form = d3.select(id).append("table")
         table_form.attr("id", "input_form_link");
         // 0.radek
         table_form.append("tr").append("h3").text("Linka");
@@ -48,10 +68,12 @@ function setting() {
         table_form.append("tr").attr("height", $('tr').eq(1).height()).append("td");
 
         // 4.radek 
-        table_form.append("tr").append("td").attr("align", "right").append("input").attr("type", "submit").attr("value", "Vlozit linku").attr("onclick", 'add_to_link_table()');
+        table_form.append("tr").append("td").attr("align", "right")
+                  .append("input").attr("type", "submit").attr("value", "Vlozit linku")
+                  .attr("onclick", "geoSetting.getInstance().add_link();");
 
-        d3.select("#my_setting").append("hr")
-        tables = d3.select("#my_setting").append("div");
+        d3.select(id).append("hr")
+        tables = d3.select(id).append("div");
 
         // tabulka pro zobrazeni uzlu
         title = tables
@@ -81,9 +103,10 @@ function setting() {
         title_link.append("td").text("Smazat");
 
         // tlacitko pro vytvoreni exportu
-        d3.select("#my_setting").append("hr");
-        d3.select("#my_setting").append("div")
-             .append("input").attr("type", "submit").attr("value", "Vytvor soubor").attr("onclick", "create_file()");
+        d3.select(id).append("hr");
+        d3.select(id).append("div")
+             .append("input").attr("type", "submit").attr("value", "Vytvor soubor")
+             .attr("onclick", "geoSetting.getInstance().create_geojson_file();");
     }
 
     function insert_node() {
@@ -98,7 +121,10 @@ function setting() {
         node = { name: name, lat: latitude, long: longitude };
         nodes.push(node);
 
-        $('#node_setting_result > tbody:last-child').append('<tr id="'+name+'"><td>' + name + '</td><td>' + longitude + '</td><td>' + latitude + '</td><td align="center"><input type="submit" value="..." title="' + name + '" onclick="delete_node(this)"></td></tr>');
+        $('#node_setting_result > tbody:last-child')
+            .append('<tr id="' + name + '"><td>' + name + '</td><td>' + longitude + '</td><td>'
+            + latitude + '</td><td align="center"><input type="submit" value="..." title="' + name
+            + '" onclick="geoSetting.getInstance().delete_node(this.title);"></td></tr>');
 
         update_list();
     }
@@ -113,7 +139,10 @@ function setting() {
         link = { source: source, dest: destination };
         links.push(link);
 
-        $('#link_setting_result > tbody:last-child').append('<tr id="' +source+'_'+destination+'"><td>' + source + '</td><td>' + destination + '</td><td align="center"><input type="submit" value="..." title="' + source + '_' + destination + '" onclick="delete_link(this)>"</td></tr>');
+        $('#link_setting_result > tbody:last-child')
+            .append('<tr id="' + source + '_' + destination + '"><td>' + source + '</td><td>' + destination
+            + '</td><td align="center"><input type="submit" value="..." title="' + source + '_' + destination
+            + '" onclick="geoSetting.getInstance().delete_link(this.title);"></td></tr>');
 
     }
 
@@ -140,22 +169,42 @@ function setting() {
         content = '{ "type": "FeatureCollection", "features": ['; // start
         curr_node = "";
         for (count = 0; count < nodes.length; count++) {
-            curr_node = '{ "geometry": { "type": "Point", "coordinates": [ ' + nodes[count].long + ', ' + nodes[count].lat + ' ]},';
+            curr_node = '{ "geometry": { "type": "Point", "coordinates": [ '
+                        + nodes[count].long + ', ' + nodes[count].lat + ' ]},';
             curr_node +=  '"properties": { "name": "' + nodes[count].name + '"},';
             curr_node += '"type": "Feature" }';
-            if (count != nodes.length - 1) { curr_node += ',';}
+            if (count != nodes.length - 1) { curr_node += ','; }
+            content += curr_node;
         }
-        content += curr_node;
         
         if (links.length != 0) { content += ','; }
 
-        for (count = 0; count < lineks.length; count++) {
-            curr_node = '{ "geometry": { "type": "LineString", "coordinates": []},';
-            curr_node += '"properties": { "source": "' + links[count].source + '", "target": "' + links[count].dest + '"},';
+        for (count = 0; count < links.length; count++) {
+
+            source_coordinates = "";
+            for (s_count = 0; s_count < nodes.length; s_count++) {
+                if (nodes[s_count].name == links[count].source) {
+                    source_coordinates = '[ ' + nodes[s_count].long + ', ' + nodes[s_count].lat + ' ]';
+                    break;
+                }
+            }
+
+            dest_coordinates = "";
+            for (d_count = 0; d_count < nodes.length; d_count++) {
+                if (nodes[d_count].name == links[count].dest) {
+                    dest_coordinates = '[ ' + nodes[d_count].long + ', ' + nodes[d_count].lat + ' ]';
+                    break;
+                }
+            }
+
+            curr_node = '{ "geometry": { "type": "LineString", "coordinates": [ ' + source_coordinates + ', ' + dest_coordinates + ' ]},';
+            curr_node += '"properties": { "source": "' + links[count].source + '", "target": "'
+                         + links[count].dest + '"},';
             curr_node += '"type": "Feature" }';
-            if (count != links[count].length - 1) { curr_node += ','; }
+            if (count != links.length - 1) { curr_node += ','; }
+            content += curr_node;
         }
-        content += curr_node;
+
         content += ']}';    // end
         window.open('data:text/json;charset=utf-8,' + escape(content))
     }
@@ -179,7 +228,7 @@ function setting() {
                 break;
             }
         }
-        links[count].splice(count, 1);
+        links.splice(count, 1);
         d3.select("#"+title).remove();
         update_list();
     }
