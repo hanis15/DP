@@ -85,7 +85,15 @@
 
                 var my_graph = new Graph(id, width, height);
                 my_graph.create_graph();
+                var body = document.body,
+                    html = document.documentElement;
 
+                var my_height = Math.max(body.scrollHeight, body.offsetHeight,
+                                       html.clientHeight, html.scrollHeight, html.offsetHeight);
+                document.body.style.height = (my_height + 300) + "px";
+                $(window).scroll(function () {
+                    $("body").scroll(document.body.height, document.body.width);
+                });
             </script>
         </div>
     </div>

@@ -4,7 +4,7 @@ function Graph(id, width, height) {
     this.create_graph = load_graph;
 
     function load_graph() {
-        d3.json("json/draft_v1.json", parse_data);
+        d3.json("json/brno_school.geo.json", parse_data);
     }
 
     function parse_data(error, data) {
@@ -20,21 +20,42 @@ function Graph(id, width, height) {
             .attr("height", height)
             .attr("style", "border: 1px solid black;");
 
+        // prevod z geoJson do force reprezentace
+        nodes = [];
+        links = [];
+        for (count = 0; count < data.features.length; count++) {
+            if (data.features[count].geometry.type == "Point") {
+                nodes.push(data.features[count].properties);
+            }
+            else {
+                links.push(data.features[count].properties);
+            }
+        }
+
+        for (count = 0; count < links.length; count++) {
+            for (n_count = 0; n_count < nodes.length; n_count++) {
+                if (links[count].source == nodes[n_count].name)
+                    links[count].source = n_count;
+                if (links[count].target == nodes[n_count].name)
+                    links[count].target = n_count;
+            }
+        }
+        
         force
-            .nodes(data.networks)
-            .links(data.routes)
+            .nodes(nodes)
+            .links(links)
             .start();
 
         link = svg.selectAll(".link")
-            .data(data.routes)
+            .data(links)
             .enter().append("line")
             .attr("class", "link")
-            .style("stroke-width", function (d) { return d.bandwidth / 100; })
+            //.style("stroke-width", function (d) { return d.bandwidth / 100; })
             .attr("title", function (d) { return d.name; })
             .attr("id", function (d) { return d.name; });
 
         node = svg.selectAll(".node")
-            .data(data.networks)
+            .data(nodes)
             .enter().append("circle")
             .attr("class", "node")
             .attr("r", 20)
