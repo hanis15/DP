@@ -7,6 +7,23 @@ function geo_Leaflet_graph(id, width, height) {
     this.set_center = nastav_stred;
     this.set_data = nacti_data;
 
+    // definovani css style
+    function define_style() {
+        style = document.createElement('style');
+        style.type = 'text/css';
+        style.innerHTML = ".ui-tooltip, .qtip{"
+                        + "position: absolute;"
+                        + "left: -28000px;"
+                        + "top: -28000px;"
+                        + "display: none;"
+                        + "max-width: 900px;"
+                        + "min-width: 600px;"
+                        + "font-size: 10.5px;"
+                        + "line-height: 12px;"
+                        + "}";
+        document.getElementsByTagName('head')[0].appendChild(style);
+    }
+
     function nacti_data(data) {
         var json_data = jQuery.parseJSON(data);
 
@@ -29,6 +46,11 @@ function geo_Leaflet_graph(id, width, height) {
 
     // vytvori mapu
     function load_graph() {
+        define_style();
+
+        // nastaveni velikosti
+        $("#" + id).height(height);
+        $("#" + id).width(width);
         
         zoom = 7;
         error = null;
@@ -39,7 +61,6 @@ function geo_Leaflet_graph(id, width, height) {
         if (error) throw error;
         
         new_map(data);
-        
     }
 
     function new_map(data) {
