@@ -15,35 +15,6 @@
     <script src="source/main.js" type="text/javascript"></script>
 
     <link href="bootstrap/css/bootstrap.css" type="text/css" rel="stylesheet" />
-
-    <style>
-        .ui-tooltip, .qtip{
-	        position: absolute;
-	        left: -28000px;
-	        top: -28000px;
-	        display: none;
- 
-	        max-width: 900px;
-	        min-width: 600px;
- 
-	        font-size: 10.5px;
-	        line-height: 12px;
-        }
-        .node {
-          stroke: #000;
-          fill: #ccc;
-          stroke-width: .5px;
-        }
-
-        .link {
-          stroke: #9ecae1;
-          stroke-width: 1.5px;
-        }
-
-        .graph {
-            border: 1px solid black;
-        }
-    </style>
 </head>
 <body>
     <div class="navbar navbar-inverse navbar-fixed-top">
@@ -74,26 +45,48 @@
             <h1>Topology map</h1>
             <p>Zde bude canvas s topologickou mapou</p>
 
-            <svg id="d3_graph" class="graph"></svg>
+            <p>
+                GeoJSON:
+                <input type="file" id="file_input_goe_json">
+            </p>
+
+            <div id="d3_graph"></div>
             <script type="text/javascript">
 
-                var width = 800;//document.getElementById('d3_graph').getBoundingClientRect().width;
+                var width = 800;
                 var height = 600;
                 var id = "#d3_graph";
 
-                d3.select(id).attr("width", width).attr("height", height);
-
                 var my_graph = new Graph(id, width, height);
                 my_graph.create_graph();
+
                 var body = document.body,
                     html = document.documentElement;
 
                 var my_height = Math.max(body.scrollHeight, body.offsetHeight,
-                                       html.clientHeight, html.scrollHeight, html.offsetHeight);
+                                        html.clientHeight, html.scrollHeight, html.offsetHeight);
                 document.body.style.height = (my_height + 300) + "px";
                 $(window).scroll(function () {
                     $("body").scroll(document.body.height, document.body.width);
                 });
+
+                // nacteni GEOJSON
+                function readSingleFile(e) {
+                    var file = e.target.files[0];
+                    if (!file) {
+                        return;
+                    }
+                    var reader = new FileReader();
+                    reader.onload = function (e) {
+                        var contents = e.target.result;
+                        my_graph.set_data(contents);
+                    };
+                    reader.readAsText(file);
+                }
+
+                document.getElementById('file_input_goe_json')
+                    .addEventListener('change', readSingleFile, false);
+
             </script>
         </div>
     </div>
