@@ -7,7 +7,10 @@
           "coordinates": [ 16.612972, 49.196153 ]
         },
         "properties": {
-          "name": "Brno"
+          "name": "Brno",
+          "type_node": "S",
+          "description": "Brno sonda",
+          "address": "12.2.1.1"
         },
         "type": "Feature"
       },
@@ -17,7 +20,10 @@
           "coordinates": [ 14.420251, 50.087442 ]
         },
         "properties": {
-          "name": "Praha"
+          "name": "Praha",
+          "type_node": "R",
+          "description": "Praha router",
+          "address": "12.2.1.3"
         },
         "type": "Feature"
       },
@@ -27,7 +33,10 @@
           "coordinates": [ 18.266226, 49.820100 ]
         },
         "properties": {
-          "name": "Ostrava"
+          "name": "Ostrava",
+          "type_node": "S",
+          "description": "Ostrava sonda",
+          "address": "12.2.1.4"
         },
         "type": "Feature"
       },
@@ -37,7 +46,10 @@
           "coordinates": [ 15.051385, 50.766528 ]
         },
         "properties": {
-          "name": "Liberec"
+          "name": "Liberec",
+          "type_node": "R",
+          "description": "Liberec router",
+          "address": "12.2.1.5"
         },
         "type": "Feature"
       },
@@ -47,7 +59,10 @@
           "coordinates": [ 14.479216, 48.975430 ]
         },
         "properties": {
-          "name": "Ceske Budejivoce"
+          "name": "Ceske Budejovice",
+          "type_node": "r",
+          "description": "CB router",
+          "address": "12.2.1.6"
         },
         "type": "Feature"
       },
@@ -64,7 +79,9 @@
         "properties": {
           "name": "connect_Brno_Praha",
           "source": "Brno",
-          "target": "Praha"
+          "target": "Praha",
+          "target_port": "p1001",
+          "source_port": "p1002"
         }
      },
       {
@@ -79,7 +96,9 @@
         "properties": {
           "name": "Brno_Ostrava",
           "source": "Brno",
-          "target": "Ostrava"
+          "target": "Ostrava",
+          "target_port": "p1003",
+          "source_port": "p1004"
         }
      },
       {
@@ -94,7 +113,9 @@
         "properties": {
           "name": "Ostrava_Praha",
           "source": "Ostrava",
-          "target": "Praha"
+          "target": "Praha",
+          "target_port": "p1005",
+          "source_port": "p1006"
         }
       },
       {
@@ -109,7 +130,9 @@
         "properties": {
           "name": "Liberec_Praha",
           "source": "Liberec",
-          "target": "Praha"
+          "target": "Praha",
+          "target_port": "p1007",
+          "source_port": "p1008"
         }
       },
       {
@@ -123,8 +146,10 @@
         },
         "properties": {
           "name": "CB_Brno",
-          "source": "Ceske budejovice",
-          "target": "Brno"
+          "source": "Ceske Budejovice",
+          "target": "Brno",
+          "target_port": "p1009",
+          "source_port": "p1010"
         }
       },
       {
@@ -138,8 +163,10 @@
         },
         "properties": {
           "name": "Ostrava_Praha",
-          "source": "Ceske budejovice",
-          "target": "Praha"
+          "source": "Ceske Budejovice",
+          "target": "Praha",
+          "target_port": "p1011",
+          "source_port": "p1012"
         }
      }
   ]

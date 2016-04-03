@@ -1,0 +1,35 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "geometry": {
+        "type": "Point",
+        "coordinates": [ 8098, 9898 ]
+      },
+      "properties": {
+        "name": "jkljkkl",
+        "type_node": "S",
+        "description": "kjh",
+        "address": "jhjkh"
+      },
+      "type": "Feature"
+    },
+    {
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [ 8098, 9898 ],
+          [ 8098, 9898 ]
+        ]
+      },
+      "properties": {
+        "source": "jkljkkl",
+        "target": "jkljkkl",
+        "target_port": "wsd",
+        "source_port": "dwsdws",
+        "name": "kjjk"
+      },
+      "type": "Feature"
+    }
+  ]
+}

@@ -1,0 +1,57 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "geometry": {
+        "type": "Point",
+        "coordinates": [ 17.663115, 49.224519 ]
+      },
+      "properties": { "name": "Zlin" },
+      "type": "Feature"
+    },
+    {
+      "geometry": {
+        "type": "Point",
+        "coordinates": [ 12.868089, 50.231591 ]
+      },
+      "properties": { "name": "Karolovy vary" },
+      "type": "Feature"
+    },
+    {
+      "geometry": {
+        "type": "Point",
+        "coordinates": [ 14.481276, 48.976557 ]
+      },
+      "properties": { "name": "Ceske budejovice" },
+      "type": "Feature"
+    },
+    {
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [ 17.663115, 49.224519 ],
+          [ 12.868089, 50.231591 ]
+        ]
+      },
+      "properties": {
+        "source": "Zlin",
+        "target": "Karolovy vary"
+      },
+      "type": "Feature"
+    },
+    {
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [ 12.868089, 50.231591 ],
+          [ 14.481276, 48.976557 ]
+        ]
+      },
+      "properties": {
+        "source": "Karolovy vary",
+        "target": "Ceske budejovice"
+      },
+      "type": "Feature"
+    }
+  ]
+}
