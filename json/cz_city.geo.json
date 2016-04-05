@@ -81,7 +81,7 @@
           "source": "Brno",
           "target": "Praha",
           "target_port": "p1001",
-          "source_port": "p1002"
+          "source_port": "p1002" 
         }
      },
       {
