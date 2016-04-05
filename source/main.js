@@ -2,6 +2,8 @@
 
 function Graph(id, width, height) {
     var svg;
+    var nodes = [];
+    var links = [];
     this.create_graph = load_graph;
     this.define_style = define_style;
     this.set_data = nacti_data;
@@ -42,11 +44,11 @@ function Graph(id, width, height) {
         new_graph(data);
     }
 
-
     function new_graph(data) {
         force = d3.layout.force()
             .charge(-400)       // zaporne hodnoty nastavuji jak se odpuzuji jednotlivy uzly
             .linkDistance(200)
+            .gravity(0.05)
             .size([width, height])
             .on("tick", tick)
             .on("end", function () {
@@ -65,8 +67,6 @@ function Graph(id, width, height) {
             .on("click", explicitlyPosition);
 
         // prevod z geoJson do force reprezentace
-        nodes = [];
-        links = [];
         for (count = 0; count < data.features.length; count++) {
             if (data.features[count].geometry.type == "Point") {
                 nodes.push(data.features[count].properties);
@@ -85,6 +85,9 @@ function Graph(id, width, height) {
             }
         }
         
+        // uvodni nacteni parametru ze sond
+        load_parameter_from_sensors();
+
         force
             .nodes(nodes)
             .links(links)
@@ -130,7 +133,7 @@ function Graph(id, width, height) {
                 title: function (event, api) {
                     return api.elements.target.attr("title");
                 },
-                text: $('<iframe height="180" width="640" src="data.html" />')
+                text: $('<iframe height="180" width="640" src="template/data.html" />')
             },
             show: { solo: true },
             hide: 'unfocus',
@@ -170,6 +173,70 @@ function Graph(id, width, height) {
             node.attr("cx", function (d) { return d.x; })
                 .attr("cy", function (d) { return d.y; })
                 .attr("transform", function (d) { return "translate(" + d.x + "," + d.y + ")"; });
+        }
+    }
+
+    // projde vsechny uzly a linky a pokud je to sonda tak nacte data
+    function load_parameter_from_sensors() {
+        // prochazi vsehny 
+        /*for (n in node) {
+            null;
+        }
+        */
+        null;
+    }
+
+    // provede update obj pomoci nactenych dat
+    function update_sensor(obj, data) {
+        null;
+    }
+
+    // nacte data z konkretni sondy
+    function load_parameter(address, type_data) {
+        // nastaveni adresy = addresss
+        var host = "collector-devel.ics.muni.cz";//"147.251.14.50";////"192.168.51.145";// collector-devel.ics.muni.cz
+        $.ajax({
+            type: "POST",
+            url: "https://" + host + "/resources/oAuth/token",
+            contentType: "application/x-www-form-urlencoded",
+            data: {
+                "username": "rest",// UCO
+                "password": "r3st&ful",// sekundarni heslo
+                "client_id": "invea-tech",
+                "grant_type": "password"
+            },
+
+            success: function (msg) {
+                token = msg.access_token; 
+                getResults(msg.access_token);
+                //alert("Mam token: " + msg.access_token);
+            },
+
+            error: function (a, b, err) { console.log(err); },
+        });
+
+        function getResults(t) {
+            $.ajax({
+                type: "GET",
+                url: "https://" + host + "/rest/fmc/analysis/chart", // typ zobrazovaneho grafu
+                headers: { "Authorization": "bearer " + t },
+                data: {
+                    search: JSON.stringify({
+                        "from": "2016-03-04 00:05",
+                        "to": "2016-03-04 14:20",
+                        "profile": "live",// nazev profilu - geoJson
+                        "chart": {
+                            "measure": "traffic",
+                            "protocol": 1
+                        }
+                    })
+                },
+                success: function (msg) {
+                    // na obj je aplikovan json,ktery byl nacten
+                    update_sensor(obj, JSON.stringify(msg));
+                },
+                error: function (a, b, err) { console.log(err); },
+            });
         }
     }
 }
