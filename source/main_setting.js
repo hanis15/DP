@@ -20,6 +20,8 @@ var geoSetting = (function () {
 function setting() {
     var nodes = []; // seznam vsech uzlu
     var links = []; // seznam vsech linek mezi uzly
+    var validator_node;
+    var validator_link;
     this.initialize = init;
     this.add_node = insert_node;
     this.add_link = insert_link;
@@ -55,7 +57,7 @@ function setting() {
         // -------------------------------------------------------------------------------------------------------------------
         // formular pro vkladani uzlu
         div_form = d3.select(id).append("div").attr("id", "forms_block");
-        table_form = div_form.append("form").attr("id", "node_form").append("table");
+        table_form = div_form.append("form").attr("action", "javascript:void(0);").attr("id", "node_form").append("table");
         table_form.style("float", "left").attr("id", "input_form_node").style("margin-right", "1cm");
         // 0.radek - nadpis
         table_form.append("tr").append("h3").text("Uzel");
@@ -66,7 +68,7 @@ function setting() {
 
         // 2.radek - zemepisna delka
         table_form.append("tr").append("td").attr("align", "right").append("p").text("Zem. delka: ")
-                  .append("input").attr("id", "longitude").attr("name", "longitude").attr("type", 'text')
+                  .append("input").attr("id", "longitude").attr("name", "longitude").attr("type", 'text');
 
         // 3.radek - zemepisna sirka
         table_form.append("tr").append("td").attr("align", "right").append("p").text("Zem. sirka: ")
@@ -90,8 +92,8 @@ function setting() {
 
         // 7.radek - tlacitko
         table_form.append("tr").append("td").attr("align", "right")
-                  .append("input").attr("type", "submit").attr("value", "Vlozit uzel")
-                  .attr("onclick", "geoSetting.getInstance().add_node(this);");
+                  .append("input").attr("type", "submit").attr("value", "Vlozit uzel");
+                  //.attr("onclick", "geoSetting.getInstance().add_node(this);");
 
         // -------------------------------------------------------------------------------------------------------------------
         // formular pro vkladani linek
@@ -127,8 +129,8 @@ function setting() {
 
         // 7.radek 
         table_form.append("tr").append("td").attr("align", "right")
-                  .append("input").attr("type", "submit").attr("value", "Vlozit linku")
-                  .attr("onclick", "geoSetting.getInstance().add_link();");
+                  .append("input").attr("type", "submit").attr("value", "Vlozit linku");
+                  //.attr("onclick", "geoSetting.getInstance().add_link();");
 
         d3.select(id).append("hr");
         tables = d3.select(id).append("div").attr("id", "tables_block");
@@ -296,7 +298,7 @@ function setting() {
     }
 
     function set_validate_rules() {
-        $("#node_form").validate({
+        validator_node = $("#node_form").validate({
             rules: {
                 name_node: "required",
                 //type_node: "required",
@@ -325,11 +327,12 @@ function setting() {
             },
             submitHandler: function (form) {
                 // do other things for a valid form
-                form.submit();
+                //form.submit();
+                insert_node();
             }
         });
 
-        $("#link_form").validate({
+        validator_link = $("#link_form").validate({
             rules: {
                 target_node: "required",
                 //target_port: "required",
@@ -346,7 +349,8 @@ function setting() {
             },
             submitHandler: function (form) {
                 // do other things for a valid form
-                form.submit();
+                //form.submit();
+                insert_link();
             }
         });
 
@@ -368,14 +372,8 @@ function setting() {
         target_node = document.getElementById("target_node").value;
         target_port = "";//document.getElementById("target_port").value;
 
-        document.getElementById("name_node").value = "";
-        document.getElementById("latitude").value = "";
-        document.getElementById("longitude").value = "";
-        //document.getElementById("type_node").value = "";
-        //document.getElementById("address_node").value = "";
-        document.getElementById("description_node").value = "";
-        document.getElementById("description_node").value = "";
-
+        $('#node_form')[0].reset();
+        
         node = {
             name: name,
             lat: latitude,
@@ -411,11 +409,7 @@ function setting() {
         target = document.getElementById("target_node").value;
         target_port = "";//document.getElementById("target_port").value;
 
-        document.getElementById("source_node").value = "";
-        document.getElementById("target_node").value = "";
-        document.getElementById("name_link").value = "";
-        //document.getElementById("source_port").value = "";
-        //document.getElementById("target_port").value = "";
+        $('#link_form')[0].reset();
 
         link = {
             source_node: source,
@@ -474,7 +468,6 @@ function setting() {
         } else {
             alert("Local storage isn't support");
         }
-        $('.qtip.ui-tooltip').qtip('hide');
     }
 
     function update_list_sensor() {
@@ -527,7 +520,7 @@ function setting() {
         table_body = table.append("tbody");
         for (count = 0; count < nodes.length; count++) {
             table_row = table_body.append("tr");
-            table_row.attr("id", "node_" + nodes[count].name)
+            table_row.attr("id", "node_" + nodes[count].name);
             table_row.append("td").text(nodes[count].name);
             table_row.append("td").text(nodes[count].long);
             table_row.append("td").text(nodes[count].lat);
@@ -557,7 +550,7 @@ function setting() {
         table_body = table.append("tbody");
         for (var count = 0; count < links.length; count++) {
             table_row = table_body.append("tr");
-            table_row.attr("id", "link_" + links[count].source_node + '_' + links[count].target_node)
+            table_row.attr("id", "link_" + links[count].source_node + '_' + links[count].target_node);
             table_row.append("td").text(links[count].name);
             table_row.append("td").text(links[count].source_node);
             table_row.append("td").text(links[count].source_port);
