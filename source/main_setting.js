@@ -20,8 +20,7 @@ var geoSetting = (function () {
 function setting() {
     var nodes = []; // seznam vsech uzlu
     var links = []; // seznam vsech linek mezi uzly
-    var validator_node;
-    var validator_link;
+
     this.initialize = init;
     this.add_node = insert_node;
     this.add_link = insert_link;
@@ -57,7 +56,7 @@ function setting() {
         // -------------------------------------------------------------------------------------------------------------------
         // formular pro vkladani uzlu
         div_form = d3.select(id).append("div").attr("id", "forms_block");
-        table_form = div_form.append("form").attr("action", "javascript:void(0);").attr("id", "node_form").append("table");
+        table_form = div_form.append("form").attr("id", "node_form").append("table");
         table_form.style("float", "left").attr("id", "input_form_node").style("margin-right", "1cm");
         // 0.radek - nadpis
         table_form.append("tr").append("h3").text("Uzel");
@@ -298,7 +297,7 @@ function setting() {
     }
 
     function set_validate_rules() {
-        validator_node = $("#node_form").validate({
+        $("#node_form").validate({
             rules: {
                 name_node: "required",
                 //type_node: "required",
@@ -332,7 +331,7 @@ function setting() {
             }
         });
 
-        validator_link = $("#link_form").validate({
+        $("#link_form").validate({
             rules: {
                 target_node: "required",
                 //target_port: "required",
