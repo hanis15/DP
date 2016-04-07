@@ -46,7 +46,8 @@ function setting() {
                         + "line-height: 12px;"
                         + "}"
                         + "form label.error { color:red; }"
-                        + "form input.error { border:1px solid red; }";
+                        + "form input.error { border:1px solid red; }"
+                        + "table { white-space: nowrap; }";
         document.getElementsByTagName('head')[0].appendChild(style);
     }
 
@@ -136,8 +137,10 @@ function setting() {
 
         // -------------------------------------------------------------------------------------------------------------------
         // tabulka pro zobrazeni uzlu
+        tables.append("h3").text("Uzly");
         title = tables
             .append("table")
+            .attr("class", "table table-hover")
             .attr("id", "node_setting_result")
             .style("float", "left")
             .style("margin-right", "1cm")
@@ -156,8 +159,10 @@ function setting() {
 
         // -------------------------------------------------------------------------------------------------------------------
         // tabulka pro zobrazeni linek
+        tables.append("h3").text("Linky");
         title_link = tables
              .append("table")
+             .attr("class", "table table-hover")
              .attr("id", "link_setting_result")
              .attr("border", "1")
              .attr("width", $("#input_form_link").width());
@@ -532,14 +537,14 @@ function setting() {
                 .attr("id", "node_" + nodes[count].name + "_del")
                 .attr("onclick", 'geoSetting.getInstance().delete_node(this.id);');
         }
-
+        /*
         if ($("#node_setting_result").height() > $("#link_setting_result").height()) {
             d3.select("#tables_block").style("height", $("#node_setting_result").height() + "px");
         }
         else {
             d3.select("#tables_block").style("height", $("#link_setting_result").height() + "px");
         }
-
+        */
     }
 
     function update_table_link() {
@@ -609,13 +614,14 @@ function setting() {
                 }
             });
         }
-
+        /*
         if ($("#node_setting_result").height() > $("#link_setting_result").height()) {
             d3.select("#tables_block").style("height", $("#node_setting_result").height() + "px");
         }
         else {
             d3.select("#tables_block").style("height", $("#link_setting_result").height() + "px");
         }
+        */
     }
 
     function create_file() {
