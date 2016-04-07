@@ -57,7 +57,7 @@ function setting() {
         // -------------------------------------------------------------------------------------------------------------------
         // formular pro vkladani uzlu
         div_form = d3.select(id).append("div").attr("id", "forms_block");
-        table_form = div_form.append("form").attr("id", "node_form").append("table");
+        table_form = div_form.append("form").attr("id", "node_form").append("table").style("width", "45%");
         table_form.style("float", "left").attr("id", "input_form_node").style("margin-right", "1cm");
         // 0.radek - nadpis
         table_form.append("tr").append("h3").text("Uzel");
@@ -97,7 +97,7 @@ function setting() {
 
         // -------------------------------------------------------------------------------------------------------------------
         // formular pro vkladani linek
-        table_form = div_form.append("form").attr("id", "link_form").append("table")
+        table_form = div_form.append("form").attr("id", "link_form").append("table").style("width", "45%")
         table_form.attr("id", "input_form_link");
         // 0.radek - nadpis
         table_form.append("tr").append("h3").text("Linka");
@@ -147,13 +147,13 @@ function setting() {
             .attr("border", "1")
             .attr("width", $("#input_form_node").width());
         table_head = title.append("thead").append("tr");
-        table_head.append("td").text("Nazev");
-        table_head.append("td").text("Zem. delka");
-        table_head.append("td").text("Zem. sirka");
-        table_head.append("td").text("Typ");
-        table_head.append("td").text("Adresa");
+        table_head.append("th").text("Nazev");
+        table_head.append("th").text("Zem. delka");
+        table_head.append("th").text("Zem. sirka");
+        table_head.append("th").text("Typ");
+        table_head.append("th").text("Adresa");
         //table_head.append("td").text("Popis");
-        table_head.append("td").text("Smazat");
+        table_head.append("th").text("Smazat");
 
         update_table_node();
 
@@ -167,13 +167,13 @@ function setting() {
              .attr("border", "1")
              .attr("width", $("#input_form_link").width());
         table_head = title_link.append("thead").append("tr");
-        table_head.append("td").text("Nazev");
-        table_head.append("td").text("Zdrojovy uzel");
-        table_head.append("td").text("Zdrojovy port");
-        table_head.append("td").text("Cilovy uzel");
-        table_head.append("td").text("Cilovy port");
-        table_head.append("td").text("Smazat");
-        table_head.append("td").text("Sonda");
+        table_head.append("th").text("Nazev");
+        table_head.append("th").text("Zdrojovy uzel");
+        table_head.append("th").text("Zdrojovy port");
+        table_head.append("th").text("Cilovy uzel");
+        table_head.append("th").text("Cilovy port");
+        table_head.append("th").text("Smazat");
+        table_head.append("th").text("Sonda");
 
         update_table_link();
 
