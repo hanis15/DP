@@ -42,6 +42,18 @@ function setting() {
         update_table_node();
     }
 
+    function init_local_variables() {
+        // nacteni z HTML5 lokalniho uloziste
+        if (typeof (Storage) !== "undefined") {
+            sessionStorage.nodes = "";
+            sessionStorage.links = "";
+            sessionStorage.curr_link_index = "";
+        } else {
+            alert("Local storage isn't support");
+        }
+
+    }
+
     function load_local_variable() {
         // nacteni z HTML5 lokalniho uloziste
         if (typeof (Storage) !== "undefined") {
@@ -83,6 +95,7 @@ function setting() {
     }
 
     function init(id) {
+        init_local_variables();
         define_style();
 
         // -------------------------------------------------------------------------------------------------------------------
@@ -270,19 +283,9 @@ function setting() {
 
         load_local_variable();
         if (typeof (Storage) !== "undefined") {
-            current_link_name = sessionStorage.curr_link_name;
+            current_link_index = parseInt(sessionStorage.curr_link_index);
         } else {
             alert("Local storage isn't support");
-        }
-
-        link_name = current_link_name.split("_");
-        current_link_index = 0;
-        for (count = 0; count < links.length; count++) {
-            if (links[count].name == link_name[0]
-                && links[count].source_node == link_name[1]
-                && links[count].target_node == link_name[2]) {
-                current_link_index = count;
-            }
         }
 
         update_list_sensor();
@@ -538,7 +541,7 @@ function setting() {
         table_body = table.append("tbody");
         for (count = 0; count < nodes.length; count++) {
             table_row = table_body.append("tr");
-            table_row.attr("id", "node_" + nodes[count].name);
+            table_row.attr("id", "node_" + count);
             table_row.append("td").text(nodes[count].name);
             table_row.append("td").text(nodes[count].long);
             table_row.append("td").text(nodes[count].lat);
@@ -548,7 +551,7 @@ function setting() {
             table_row.append("td").attr("align", "center").append("input")
                 .attr("type", "submit")
                 .attr("value", "...")
-                .attr("id", "node_" + nodes[count].name + "_del")
+                .attr("id", "node_" + count + "_del")
                 .attr("onclick", 'geoSetting.getInstance().delete_node(this.id);');
         }
         /*
@@ -568,7 +571,7 @@ function setting() {
         table_body = table.append("tbody");
         for (var count = 0; count < links.length; count++) {
             table_row = table_body.append("tr");
-            table_row.attr("id", "link_" + links[count].source_node + '_' + links[count].target_node);
+            table_row.attr("id", "link_" + count);
             table_row.append("td").text(links[count].name);
             table_row.append("td").text(links[count].source_node);
             table_row.append("td").text(links[count].source_port);
@@ -577,22 +580,22 @@ function setting() {
             table_row.append("td").attr("align", "center").append("input")
                 .attr("type", "submit")
                 .attr("value", "...")
-                .attr("id", "link_" + links[count].source_node + "_" + links[count].target_node + "_del")
+                .attr("id", "link_" + count + "_del")
                 .attr("onclick", 'geoSetting.getInstance().delete_link(this.id);');
             table_row.append("td").attr("align", "center").append("input")
                 .attr("type", "submit")
                 .attr("value", "+")
-                .attr("id", "link_btn_" + links[count].name + "_" + links[count].source_node + "_" + links[count].target_node);
+                .attr("id", "link_btn_" + count);
 
 
-            $("#link_btn_" + links[count].name + '_' + links[count].source_node + '_' + links[count].target_node).qtip({
+            $("#link_btn_" + count).qtip({
                 content: {
                     button: 'Close',
                     title: function (event, api) {
                         local_id = api.elements.target.attr("id");
                         my_id = local_id.split("_");
                         if (typeof (Storage) !== "undefined") {
-                            sessionStorage.curr_link_name = my_id[2] + '_' + my_id[3] + '_' + my_id[4];
+                            sessionStorage.curr_link_index = my_id[2];
                         } else {
                             alert("Local storage isn't support");
                         }
@@ -651,6 +654,8 @@ function setting() {
         alert("Vytvarim soubor...");
         content = '{ "type": "FeatureCollection", "features": ['; // start
         curr_node = "";
+
+        // uklada uzly
         for (count = 0; count < nodes.length; count++) {
             curr_node = '{ "geometry": { "type": "Point", "coordinates": [ '
                         + nodes[count].long + ', ' + nodes[count].lat + ' ]},';
@@ -665,8 +670,8 @@ function setting() {
         
         if (links.length != 0) { content += ','; }
 
+        // uklada linky
         for (count = 0; count < links.length; count++) {
-
             source_coordinates = "";
             for (s_count = 0; s_count < nodes.length; s_count++) {
                 if (nodes[s_count].name == links[count].source_node) {
@@ -683,17 +688,49 @@ function setting() {
                 }
             }
 
-            curr_node = '{ "geometry": { "type": "LineString", "coordinates": [ ' + source_coordinates + ', ' + dest_coordinates + ' ]},';
-            curr_node += '"properties": { "source": "' + links[count].source_node
-                      + '", "target": "' + links[count].target_node
-                      + '", "target_port": "' + links[count].target_port
-                      + '", "source_port": "' + links[count].source_port
-                      + '", "name": "' + links[count].name + '"},';
-            curr_node += '"type": "Feature" }';
-            if (count != links.length - 1) { curr_node += ','; }
-            content += curr_node;
-        }
+            if (links[count].node != '') { // linka spojuje 2 uzly -> je na ni sonda
+                var sensor_index = 0;
+                for (p_count = 0; p_count < nodes.length; p_count++) {
+                    if ((nodes[p_count].name == links[count].node) && (nodes[p_count].type_node == 'S')) {
+                        sensor_index = p_count;
+                        break;
+                    }
+                }
 
+                var sensor_coordinates = '[' + nodes[sensor_index].long + ', ' + nodes[sensor_index].lat + ' ]';
+
+                // vytvorim 2 linky
+                curr_node = '{ "geometry": { "type": "LineString", "coordinates": [ ' + source_coordinates + ', ' + sensor_coordinates + ' ]},';
+                curr_node += '"properties": { "source": "' + links[count].source_node
+                            + '", "target": "' + nodes[sensor_index].name
+                            + '", "target_port": "' + links[count].target_port
+                            + '", "source_port": "' + links[count].source_port
+                            + '", "name": "' + links[count].name + '"},';
+                curr_node += '"type": "Feature" },';
+                content += curr_node;
+
+                curr_node = '{ "geometry": { "type": "LineString", "coordinates": [ ' + sensor_coordinates + ', ' + dest_coordinates + ' ]},';
+                curr_node += '"properties": { "source": "' + nodes[sensor_index].name
+                            + '", "target": "' + links[count].target_node
+                            + '", "target_port": "' + links[count].target_port
+                            + '", "source_port": "' + links[count].source_port
+                            + '", "name": "' + links[count].name + '"},';
+                curr_node += '"type": "Feature" }';
+                if (count != links.length - 1) { curr_node += ','; }
+                content += curr_node;
+            }
+            else {
+                curr_node = '{ "geometry": { "type": "LineString", "coordinates": [ ' + source_coordinates + ', ' + dest_coordinates + ' ]},';
+                curr_node += '"properties": { "source": "' + links[count].source_node
+                            + '", "target": "' + links[count].target_node
+                            + '", "target_port": "' + links[count].target_port
+                            + '", "source_port": "' + links[count].source_port
+                            + '", "name": "' + links[count].name + '"},';
+                curr_node += '"type": "Feature" }';
+                if (count != links.length - 1) { curr_node += ','; }
+                content += curr_node;
+            }
+        }
         content += ']}';    // end
         window.open('data:text/json;charset=utf-8,' + escape(content))
     }
@@ -701,7 +738,7 @@ function setting() {
     function delete_node(id) {
         var count;
         for (count = 0; count < nodes.length; count++) {
-            if (('node_' + nodes[count].name) + '_del' == id) {
+            if ('node_' + count + '_del' == id) {
                 break;
             }
         }
@@ -714,7 +751,7 @@ function setting() {
     function delete_link(id) {
         var count;
         for (count = 0; count < links.length; count++) {
-            if (('link_' + links[count].source_node + '_' + links[count].target_node) + '_del' == id) {
+            if ('link_' + count + '_del' == id) {
                 break;
             }
         }
