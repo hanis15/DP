@@ -1,0 +1,356 @@
+{
+   "type":"object",
+   "$schema": "http://json-schema.org/draft-03/schema",
+   "id": "http://jsonschema.net",
+   "required":false,
+   "properties":{
+      "hosts": {
+         "type":"object",
+         "id": "http://jsonschema.net/hosts",
+         "required":false,
+         "properties":{
+            "hosts": {
+               "type":"array",
+               "id": "http://jsonschema.net/hosts/hosts",
+               "required":true,
+               "items":
+                  {
+                     "type":"object",
+                     "id": "http://jsonschema.net/hosts/hosts/0",
+                     "required":true,
+                     "properties":{
+                        "group": {
+                           "type":"string",
+                           "id": "http://jsonschema.net/hosts/hosts/0/group",
+                           "required":false
+                        },
+                        "imageId": {
+                           "type":"number",
+                           "id": "http://jsonschema.net/hosts/hosts/0/imageId",
+                           "required":false
+                        },
+                        "ip": {
+                           "type":"string",
+                           "id": "http://jsonschema.net/hosts/hosts/0/ip",
+                           "required":true
+                        },
+                        "lan": {
+                           "type":"string",
+                           "id": "http://jsonschema.net/hosts/hosts/0/lan",
+                           "required":true
+                        },
+                        "logicalRole": {
+                           "type":"string",
+                           "id": "http://jsonschema.net/hosts/hosts/0/logicalRole",
+                           "required":false
+                        },
+                        "name": {
+                           "type":"string",
+                           "id": "http://jsonschema.net/hosts/hosts/0/name",
+                           "required":true
+                        },
+                        "physRole": {
+                           "type":"string",
+                           "id": "http://jsonschema.net/hosts/hosts/0/physRole",
+                           "required":true
+                        },
+                        "vncPassword": {
+                           "type":"string",
+                           "id": "http://jsonschema.net/hosts/hosts/0/physRole",
+                           "required":false
+                        }
+                     }
+                  }
+               
+
+            }
+         }
+      },
+      "linksProperties": {
+         "type":"object",
+         "id": "http://jsonschema.net/linksProperties",
+         "required":false,
+         "properties":{
+            "linksProperties": {
+               "type":"array",
+               "id": "http://jsonschema.net/linksProperties/linksProperties",
+               "required":true,
+               "items":
+                  {
+                     "type":"object",
+                     "id": "http://jsonschema.net/linksProperties/linksProperties/0",
+                     "required":true,
+                     "properties":{
+                        "direction": {
+                           "type":"string",
+                           "id": "http://jsonschema.net/linksProperties/linksProperties/0/direction",
+                           "required":true
+                        },
+                        "hostName": {
+                           "type":"string",
+                           "id": "http://jsonschema.net/linksProperties/linksProperties/0/hostName",
+                           "required":true
+                        },
+                        "lanName": {
+                           "type":"string",
+                           "id": "http://jsonschema.net/linksProperties/linksProperties/0/lanName",
+                           "required":true
+                        },
+                        "properties": {
+                           "type":"string",
+                           "id": "http://jsonschema.net/linksProperties/linksProperties/0/properties",
+                           "required":true
+                        }
+                     }
+                  }
+               
+
+            }
+         }
+      },
+      "measurements": {
+         "type":"object",
+         "id": "http://jsonschema.net/measurements",
+         "required":false,
+         "properties":{
+            "startELK": {
+               "type":"boolean",
+               "title": "startELK",
+               "name": "startELK",
+               "id": "http://jsonschema.net/measurements/startELK",
+               "required":false
+            },
+            "startMeasurement": {
+               "type":"boolean",
+               "title": "startMeasurement",
+               "name": "startMeasurement",
+               "id": "http://jsonschema.net/measurements/startMeasurement",
+               "required":false
+            },
+            "hostsMeasurements": {
+               "type":"array",
+               "id": "http://jsonschema.net/measurements/hostsMeasurements",
+               "required":false,
+               "items":
+                  {
+                     "type":"object",
+                     "id": "http://jsonschema.net/measurements/hostsMeasurements/0",
+                     "required":true,
+                     "properties":{
+                        "detectionMethodName": {
+                           "type":"string",
+                           "id": "http://jsonschema.net/measurements/hostsMeasurements/0/detectionMethodName",
+                           "required":true
+                        },
+                        "hostName": {
+                           "type":"string",
+                           "id": "http://jsonschema.net/measurements/hostsMeasurements/0/hostName",
+                           "required":true
+                        },
+                        "measurementName": {
+                           "type":"string",
+                           "id": "http://jsonschema.net/measurements/hostsMeasurements/0/measurementName",
+                           "required":true
+                        },
+                        "phenomenonName": {
+                           "type":"string",
+                           "id": "http://jsonschema.net/measurements/hostsMeasurements/0/phenomenonName",
+                           "required":true
+                        },
+                        "lanName": {
+                           "type":"string",
+                           "id": "http://jsonschema.net/measurements/hostsMeasurements/0/lanName",
+                           "required":true
+                        }
+                     }
+                  }
+               
+
+            },
+            "networksMeasurements": {
+               "type":"array",
+               "id": "http://jsonschema.net/measurements/networksMeasurements",
+               "required":false,
+               "items":
+                  {
+                     "type":"object",
+                     "id": "http: //jsonschema.net/measurements/networksMeasurements/0",
+                     "required":true,
+                     "properties":{
+                        "detectionMethodName": {
+                           "type":"string",
+                           "id": "http://jsonschema.net/measurements/networksMeasurements/0/detectionMethodName",
+                           "required":true
+                        },
+                        "lan1": {
+                           "type":"string",
+                           "id": "http://jsonschema.net/measurements/networksMeasurements/0/lan1",
+                           "required":true
+                        },
+                        "lan2": {
+                           "type":"string",
+                           "id": "http://jsonschema.net/measurements/networksMeasurements/0/lan2",
+                           "required":true
+                        },
+                        "measurementName": {
+                           "type":"string",
+                           "id": "http://jsonschema.net/measurements/networksMeasurements/0/measurementName",
+                           "required":true
+                        },
+                        "phenomenonName": {
+                           "type":"string",
+                           "id": "http://jsonschema.net/measurements/networksMeasurements/0/phenomenonName",
+                           "required":true
+                        }
+                     }
+                  }
+              
+            }
+         }
+      },
+      "networks": {
+         "type":"object",
+         "id": "http://jsonschema.net/networks",
+         "required":true,
+         "properties":{
+            "networks": {
+               "type":"array",
+               "id": "http://jsonschema.net/networks/networks",
+               "required":true,
+               "items":
+                  {
+                     "type":"object",
+                     "id": "http://jsonschema.net/networks/networks/0",
+                     "required":true,
+                     "properties":{
+                        "ip": {
+                           "type":"string",
+                           "id": "http://jsonschema.net/networks/networks/0/ip",
+                           "required":true
+                        },
+                        "maxHosts": {
+                           "type":"number",
+                           "id": "http://jsonschema.net/networks/networks/0/maxHosts",
+                           "required":true
+                        },
+                        "name": {
+                           "type":"string",
+                           "id": "http://jsonschema.net/networks/networks/0/name",
+                           "required":true
+                        },
+                        "prefix": {
+                           "type":"number",
+                           "minimum":1,
+                           "maximum":30,
+                           "id": "http://jsonschema.net/networks/networks/0/prefix",
+                           "required":true
+                        },
+                        "imageId": {
+                           "type":"number",
+                           "id": "http://jsonschema.net/networks/networks/0/imageId",
+                           "required":false
+                        }
+                     }
+                  }
+               
+
+            }
+         }
+      },
+      "routes": {
+         "type":"object",
+         "id": "http://jsonschema.net/routes",
+         "required":false,
+         "properties":{
+            "routes": {
+               "type":"array",
+               "id": "http://jsonschema.net/routes/routes",
+               "required":true,
+               "items":
+                  {
+                     "type":"object",
+                     "id": "http://jsonschema.net/routes/routes/0",
+                     "required":true,
+                     "properties":{
+                        "bandwidth": {
+                           "type":"number",
+                           "minimum":1,
+                           "maximum":1048576,
+                           "id": "http://jsonschema.net/routes/routes/0/bandwidth",
+                           "required":false
+                        },
+                        "lan1": {
+                           "type":"string",
+                           "id": "http://jsonschema.net/routes/routes/0/lan1",
+                           "required":true
+                        },
+                        "lan2": {
+                           "type":"string",
+                           "id": "http://jsonschema.net/routes/routes/0/lan2",
+                           "required":true
+                        },
+                        "name": {
+                           "type":"string",
+                           "id": "http://jsonschema.net/routes/routes/0/name",
+                           "required":true
+                        }
+                     }
+                  }
+               
+
+            }
+         }
+      },
+      "additional_interfaces": {
+         "type":"object",
+         "id":"http://jsonschema.net/additional_interfaces",
+         "required":false,
+         "properties": {
+            "additional_interfaces": {
+               "type": "array",
+               "id":"http://jsonschema.net/additional_interfaces/additional_interfaces",
+               "required": true,
+               "items": {
+                  "type":"object",
+                  "id":"http://jsonschema.net/additional_interfaces/additional_interfaces/0",
+                  "required":true,
+                  "properties": {
+                     "lanName": {
+                        "type":"string",
+                        "id":"http://jsonschema.net/additional_interfaces/additional_interfaces/0/lanName",
+                        "required":"true"
+                     },
+                     "hostName": {
+                        "type":"string",
+                        "id":"http://jsonschema.net/additional_interfaces/additional_interfaces/0/hostName",
+                        "required":"true"
+                     },
+                     "ip": {
+                        "type":"string",
+                        "id":"http://jsonschema.net/additional_interfaces/additional_interfaces/0/ip",
+                        "required":"true"
+                     }
+                  }
+               }   
+            }
+         }
+      },
+      "sandbox": {
+         "type":"object",
+         "id": "http://jsonschema.net/sandbox",
+         "required":true,
+         "properties":{
+            "document paths": {
+               "type":"string",
+               "id": "http://jsonschema.net/sandbox/document paths",
+               "required":false
+            },
+            "name": {
+               "type":"string",
+               "id": "http://jsonschema.net/sandbox/name",
+               "required":true
+            }
+         }
+      }
+   }
+}

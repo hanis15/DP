@@ -1,0 +1,46 @@
+{
+  "networks": {
+    "networks": [
+      {
+        "name": "router_name1",
+        "ip": "192.3.3.4",
+        "prefix": "10",
+        "maxHosts": 0
+      },
+      {
+        "name": "router_name2",
+        "ip": "192.1.5.2",
+        "prefix": "10",
+        "maxHosts": 0
+      },
+      {
+        "name": "router_name3",
+        "ip": "10.3.2.5",
+        "prefix": "12",
+        "maxHosts": 0
+      }
+    ]
+  },
+  "routes": {
+    "routes": [
+      {
+        "name": "connect_router1_router2",
+        "lan1": "router_name1",
+        "lan2": "router_name2",
+        "bandwidth": "200"
+      },
+      {
+        "name": "router1_router3",
+        "lan1": "router_name3",
+        "lan2": "router_name1",
+        "bandwidth": "400"
+      },
+      {
+        "name": "router2_router3",
+        "lan1": "router_name2",
+        "lan2": "router_name3",
+        "bandwidth": "500"
+      }
+    ]
+  }
+}

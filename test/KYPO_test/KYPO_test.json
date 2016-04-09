@@ -1,0 +1,73 @@
+{
+  "networks": {
+    "networks": [
+      {
+        "name": "router_name",
+        "ip": "192.168.2.1",
+        "prefix": "24",
+        "maxHosts": 3,
+        "imageId": "i",
+        "note": "n"
+      }
+    ]
+  },
+  "hosts": {
+    "hosts": [
+      {
+        "name": "pc_name",
+        "lan": "router_name",
+        "ip": "192.169.1.4",
+        "physRole": "desktop",
+        "logicalRole": "attacker",
+        "vncPassword": "www",
+        "imageId": "k",
+        "group": "o",
+        "note": "i"
+      },
+      {
+        "name": "server_name",
+        "lan": "router_name",
+        "ip": "192.169.1.3",
+        "physRole": "server",
+        "logicalRole": "bot",
+        "vncPassword": "aaa",
+        "imageId": "j",
+        "group": "i",
+        "note": "y"
+      },
+      {
+        "name": "mobile_phone",
+        "lan": "router_name",
+        "ip": "192.169.1.7",
+        "physRole": "mobile",
+        "logicalRole": "traffic_generator",
+        "vncPassword": "uuu",
+        "imageId": "j",
+        "group": "m",
+        "note": "n"
+      }
+    ]
+  },
+  "linksProperties": {
+    "linksProperties": [
+      {
+        "lanName": "router_name",
+        "hostName": "pc_name",
+        "direction": "out",
+        "properties": "rate 1000kbit delay 7ms 2ms distribution normal loss 1%"
+      },
+      {
+        "lanName": "router_name",
+        "hostName": "server_name",
+        "direction": "duplex",
+        "properties": "rate 1000kbit delay 7ms 2ms distribution normal loss 1%"
+      },
+      {
+        "lanName": "router_name",
+        "hostName": "mobile_phone",
+        "direction": "in",
+        "properties": "rate 1000kbit delay 7ms 2ms distribution normal loss 1%"
+      }
+    ]
+  }
+}
