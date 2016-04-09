@@ -3,13 +3,6 @@
 function Graph(id, width, height) {
     this.create_graph = load_graph;
 
-    .axis {
-        font-size: 12px;
-    }
-
-    .bar {
-        fill: blue;
-    }
     // definovani css style
     function define_style() {
         style = document.createElement('style');

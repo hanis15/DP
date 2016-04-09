@@ -67,6 +67,8 @@ function Graph(id, width, height) {
             .on("click", explicitlyPosition);
 
         // prevod z geoJson do force reprezentace
+        nodes = [];
+        links = [];
         for (count = 0; count < data.features.length; count++) {
             if (data.features[count].geometry.type == "Point") {
                 nodes.push(data.features[count].properties);
@@ -86,7 +88,7 @@ function Graph(id, width, height) {
         }
         
         // uvodni nacteni parametru ze sond
-        load_parameter_from_sensors();
+        //load_parameter_from_sensors();
 
         force
             .nodes(nodes)
@@ -133,7 +135,7 @@ function Graph(id, width, height) {
                 title: function (event, api) {
                     return api.elements.target.attr("title");
                 },
-                text: $('<iframe height="180" width="640" src="template/data.html" />')
+                text: $('<iframe height="180" width="640" src="../template/data.html" />')
             },
             show: { solo: true },
             hide: 'unfocus',

@@ -47,7 +47,7 @@
 
             <p>
                 GeoJSON:
-                <input type="file" id="file_input_goe_json">
+                <input type="file" id="file_input_geo_json">
             </p>
 
             <div id="d3_graph"></div>
@@ -84,7 +84,7 @@
                     reader.readAsText(file);
                 }
 
-                document.getElementById('file_input_goe_json')
+                document.getElementById('file_input_geo_json')
                     .addEventListener('change', readSingleFile, false);
 
             </script>
