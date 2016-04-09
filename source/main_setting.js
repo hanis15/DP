@@ -291,10 +291,10 @@ function setting() {
         update_list_sensor();
 
         d3.select("#target_node")
-            .attr("value", links[current_link_index].target_node)
+            .attr("value", links[current_link_index].target)
             .attr("readonly", "readonly");
         d3.select("#source_node")
-            .attr("value", links[current_link_index].source_node)
+            .attr("value", links[current_link_index].source)
             .attr("readonly", "readonly");
 
         // validace formulare
@@ -419,9 +419,9 @@ function setting() {
             type_node: type_node,
             address: address_node,
             description: description_node,
-            //source_node: source_node,
+            //source: source_node,
             //source_port: source_port,
-            //target_node: target_node,
+            //target: target_node,
             //target_port: target_port
         };
         nodes.push(node);
@@ -444,9 +444,9 @@ function setting() {
         $('#link_form')[0].reset();
 
         link = {
-            source_node: source,
+            source: source,
             source_port: source_port,
-            target_node: target,
+            target: target,
             target_port: target_port,
             name: name_link,
             node: ""
@@ -573,9 +573,9 @@ function setting() {
             table_row = table_body.append("tr");
             table_row.attr("id", "link_" + count);
             table_row.append("td").text(links[count].name);
-            table_row.append("td").text(links[count].source_node);
+            table_row.append("td").text(links[count].source);
             table_row.append("td").text(links[count].source_port);
-            table_row.append("td").text(links[count].target_node);
+            table_row.append("td").text(links[count].target);
             table_row.append("td").text(links[count].target_port);
             table_row.append("td").attr("align", "center").append("input")
                 .attr("type", "submit")
@@ -674,7 +674,7 @@ function setting() {
         for (count = 0; count < links.length; count++) {
             source_coordinates = "";
             for (s_count = 0; s_count < nodes.length; s_count++) {
-                if (nodes[s_count].name == links[count].source_node) {
+                if (nodes[s_count].name == links[count].source) {
                     source_coordinates = '[ ' + nodes[s_count].long + ', ' + nodes[s_count].lat + ' ]';
                     break;
                 }
@@ -682,7 +682,7 @@ function setting() {
 
             dest_coordinates = "";
             for (d_count = 0; d_count < nodes.length; d_count++) {
-                if (nodes[d_count].name == links[count].target_node) {
+                if (nodes[d_count].name == links[count].target) {
                     dest_coordinates = '[ ' + nodes[d_count].long + ', ' + nodes[d_count].lat + ' ]';
                     break;
                 }
@@ -701,7 +701,7 @@ function setting() {
 
                 // vytvorim 2 linky
                 curr_node = '{ "geometry": { "type": "LineString", "coordinates": [ ' + source_coordinates + ', ' + sensor_coordinates + ' ]},';
-                curr_node += '"properties": { "source": "' + links[count].source_node
+                curr_node += '"properties": { "source": "' + links[count].source
                             + '", "target": "' + nodes[sensor_index].name
                             + '", "target_port": "' + links[count].target_port
                             + '", "source_port": "' + links[count].source_port
@@ -711,7 +711,7 @@ function setting() {
 
                 curr_node = '{ "geometry": { "type": "LineString", "coordinates": [ ' + sensor_coordinates + ', ' + dest_coordinates + ' ]},';
                 curr_node += '"properties": { "source": "' + nodes[sensor_index].name
-                            + '", "target": "' + links[count].target_node
+                            + '", "target": "' + links[count].target
                             + '", "target_port": "' + links[count].target_port
                             + '", "source_port": "' + links[count].source_port
                             + '", "name": "' + links[count].name + '"},';
@@ -721,8 +721,8 @@ function setting() {
             }
             else {
                 curr_node = '{ "geometry": { "type": "LineString", "coordinates": [ ' + source_coordinates + ', ' + dest_coordinates + ' ]},';
-                curr_node += '"properties": { "source": "' + links[count].source_node
-                            + '", "target": "' + links[count].target_node
+                curr_node += '"properties": { "source": "' + links[count].source
+                            + '", "target": "' + links[count].target
                             + '", "target_port": "' + links[count].target_port
                             + '", "source_port": "' + links[count].source_port
                             + '", "name": "' + links[count].name + '"},';
