@@ -20,6 +20,7 @@ var geoSetting = (function () {
 function setting() {
     var nodes = []; // seznam vsech uzlu
     var links = []; // seznam vsech linek mezi uzly
+    var current_link_index;
 
     this.initialize = init;
     this.add_node = insert_node;
@@ -28,9 +29,39 @@ function setting() {
     this.delete_node = delete_node;
     this.delete_link = delete_link;
     this.prepopulation_list_sensor = prepopulation_list;
+    this.save_local_variable = save_local_variable;
+    this.load_local_variable = load_local_variable;
+    this.update = update_all;
     
     this.init_sensor_form = init_sensor_form;
     this.add_sensor = insert_sensor;
+
+    function update_all() {
+        load_local_variable();
+        update_table_link();
+        update_table_node();
+    }
+
+    function load_local_variable() {
+        // nacteni z HTML5 lokalniho uloziste
+        if (typeof (Storage) !== "undefined") {
+            nodes = jQuery.parseJSON(sessionStorage.nodes);
+            links = jQuery.parseJSON(sessionStorage.links);
+        } else {
+            alert("Local storage isn't support");
+        }
+    }
+
+    function save_local_variable() {
+        // nacteni z HTML5 lokalniho uloziste
+        if (typeof (Storage) !== "undefined") {
+            sessionStorage.nodes = JSON.stringify(nodes);
+            sessionStorage.links = JSON.stringify(links);
+        } else {
+            alert("Local storage isn't support");
+        }
+
+    }
 
     function define_style() {
         style = document.createElement('style');
@@ -184,6 +215,8 @@ function setting() {
              .append("input").attr("type", "submit").attr("value", "Vytvor soubor")
              .attr("onclick", "geoSetting.getInstance().create_geojson_file();");
         set_validate_rules();
+
+        //document.onhaschange(alert("zmeneno!!!!"));
     }
 
     function init_sensor_form(id) {
@@ -235,11 +268,9 @@ function setting() {
                   .append("input").attr("type", "submit").attr("value", "Vlozit senzor")
                   .attr("onclick", "geoSetting.getInstance().add_sensor();");
 
-        // nacteni z HTML5 lokalniho uloziste
+        load_local_variable();
         if (typeof (Storage) !== "undefined") {
-            nodes = jQuery.parseJSON(sessionStorage.nodes);
-            links = jQuery.parseJSON(sessionStorage.links);
-            current_link_name = sessionStorage.curr_link;
+            current_link_name = sessionStorage.curr_link_name;
         } else {
             alert("Local storage isn't support");
         }
@@ -371,9 +402,9 @@ function setting() {
         type_node = "R";//document.getElementById("type_node").value;
         address_node = "";//document.getElementById("address_node").value;
         description_node = document.getElementById("description_node").value;
-        source_node = document.getElementById("source_node").value;
+        source_node = "";//document.getElementById("source_node").value;
         source_port = "";//document.getElementById("source_port").value;
-        target_node = document.getElementById("target_node").value;
+        target_node = "";//document.getElementById("target_node").value;
         target_port = "";//document.getElementById("target_port").value;
 
         $('#node_form')[0].reset();
@@ -385,19 +416,13 @@ function setting() {
             type_node: type_node,
             address: address_node,
             description: description_node,
-            source_node: source_node,
-            source_port: source_port,
-            target_node: target_node,
-            target_port: target_port
+            //source_node: source_node,
+            //source_port: source_port,
+            //target_node: target_node,
+            //target_port: target_port
         };
         nodes.push(node);
         
-        if (typeof (Storage) !== "undefined") {
-            sessionStorage.nodes = JSON.stringify(nodes);
-        } else {
-            alert("Local storage isn't support");
-        }
-
         update_list();
         update_table_node();
     }
@@ -425,14 +450,7 @@ function setting() {
         };
         links.push(link);
 
-        if (typeof (Storage) !== "undefined") {
-            sessionStorage.links = JSON.stringify(links);
-        } else {
-            alert("Local storage isn't support");
-        }
-
         update_table_link();
-        
     }
 
     function insert_sensor() {
@@ -466,12 +484,8 @@ function setting() {
 
         nodes.push(node);
 
-        if (typeof (Storage) !== "undefined") {
-            sessionStorage.links = JSON.stringify(links);
-            sessionStorage.nodes = JSON.stringify(nodes);
-        } else {
-            alert("Local storage isn't support");
-        }
+        save_local_variable();
+        parent.closeIFrame();
     }
 
     function update_list_sensor() {
@@ -578,13 +592,13 @@ function setting() {
                         local_id = api.elements.target.attr("id");
                         my_id = local_id.split("_");
                         if (typeof (Storage) !== "undefined") {
-                            sessionStorage.curr_link = my_id[2] + '_' + my_id[3] + '_' + my_id[4];
+                            sessionStorage.curr_link_name = my_id[2] + '_' + my_id[3] + '_' + my_id[4];
                         } else {
                             alert("Local storage isn't support");
                         }
                         return my_id[2];
                     },
-                    text: $('<iframe height="430" width="820" src="template/sensor.html" />')
+                    text: function () {return '<iframe height="450" width="820" src="template/sensor.html" />'; }//'Loading...',
                 },
                 show: {
                     solo: true,
@@ -601,8 +615,9 @@ function setting() {
                     event: 'unfocus'
                 },
                 position: {
-                    my: 'bottom center',
-                    at: 'top center',
+                    my: 'center',
+                    at: 'center',
+                    target: $(window),
                     adjust: {
                         screen: true
                     }
@@ -611,6 +626,14 @@ function setting() {
                     classes: 'qtip-bootstrap',
                     width: 860,
                     height: 490
+                },
+                events: {
+                    toggle: function (event, api) {
+                        if (event.type == 'tooltipshow')
+                            save_local_variable();
+                        if (event.type == 'tooltiphide')
+                            update_table_node();
+                    }
                 }
             });
         }

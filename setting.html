@@ -51,6 +51,11 @@
                 setting = geoSetting.getInstance();
                 setting.initialize(id);
 
+                function closeIFrame() {
+                    $('.qtip').hide();
+                    geoSetting.getInstance().update();
+                }
+
             </script>
 
         </div>
