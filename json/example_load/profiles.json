@@ -1,0 +1,486 @@
+[
+  {
+    "id": "Sources/147251-04a55a",
+    "name": "147.251.14.44",
+    "parent": "live",
+    "start": "2016-03-22 16:55",
+    "type": "shadow",
+    "status": "OK",
+    "history": false,
+    "description": "147.251.14.44",
+    "group": "Sources",
+    "end": "2016-04-10 12:25",
+    "channels": [
+      {
+        "id": "port-1",
+        "name": "All Ports",
+        "sign": "+",
+        "color": "#2466f4",
+        "parent": [ "147-251-14-44_p3000-b01b117" ],
+        "filter": "any"
+      }
+    ]
+  },
+  {
+    "id": "Sources/collec-477c67",
+    "name": "127.0.0.1 (collector-devel.ics.muni.cz)",
+    "parent": "live",
+    "start": "2015-05-06 10:05",
+    "type": "shadow",
+    "status": "OK",
+    "history": false,
+    "description": "127.0.0.1",
+    "group": "Sources",
+    "end": "2016-04-10 12:25",
+    "channels": [
+      {
+        "id": "port-1",
+        "name": "All Ports",
+        "sign": "+",
+        "color": "#2466f4",
+        "parent": [ "127-0-0-1_p3001" ],
+        "filter": "any"
+      }
+    ]
+  },
+  {
+    "id": "live",
+    "name": "All Sources",
+    "parent": "live",
+    "start": "2015-05-06 10:05",
+    "type": "real",
+    "status": "OK",
+    "history": false,
+    "description": "",
+    "end": "2016-04-10 12:25",
+    "maxsize": 593981,
+    "channels": [
+      {
+        "id": "p3000-b01b117",
+        "name": "csirt-mu_anonimizovano",
+        "sign": "+",
+        "color": "#b400bd",
+        "parent": [ "p3000-b01b117" ],
+        "filter": "any"
+      },
+      {
+        "id": "127-0-0-1_p3001",
+        "name": "127.0.0.1 (collector-devel.ics.muni.cz)",
+        "sign": "+",
+        "color": "#2466f4",
+        "parent": [ "127-0-0-1_p3001" ],
+        "filter": "any"
+      },
+      {
+        "id": "147-251-14-44_p3000-b01b117",
+        "name": "147.251.14.44",
+        "sign": "+",
+        "color": "#78c800",
+        "parent": [ "147-251-14-44_p3000-b01b117" ],
+        "filter": "any"
+      },
+      {
+        "id": "p3001",
+        "name": "collector-devel_eth3",
+        "sign": "+",
+        "color": "#FFFF20",
+        "parent": [ "p3001" ],
+        "filter": "any"
+      },
+      {
+        "id": "p3002",
+        "name": "collector-devel_eth2",
+        "sign": "+",
+        "color": "#0000FF",
+        "parent": [ "p3002" ],
+        "filter": "any"
+      },
+      {
+        "id": "p3003",
+        "name": "flowmon-ics-cesnet-test-nat_testing",
+        "sign": "+",
+        "color": "#33CC00",
+        "parent": [ "p3003" ],
+        "filter": "any"
+      }
+    ]
+  },
+  {
+    "id": "IPv4_IPv6",
+    "name": "IPv4_IPv6",
+    "parent": "live",
+    "start": "2016-03-22 13:25",
+    "type": "real",
+    "status": "OK",
+    "history": false,
+    "description": "#",
+    "end": "2016-04-10 12:25",
+    "maxsize": 1024,
+    "channels": [
+      {
+        "id": "IPv4",
+        "name": "IPv4",
+        "sign": "+",
+        "color": "#00ff00",
+        "parent": [ "p3000-b01b117" ],
+        "filter": "("
+      },
+      {
+        "id": "IPv6",
+        "name": "IPv6",
+        "sign": "+",
+        "color": "#0000ff",
+        "parent": [ "p3000-b01b117" ],
+        "filter": "("
+      }
+    ]
+  },
+  {
+    "id": "mail",
+    "name": "mail",
+    "parent": "live",
+    "start": "2016-03-20 09:30",
+    "type": "real",
+    "status": "OK",
+    "history": false,
+    "description": "Mail protocols",
+    "end": "2016-04-10 12:25",
+    "maxsize": 1024,
+    "channels": [
+      {
+        "id": "smtp",
+        "name": "smtp",
+        "sign": "+",
+        "color": "#ff6348",
+        "parent": [ "p3000-b01b117" ],
+        "filter": "("
+      },
+      {
+        "id": "imaps",
+        "name": "imaps",
+        "sign": "+",
+        "color": "#ef2400",
+        "parent": [ "p3000-b01b117" ],
+        "filter": "("
+      },
+      {
+        "id": "imap",
+        "name": "imap",
+        "sign": "+",
+        "color": "#ffff28",
+        "parent": [ "p3000-b01b117" ],
+        "filter": "("
+      },
+      {
+        "id": "spop3",
+        "name": "spop3",
+        "sign": "+",
+        "color": "#00cf00",
+        "parent": [ "p3000-b01b117" ],
+        "filter": "("
+      },
+      {
+        "id": "pop3",
+        "name": "pop3",
+        "sign": "+",
+        "color": "#38ffff",
+        "parent": [ "p3000-b01b117" ],
+        "filter": "("
+      },
+      {
+        "id": "smtps",
+        "name": "smtps",
+        "sign": "+",
+        "color": "#abcdef",
+        "parent": [ "p3000-b01b117" ],
+        "filter": "("
+      }
+    ]
+  },
+  {
+    "id": "messanger",
+    "name": "messanger",
+    "parent": "live",
+    "start": "2016-03-16 17:45",
+    "type": "real",
+    "status": "OK",
+    "history": false,
+    "description": "Messanger protocols",
+    "end": "2016-04-10 12:25",
+    "maxsize": 1024,
+    "channels": [
+      {
+        "id": "jabber",
+        "name": "jabber",
+        "sign": "+",
+        "color": "#ffa658",
+        "parent": [ "p3000-b01b117" ],
+        "filter": "("
+      },
+      {
+        "id": "irc",
+        "name": "irc",
+        "sign": "+",
+        "color": "#d72700",
+        "parent": [ "p3000-b01b117" ],
+        "filter": "("
+      },
+      {
+        "id": "msn_messanger",
+        "name": "msn_messanger",
+        "sign": "+",
+        "color": "#ffff40",
+        "parent": [ "p3000-b01b117" ],
+        "filter": "("
+      },
+      {
+        "id": "icq",
+        "name": "icq",
+        "sign": "+",
+        "color": "#00d700",
+        "parent": [ "p3000-b01b117" ],
+        "filter": "("
+      }
+    ]
+  },
+  {
+    "id": "nomsov-18a523",
+    "name": "noms_ovs",
+    "parent": "live",
+    "start": "2016-04-10 12:00",
+    "type": "real",
+    "status": "OK",
+    "history": false,
+    "description": "kanal pro clanek o mereni OVS",
+    "end": "2016-04-10 12:25",
+    "maxsize": 1024,
+    "channels": [
+      {
+        "id": "flowmo-b161fc",
+        "name": "flowmon",
+        "sign": "+",
+        "color": "#2466f4",
+        "parent": [ ],
+        "filter": "("
+      },
+      {
+        "id": "ovsipf-deac17",
+        "name": "ovs_ipfix",
+        "sign": "+",
+        "color": "#f44100",
+        "parent": [ ],
+        "filter": "("
+      },
+      {
+        "id": "ovsnf9-b01990",
+        "name": "ovs_nf9",
+        "sign": "+",
+        "color": "#ffa216",
+        "parent": [ ],
+        "filter": "("
+      },
+      {
+        "id": "ovslan-0f641f",
+        "name": "ovs_lan2_nf9",
+        "sign": "+",
+        "color": "#1bb500",
+        "parent": [ ],
+        "filter": "("
+      },
+      {
+        "id": "ovslan-e3eb8c",
+        "name": "ovs_lan2_ipfix",
+        "sign": "+",
+        "color": "#b400bd",
+        "parent": [ ],
+        "filter": "("
+      },
+      {
+        "id": "lan2fl-266ccd",
+        "name": "lan2_flowmon",
+        "sign": "+",
+        "color": "#00ace5",
+        "parent": [ ],
+        "filter": "("
+      }
+    ]
+  },
+  {
+    "id": "routers",
+    "name": "routers",
+    "parent": "live",
+    "start": "2016-03-19 22:55",
+    "type": "real",
+    "status": "OK",
+    "history": false,
+    "description": "Router protocols",
+    "end": "2016-04-10 12:25",
+    "maxsize": 1024,
+    "channels": [
+      {
+        "id": "rip",
+        "name": "rip",
+        "sign": "+",
+        "color": "#ff9f50",
+        "parent": [ "p3000-b01b117" ],
+        "filter": "("
+      },
+      {
+        "id": "bgp",
+        "name": "bgp",
+        "sign": "+",
+        "color": "#b70600",
+        "parent": [ "p3000-b01b117" ],
+        "filter": "("
+      },
+      {
+        "id": "igp",
+        "name": "igp",
+        "sign": "+",
+        "color": "#ffff48",
+        "parent": [ "p3000-b01b117" ],
+        "filter": "("
+      },
+      {
+        "id": "egp",
+        "name": "egp",
+        "sign": "+",
+        "color": "#09ff00",
+        "parent": [ "p3000-b01b117" ],
+        "filter": "("
+      },
+      {
+        "id": "gre",
+        "name": "gre",
+        "sign": "+",
+        "color": "#20ffff",
+        "parent": [ "p3000-b01b117" ],
+        "filter": "("
+      },
+      {
+        "id": "ospf",
+        "name": "ospf",
+        "sign": "+",
+        "color": "#ff0000",
+        "parent": [ "p3000-b01b117" ],
+        "filter": "("
+      }
+    ]
+  },
+  {
+    "id": "service",
+    "name": "service",
+    "parent": "live",
+    "start": "2016-03-22 10:00",
+    "type": "real",
+    "status": "OK",
+    "history": false,
+    "description": "Service protocols",
+    "end": "2016-04-10 12:25",
+    "maxsize": 1024,
+    "channels": [
+      {
+        "id": "telnet",
+        "name": "telnet",
+        "sign": "+",
+        "color": "#ff8d58",
+        "parent": [ "p3000-b01b117" ],
+        "filter": "("
+      },
+      {
+        "id": "smb",
+        "name": "smb",
+        "sign": "+",
+        "color": "#df1600",
+        "parent": [ "p3000-b01b117" ],
+        "filter": "("
+      },
+      {
+        "id": "dhcp",
+        "name": "dhcp",
+        "sign": "+",
+        "color": "#ffff38",
+        "parent": [ "p3000-b01b117" ],
+        "filter": "("
+      },
+      {
+        "id": "dns",
+        "name": "dns",
+        "sign": "+",
+        "color": "#34ff10",
+        "parent": [ "p3000-b01b117" ],
+        "filter": "("
+      },
+      {
+        "id": "smtp",
+        "name": "smtp",
+        "sign": "+",
+        "color": "#40ffff",
+        "parent": [ "p3000-b01b117" ],
+        "filter": "("
+      },
+      {
+        "id": "snmp_trap",
+        "name": "snmp_trap",
+        "sign": "+",
+        "color": "#0400ff",
+        "parent": [ "p3000-b01b117" ],
+        "filter": "("
+      },
+      {
+        "id": "snmp",
+        "name": "snmp",
+        "sign": "+",
+        "color": "#000000",
+        "parent": [ "p3000-b01b117" ],
+        "filter": "("
+      }
+    ]
+  },
+  {
+    "id": "user",
+    "name": "user",
+    "parent": "live",
+    "start": "2016-03-22 09:55",
+    "type": "real",
+    "status": "OK",
+    "history": false,
+    "description": "User protocols",
+    "end": "2016-04-10 12:25",
+    "maxsize": 1024,
+    "channels": [
+      {
+        "id": "ssh",
+        "name": "ssh",
+        "sign": "+",
+        "color": "#ff7b60",
+        "parent": [ "p3000-b01b117" ],
+        "filter": "("
+      },
+      {
+        "id": "ftp",
+        "name": "ftp",
+        "sign": "+",
+        "color": "#bf1000",
+        "parent": [ "p3000-b01b117" ],
+        "filter": "("
+      },
+      {
+        "id": "https",
+        "name": "https",
+        "sign": "+",
+        "color": "#ffff38",
+        "parent": [ "p3000-b01b117" ],
+        "filter": "("
+      },
+      {
+        "id": "http",
+        "name": "http",
+        "sign": "+",
+        "color": "#00ff11",
+        "parent": [ "p3000-b01b117" ],
+        "filter": "("
+      }
+    ]
+  }
+]
