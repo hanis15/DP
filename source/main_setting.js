@@ -21,6 +21,8 @@ function setting() {
     var nodes = []; // seznam vsech uzlu
     var links = []; // seznam vsech linek mezi uzly
     var current_link_index;
+    var speed_table = {}
+
 
     this.initialize = init;
     this.add_node = insert_node;
@@ -163,11 +165,18 @@ function setting() {
         table_form.append("tr").append("td").attr("align", "right").append("p").text("Cil: ")
                   .append("select").attr("id", "target_node").attr("name", "target_node");
 
-        // 5.radek - cilovy port
-        /*
-        table_form.append("tr").append("td").attr("align", "right").append("p").text("Cilovy port: ")
-                  .append("input").attr("id", "target_port").attr("name", "target_port").attr("type", 'text');
-        */
+        // 5.radek - rychlost linky
+        table_form.append("tr").append("td").attr("align", "right").append("p").text("Rychlost: ")
+                  .append("select").attr("id", "speed_link").attr("name", "speed_link");
+        speed_select = d3.select("#speed_link");
+        speed_select.append("option").attr("value", "").text("");
+        speed_select.append("option").attr("value", "100").text("100M");
+        speed_select.append("option").attr("value", "1000").text("1G");
+        speed_select.append("option").attr("value", "10000").text("10G");
+        speed_select.append("option").attr("value", "40000").text("40G");
+        speed_select.append("option").attr("value", "100000").text("100G");
+
+
         // 6.radek - prazdny
         table_form.append("tr").attr("height", $('tr').eq(1).height()).append("td");
 
@@ -212,6 +221,7 @@ function setting() {
              .attr("width", $("#input_form_link").width());
         table_head = title_link.append("thead").append("tr");
         table_head.append("th").text("Nazev");
+        table_head.append("th").text("Rychlost");
         table_head.append("th").text("Zdrojovy uzel");
         table_head.append("th").text("Zdrojovy port");
         table_head.append("th").text("Cilovy uzel");
@@ -376,14 +386,16 @@ function setting() {
                 //target_port: "required",
                 source_node: "required",
                 //source_port: "required",
-                name_link: "required"
+                name_link: "required",
+                speed_link: "required"
             },
             messages: {
                 target_node: "Vyberte cil",
                 //target_port: "Vyberte cilovy port",
                 source_node: "Vyberte zdroj",
                 //source_port: "Vyberte zdrojovy port",
-                name_link: "Zadejte nazev linky"
+                name_link: "Zadejte nazev linky",
+                speed_link: "Zadejte rychlost linky"
             },
             submitHandler: function (form) {
                 // do other things for a valid form
@@ -440,12 +452,14 @@ function setting() {
         source_port = "";//document.getElementById("source_port").value;
         target = document.getElementById("target_node").value;
         target_port = "";//document.getElementById("target_port").value;
+        speed_link = document.getElementById("speed_link").value;
 
         $('#link_form')[0].reset();
 
         link = {
             source: source,
             source_port: source_port,
+            speed: speed_link,
             target: target,
             target_port: target_port,
             name: name_link,
@@ -562,6 +576,20 @@ function setting() {
             d3.select("#tables_block").style("height", $("#link_setting_result").height() + "px");
         }
         */
+
+        console.log('window: ' + window.innerWidth + ', ' + window.innerHeight);
+        var body = document.body,
+        html = document.documentElement;
+        /*
+        window.innerHeight = window.innerHeight + 20;
+        var height = Math.max(body.scrollHeight, body.offsetHeight,
+                               html.clientHeight, html.scrollHeight, html.offsetHeight);
+        console.log('body.scrollHeight: ' + body.scrollHeight);
+        console.log('body.offsetHeight: ' + body.offsetHeight);
+        console.log('html.clientHeight: ' + html.clientHeight);
+        console.log('html.scrollHeight: ' + html.scrollHeight);
+        console.log('html.offsetHeight: ' + html.offsetHeight);
+        */
     }
 
     function update_table_link() {
@@ -573,6 +601,7 @@ function setting() {
             table_row = table_body.append("tr");
             table_row.attr("id", "link_" + count);
             table_row.append("td").text(links[count].name);
+            table_row.append("td").text(function () { return (links[count].speed / 1000) + 'G'; });
             table_row.append("td").text(links[count].source);
             table_row.append("td").text(links[count].source_port);
             table_row.append("td").text(links[count].target);
@@ -705,6 +734,7 @@ function setting() {
                             + '", "target": "' + nodes[sensor_index].name
                             + '", "target_port": "' + links[count].target_port
                             + '", "source_port": "' + links[count].source_port
+                            + '", "speed": "' + links[count].speed
                             + '", "name": "' + links[count].name + '"},';
                 curr_node += '"type": "Feature" },';
                 content += curr_node;
@@ -714,6 +744,7 @@ function setting() {
                             + '", "target": "' + links[count].target
                             + '", "target_port": "' + links[count].target_port
                             + '", "source_port": "' + links[count].source_port
+                            + '", "speed": "' + links[count].speed
                             + '", "name": "' + links[count].name + '"},';
                 curr_node += '"type": "Feature" }';
                 if (count != links.length - 1) { curr_node += ','; }
@@ -725,6 +756,7 @@ function setting() {
                             + '", "target": "' + links[count].target
                             + '", "target_port": "' + links[count].target_port
                             + '", "source_port": "' + links[count].source_port
+                            + '", "speed": "' + links[count].speed
                             + '", "name": "' + links[count].name + '"},';
                 curr_node += '"type": "Feature" }';
                 if (count != links.length - 1) { curr_node += ','; }
