@@ -559,7 +559,7 @@ function setting() {
             table_row.append("td").text(nodes[count].name);
             table_row.append("td").text(nodes[count].long);
             table_row.append("td").text(nodes[count].lat);
-            table_row.append("td").text(nodes[count].type_node);
+            table_row.append("td").text(function () { return (nodes[count].type_node == "R") ? "Router" : "Sonda"; });
             table_row.append("td").text(nodes[count].address);
             //table_row.append("td").text(n.description);
             table_row.append("td").attr("align", "center").append("input")
@@ -735,6 +735,7 @@ function setting() {
                             + '", "target_port": "' + links[count].target_port
                             + '", "source_port": "' + links[count].source_port
                             + '", "speed": "' + links[count].speed
+                            + '", "node": "' + links[count].node
                             + '", "name": "' + links[count].name + '"},';
                 curr_node += '"type": "Feature" },';
                 content += curr_node;
@@ -745,6 +746,7 @@ function setting() {
                             + '", "target_port": "' + links[count].target_port
                             + '", "source_port": "' + links[count].source_port
                             + '", "speed": "' + links[count].speed
+                            + '", "node": "' + links[count].node
                             + '", "name": "' + links[count].name + '"},';
                 curr_node += '"type": "Feature" }';
                 if (count != links.length - 1) { curr_node += ','; }
@@ -757,6 +759,7 @@ function setting() {
                             + '", "target_port": "' + links[count].target_port
                             + '", "source_port": "' + links[count].source_port
                             + '", "speed": "' + links[count].speed
+                            + '", "node": "'
                             + '", "name": "' + links[count].name + '"},';
                 curr_node += '"type": "Feature" }';
                 if (count != links.length - 1) { curr_node += ','; }
