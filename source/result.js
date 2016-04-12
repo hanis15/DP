@@ -114,6 +114,8 @@ function Graph(id, width, height) {
 
             error: function (a, b, err) {
                 console.log(err);
+                d3.selectAll("#sub_graph").remove();
+                d3.select(id).append("p").attr("id", "sub_graph").text('Chyba: Z adresy "' + host + '" nelze ziskat pristupovy token.');
                 alert('Chyba: Z adresy "' + host + '" nelze ziskat pristupovy token.');
             },
         });
@@ -147,6 +149,8 @@ function Graph(id, width, height) {
             },
             error: function (a, b, err) {
                 console.log(err);
+                d3.selectAll("#sub_graph").remove();
+                d3.select(id).append("p").attr("id", "sub_graph").text('Chyba: "' + err + '" .');
             },
         });
     }
