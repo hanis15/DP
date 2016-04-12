@@ -4,12 +4,83 @@ function Graph(id, width, height) {
     var svg;
     var nodes = [];
     var links = [];
+    var current_type;
+    var current_item_index;
     this.create_graph = load_graph;
     this.define_style = define_style;
     this.set_data = nacti_data;
+    this.load_change = load_local_variable;
+
+    function init_local_variables() {
+        // nacteni z HTML5 lokalniho uloziste
+        if (typeof (Storage) !== "undefined") {
+            sessionStorage.nodes = "";
+            sessionStorage.links = "";
+            sessionStorage.curr_link_index = "";
+        } else {
+            alert("Local storage isn't support");
+        }
+
+    }
+
+    function load_local_variable() {
+        // nacteni z HTML5 lokalniho uloziste
+        if (typeof (Storage) !== "undefined") {
+            nodes = jQuery.parseJSON(sessionStorage.nodes);
+            links = jQuery.parseJSON(sessionStorage.links);
+            current_item_index = sessionStorage.current_item_index;
+            current_type = sessionStorage.current_type;
+        } else {
+            alert("Local storage isn't support");
+        }
+    }
+
+    function save_local_variable() {
+        // nacteni z HTML5 lokalniho uloziste
+        if (typeof (Storage) !== "undefined") {
+            sessionStorage.nodes = JSON.stringify(nodes);
+            sessionStorage.links = JSON.stringify(links);
+            sessionStorage.current_type = current_type;
+            sessionStorage.current_item_index = current_item_index;
+        } else {
+            alert("Local storage isn't support");
+        }
+
+    }
+
+
+    // vykresleni vzorniku pro rychlost
+    function add_color_spectrum() {
+        color_spectrum = d3.select(id).append("div").attr("id", "color_palete_spectrum").attr("align", "center").append("svg");
+
+        color_spectrum.append("rect")
+                      .attr("class", "color_spectrum")
+                      .style("fill", "#6f00ff");
+
+        color_spectrum.append("rect")
+                      .attr("x", "30")
+                      .attr("class", "color_spectrum")
+                      .style("fill", "#66cdaa");
+
+        color_spectrum.append("rect")
+                      .attr("x", "60")
+                      .attr("class", "color_spectrum")
+                      .style("fill", "#ffff66");
+
+        color_spectrum.append("rect")
+                      .attr("x", "90")
+                      .attr("class", "color_spectrum")
+                      .style("fill", "#ff4444");
+
+        color_spectrum.append("rect")
+                      .attr("x", "120")
+                      .attr("class", "color_spectrum")
+                      .style("fill", "#000000");
+    }
 
     // definovani css style
     function define_style() {
+        $.getScript("source/main_setting.js");
         style = document.createElement('style');
         style.type = 'text/css';
         style.innerHTML = ".ui-tooltip, .qtip{"
@@ -18,24 +89,32 @@ function Graph(id, width, height) {
                         + "top: -28000px;"
                         + "display: none;"
                         + "max-width: 900px;"
-                        + "min-width: 600px;"
+                        + "min-width: 6px;"
                         + "font-size: 10.5px;"
-                        + "line-height: 12px;"
-                        + "}";
+                        + "line-height: 12px;}"
+                        + ".color_spectrum {"
+                        + "height: 20px;"
+                        + "width: 30px;"
+                        + "stroke: black;}";
         document.getElementsByTagName('head')[0].appendChild(style);
     }
 
     function nacti_data(data) {
+        init_local_variables();
         var json_data = jQuery.parseJSON(data);
+        var setting = geoSetting.getInstance();
+
 
         svg.remove();
+        d3.select("#color_palete_spectrum").remove();
         new_graph(json_data);
     }
 
     function load_graph() {
         define_style();
         //d3.json("json/brno_school.geo.json", parse_data);
-        d3.json("json/cz_city.geo.json", parse_data);
+        //d3.json("json/cz_city.geo.json", parse_data);
+        parse_data("");
     }
 
     function parse_data(error, data) {
@@ -66,6 +145,11 @@ function Graph(id, width, height) {
             .attr("style", "border: 1px solid black;")
             .on("click", explicitlyPosition);
 
+        add_color_spectrum();
+
+        // pokud se pouze inicializuje zobrazeni
+        if (data == null) return;
+
         // prevod z geoJson do force reprezentace
         nodes = [];
         links = [];
@@ -88,6 +172,7 @@ function Graph(id, width, height) {
         }
         
         // uvodni nacteni parametru ze sond
+        //get_all_token();
         //load_parameter_from_sensors();
 
         force
@@ -99,16 +184,33 @@ function Graph(id, width, height) {
             .data(links)
             .enter().append("line")
             .attr("class", "link")
-            .style("stroke", "#9ecae1")
-            .style("stroke-width", "1.5px")
+            .style("stroke", function (d) {
+                switch (d.speed) {
+                    case "100": return "#6f00ff";
+                    case "1000": return "#66cdaa";
+                    case "10000": return "#ffff66";
+                    case "40000": return "#ff4444";
+                    case "100000": return "#000000";
+                }
+            })
+            .style("stroke-width", function (d) {
+                switch (d.speed) {
+                    case "100": return "2px";
+                    case "1000": return "4px";
+                    case "10000": return "6px";
+                    case "40000": return "8px";
+                    case "100000": return "10px";
+                }
+            })
             .attr("title", function (d) { return d.name; })
             .attr("id", function (d) { return d.name; });
 
         node_g = svg.selectAll("g.node")
-            .data(nodes, function(d) { return d.name; });
+            .data(nodes, function (d) { return d.name; });
             
         node = node_g.enter().append("g")
                              .attr("class", "node")
+                             .attr("title", function (d) { return d.name; })
                              .attr("transform", function (d) { return "translate(" + d.x + "," + d.y + ")"; })
                              .call(force.drag);
 
@@ -123,19 +225,31 @@ function Graph(id, width, height) {
             .attr("height", 50)
             .attr("width", 50);
 
-        node.append("title")
-            .text(function (d) {
-                return d.name;
-            });
 
-
-        $("svg line").qtip({
+        $('.link, .node').qtip({
             content: {
                 button: 'Close',
                 title: function (event, api) {
+                    if (api.elements.target.attr("class") == "node") {
+                        current_type = "N";
+                        for (var count = 0; count < nodes.length; count++)
+                            if (nodes[count].name == api.elements.target.attr("title")) {
+                                current_item_index = count;
+                                break;
+                            }
+                    }
+                    else {
+                        current_type = "L";
+                        for (var count = 0; count < links.length; count++)
+                            if (links[count].name == api.elements.target.attr("title")) {
+                                current_item_index = count;
+                                break;
+                            }
+                    }
+                    save_local_variable();
                     return api.elements.target.attr("title");
                 },
-                text: $('<iframe height="180" width="640" src="../template/data.html" />')
+                text: $('<iframe height="180" width="640" src="template/data.html" />')
             },
             show: { solo: true },
             hide: 'unfocus',
@@ -150,6 +264,13 @@ function Graph(id, width, height) {
                 classes: 'qtip-bootstrap',
                 width: 660,
                 height: 230
+            },
+            events: {
+                toggle: function (event, api) {
+                    if (event.type == 'tooltiphide')
+                        load_local_variable();
+                }
+
             }
         });
 
@@ -178,14 +299,24 @@ function Graph(id, width, height) {
         }
     }
 
+    // ziska pristupove tokeny ke vsem sondam a ulozi do properties
+    function get_all_token() {
+        for (var count = 0; count < nodes.length; count ++) {
+            if (nodes[count].type_node == 'S') { // pouze u uzlu typu sonda
+                get_token(count);
+            }
+        }
+    }
+
     // projde vsechny uzly a linky a pokud je to sonda tak nacte data
     function load_parameter_from_sensors() {
         // prochazi vsehny 
-        /*for (n in node) {
-            null;
+        for (var count = 0; count < nodes.length; count ++) {
+            if (nodes[count].type_node == 'S') { // pouze u uzlu typu sonda
+                //load_parameter("collector-devel.ics.muni.cz", );
+                null;
+            }
         }
-        */
-        null;
     }
 
     // provede update obj pomoci nactenych dat
@@ -193,10 +324,9 @@ function Graph(id, width, height) {
         null;
     }
 
-    // nacte data z konkretni sondy
-    function load_parameter(address, type_data) {
-        // nastaveni adresy = addresss
-        var host = "collector-devel.ics.muni.cz";//"147.251.14.50";////"192.168.51.145";// collector-devel.ics.muni.cz
+    function get_token(node_index) {
+        var host = nodes[node_index].address
+        //var host = "collector-devel.ics.muni.cz";//"147.251.14.50";////"192.168.51.145";// collector-devel.ics.muni.cz
         $.ajax({
             type: "POST",
             url: "https://" + host + "/resources/oAuth/token",
@@ -209,13 +339,17 @@ function Graph(id, width, height) {
             },
 
             success: function (msg) {
-                token = msg.access_token; 
-                getResults(msg.access_token);
-                //alert("Mam token: " + msg.access_token);
+                token = msg.access_token;
             },
 
-            error: function (a, b, err) { console.log(err); },
+            error: function (a, b, err) {
+                console.log(err);
+            },
         });
+    }
+    // nacte data z konkretni sondy
+    function load_parameter(address, type_data) {
+        // nastaveni adresy = addresss
 
         function getResults(t) {
             $.ajax({
@@ -237,7 +371,9 @@ function Graph(id, width, height) {
                     // na obj je aplikovan json,ktery byl nacten
                     update_sensor(obj, JSON.stringify(msg));
                 },
-                error: function (a, b, err) { console.log(err); },
+                error: function (a, b, err) {
+                    console.log(err);
+                },
             });
         }
     }
