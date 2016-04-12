@@ -26,18 +26,21 @@
             function getResults(t) { 
                 $.ajax({ type: "GET", 
                     url: "https://"+host+"/rest/fmc/analysis/chart", 
-                    headers: { "Authorization" : "bearer "+t }, 
+                    headers: { "Authorization" : "bearer "+t },
+                    /*data: {
+                        id: "live"
+                    },*/
                     data: { search: JSON.stringify({ 
-                        "from": "2016-03-04 00:05", 
-                        "to": "2016-03-04 14:20", 
+                        "from": "2016-04-04 00:05", 
+                        "to": "2016-04-04 14:20", 
                         "profile": "live", 
                         "chart": { 
                             "measure": "traffic", 
                             "protocol": 1 
                         } 
-                    }) 
-                    }, 
-                    success: function(msg) { 
+                    })
+                    },
+                    success: function (msg) {
                         $("body").html(JSON.stringify(msg));
                     },
                     error: function (a, b, err) { console.log(err); },
