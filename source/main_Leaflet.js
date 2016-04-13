@@ -163,48 +163,42 @@ function geo_Leaflet_graph(id, width, height) {
                 }
             },
             onEachFeature: function (feature, layer) {
-                var myPopup = L.popup({
+                var popupOption = {
                     maxWidth: 640,
                     minWidth: 600,
 
-                }).setContent('<iframe height="180" width="640" src="template/data.html" />');
+                };
 
-                var popup = layer.bindPopup(myPopup);
-
-                if (feature.geometry.type == "LineString") {
-                    current_type = 'L';
-                    for (var count = 0; count < links.length; count++) {
-                        if (feature.properties.name == links[count].name) {
-                            current_item_index = count;
-                            break;
-                        }
-                    }
-                }
-                else {
-                    current_type = 'N';
-                    for (var count = 0; count < nodes.length; count++) {
-                        if (feature.properties.name == nodes[count].name) {
-                            current_item_index = count;
-                            break;
-                        }
-                    }
-                }
-
-                //layer.bindLabel(current_type + '_' + current_item_index);
-
-
-                return layer;
+                layer.bindPopup('<iframe height="180" width="640" src="template/data.html" />', popupOption);
             }
         }).addTo(mymap);
 
-        mymap.on("popupclose", function (e) {
+        geoJsonLayer.on("popupclose", function (e) {
             //alert("close");
             load_local_variable();
         });
 
-        mymap.on("popupopen", function (e) {
-            //alert("open");
+        geoJsonLayer.on("popupopen", function (e) {
             // najdu odpovidajici linku pro aktualni feature
+            if (e.popup._source.feature.geometry.type == "LineString") {
+                current_type = 'L';
+                for (var count = 0; count < links.length; count++) {
+                    if (e.popup._source.feature.properties.name == links[count].name) {
+                        current_item_index = count;
+                        break;
+                    }
+                }
+            }
+            else {
+                current_type = 'N';
+                for (var count = 0; count < nodes.length; count++) {
+                    if (e.popup._source.feature.properties.name == nodes[count].name) {
+                        current_item_index = count;
+                        break;
+                    }
+                }
+            }
+
             save_local_variable();
         });
 

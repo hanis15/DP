@@ -53,10 +53,8 @@ function Graph(id, width, height) {
         if (current_type == "N") {
             if (nodes[current_item_index].type_node == "R")
                 show_router_info();
-            else if (nodes[current_item_index].token == null)
-                get_token();
             else
-                get_data();
+                get_token();
         }
         else if (current_type == "L") { // jedna se o linku
             if (links[current_item_index].node == "") // jedna se o linku mezi routery
@@ -65,21 +63,11 @@ function Graph(id, width, height) {
                 for (var count = 0; count < nodes.length; count++) {
                     if (nodes[count].name == links[current_item_index].node) {
                         current_address = nodes[count].address;
-                        if (nodes[count].token == null) {
-                            current_node_index = count;
-                            get_token();
-                        }
-                        else {
-                            current_token = nodes[count].token;
-                            get_data();
-                        }
+                        get_token();
                         break;
                     }
                 }
             }
-        }
-        else {
-            get_data();
         }
     }
 
@@ -104,11 +92,7 @@ function Graph(id, width, height) {
 
             success: function (msg) {
                 current_token = msg.access_token;
-                if ((current_type == "L") && (current_node_index != null))
-                    nodes[current_node_index].token = msg.access_token;
-                else
-                    nodes[current_item_index].token = msg.access_token;
-                save_local_variable();
+                //save_local_variable();
                 get_data();
             },
 
@@ -150,7 +134,7 @@ function Graph(id, width, height) {
             error: function (a, b, err) {
                 console.log(err);
                 d3.selectAll("#sub_graph").remove();
-                d3.select(id).append("p").attr("id", "sub_graph").text('Chyba: "' + err + '" .');
+                d3.select(id).append("p").attr("id", "sub_graph").text('Chyba ' + err.code + ': "' + err.message + '" .');
             },
         });
     }
@@ -162,7 +146,7 @@ function Graph(id, width, height) {
 
     function show_link_info() {
         d3.selectAll("#sub_graph").remove();
-        var output = d3.select(id).append("p").attr("id", "sub_graph").text("Zde se budou zobrazovat informace o lince");
+        var output = d3.select(id).append("p").attr("id", "sub_graph").text("Zd se budou zobrazovat informace o lince");
     }
 
     function parse_data(data) {
