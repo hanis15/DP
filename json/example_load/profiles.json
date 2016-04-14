@@ -52,7 +52,7 @@
     "status": "OK",
     "history": false,
     "description": "",
-    "end": "2016-04-10 12:25",
+    "end": "2016-04-10 12:25", -- 5 minut / 1 den / 12 hod
     "maxsize": 593981,
     "channels": [
       {
