@@ -81,7 +81,7 @@ function geoSetting() {
 
         // -------------------------------------------------------------------------------------------------------------------
         // formular pro vkladani uzlu
-        div_form = d3.select(id).append("div").attr("id", "forms_block");
+        div_form = d3.select('#' + id).append("div").attr("id", "forms_block");
         table_form = div_form.append("form").attr("id", "node_form").append("table").style("width", "45%");
         table_form.style("float", "left").attr("id", "input_form_node").style("margin-right", "1cm");
         // 0.radek - nadpis
@@ -164,8 +164,8 @@ function geoSetting() {
                   .append("input").attr("type", "submit").attr("value", "Vlozit linku").attr("class", "btn-primary");
                   //.attr("onclick", "NetTMap_setting.getInstance().add_link();");
 
-        d3.select(id).append("hr");
-        tables = d3.select(id).append("div").attr("id", "tables_block");
+        d3.select('#' + id).append("hr");
+        tables = d3.select('#' + id).append("div").attr("id", "tables_block");
 
         // -------------------------------------------------------------------------------------------------------------------
         // tabulka pro zobrazeni uzlu
@@ -212,8 +212,8 @@ function geoSetting() {
 
         // -------------------------------------------------------------------------------------------------------------------
         // tlacitko pro vytvoreni exportu
-        d3.select(id).append("hr");
-        d3.select(id).append("div").attr("id", "button_block")
+        d3.select('#' + id).append("hr");
+        d3.select('#' + id).append("div").attr("id", "button_block")
              .append("input").attr("type", "submit").attr("value", "Vytvor soubor").attr("class", "btn-success")
              .attr("onclick", "NetTMap_setting.getInstance().create_geojson_file();");
         set_validate_rules();
@@ -222,9 +222,9 @@ function geoSetting() {
     }
 
     function init_sensor_form(id) {
-        d3.select(id).attr("width", width).attr("height", height);
+        d3.select('#' + id).attr("width", width).attr("height", height);
 
-        div_form = d3.select(id).append("div");
+        div_form = d3.select('#' + id).append("div");
         table_form = div_form.append("form").attr("id", "sensor_form").append("table");
 
         // 1.radek - nazev, listbox s existujicima sondama
@@ -464,24 +464,39 @@ function geoSetting() {
         source_port = document.getElementById("source_port").value;
         target_node = document.getElementById("target_node").value;
         target_port = document.getElementById("target_port").value;
+        sensor_node = document.getElementById("sensor_node").value;
 
-        node = {
-            name: name,
-            lat: latitude,
-            long: longitude,
-            type_node: type_node,
-            address: address_node,
-            description: description_node,
-        };
+        node = {};
+        if (sensor_node == "") {
+            node = {
+                name: name,
+                lat: latitude,
+                long: longitude,
+                type_node: type_node,
+                address: address_node,
+                description: description_node,
+            };
+            nodes.push(node);
+        }
+        else {
+            for (s_count = 0; s_count < nodes.length; s_count++) {
+                if (nodes[s_count].name == sensor_node) {
+                    nodes[s_count].name = name;
+                    nodes[s_count].lat = latitude;
+                    nodes[s_count].long = longitude;
+                    nodes[s_count].address = address_node;
+                    nodes[s_count].description = description_node;
+                    break;
+                }
+            }
+        }
 
         links[current_link_index].source_port = source_port;
         links[current_link_index].target_port = target_port;
         links[current_link_index].node = name;
 
-        nodes.push(node);
-
         save_local_variable();
-        parent.closeIFrame();
+        parent.closeQTip();
     }
 
     function update_list_sensor() {
@@ -496,15 +511,16 @@ function geoSetting() {
     }
 
     function prepopulation_list() {
-        curr_val = sensor_node_box = document.getElementById("sensor_node").value;
+        curr_val = document.getElementById("sensor_node").value;
 
-        for (n in nodes) {
-            if (n.name == curr_val) {
-                document.getElementById("sensor_name").value = n.name;
-                document.getElementById("latitude").value = n.lat;
-                document.getElementById("longitude").value = n.long;
-                document.getElementById("address").value = n.address;
-                document.getElementById("description").value = n.description; 
+        for (s_count = 0; s_count < nodes.length; s_count++) {
+            if (nodes[s_count].name == curr_val) {
+                document.getElementById("sensor_name").value = nodes[s_count].name;
+                document.getElementById("latitude").value = nodes[s_count].lat;
+                document.getElementById("longitude").value = nodes[s_count].long;
+                document.getElementById("address").value = nodes[s_count].address;
+                document.getElementById("description").value = nodes[s_count].description;
+                break;
             }
         }
     }
@@ -541,7 +557,7 @@ function geoSetting() {
             table_row.append("td").text(function () { return (nodes[count].type_node == "R") ? "Router" : "Sonda"; });
             table_row.append("td").text(nodes[count].address);
             //table_row.append("td").text(n.description);
-            table_row.append("td").attr("align", "center").append("input")
+            table_row.append("td").append("input").attr("align", "center")
                 .attr("type", "submit")
                 .attr("value", "...")
                 .attr("class", "btn-danger")
@@ -596,6 +612,7 @@ function geoSetting() {
                 .attr("type", "submit")
                 .attr("class", "btn-primary")
                 .attr("value", "+")
+                .attr("title", links[count].name)
                 .attr("id", "link_btn_" + count);
 
 
@@ -610,9 +627,9 @@ function geoSetting() {
                         } else {
                             alert("Local storage isn't support");
                         }
-                        return my_id[2];
+                        return api.elements.target.attr("title");
                     },
-                    text: function () {return '<iframe height="450" width="820" src="template/sensor.html" />'; }//'Loading...',
+                    text: function () {return '<iframe height="430" width="820" src="template/sensor.html" />'; }//'Loading...',
                 },
                 show: {
                     solo: true,
@@ -662,7 +679,6 @@ function geoSetting() {
     }
 
     function create_file() {
-        alert("Vytvarim soubor...");
         content = '{ "type": "FeatureCollection", "features": ['; // start
         curr_node = "";
 

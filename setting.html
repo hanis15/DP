@@ -43,18 +43,17 @@
         <!-- Obsah stranky -->
         <div class="container">
             <h1>Nastaveni</h1>
-            <p>Zde se bude provadet konfigurace JSON s popisem mericich uzlu</p>
             <div id="my_setting"></div>
             <script>
-                var id = "#my_setting";
+                var id = "my_setting";
                 var width = 800;
                 var height = 600;
                 var geoSetting = NetTMap_setting.getInstance();
                 geoSetting.initialize(id, width, height);
 
-                function closeIFrame() {
+                function closeQTip() {
                     $('.qtip').hide();
-                    geoSetting.getInstance().update();
+                    geoSetting.update();
                 }
 
             </script>
