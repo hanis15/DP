@@ -18,6 +18,8 @@ var NetTMap_setting = (function () {
 
 
 function geoSetting() {
+    var path_hw_type = 'sensor_type.json'; // cesta k souboru s typem hardware sond
+
     var nodes = []; // seznam vsech uzlu
     var links = []; // seznam vsech linek mezi uzly
     var current_link_index;
@@ -263,7 +265,15 @@ function geoSetting() {
         tr1.append("td").attr("align", "right").append("p").text("Cilovy port: ")
                   .append("input").attr("id", "target_port").attr("name", "target_port").attr("type", 'text');
 
-        // 6.radek - tlacitko
+        // 6.radek - HW sondy
+        tr1 = table_form.append("tr");
+        tr1.append("td").attr("align", "right").append("p").text("Hardware: ")
+                  .append("select").attr("id", "hardware").attr("name", "hardware");
+        load_hw_type();
+        tr1.append("td");
+
+
+        // 7.radek - tlacitko
         tr1 = table_form.append("tr");
         tr1.append("td");
         tr1.append("td").attr("align", "right")
@@ -322,6 +332,21 @@ function geoSetting() {
             }
         });
 
+    }
+
+    // nacte do listboxu jmena HW zarizeni z json souboru
+    function load_hw_type() {
+        d3.json(path_hw_type, load_type);
+
+        function load_type(error, data) {
+            if (error) throw error;
+
+            var sensor_select_input = d3.select('#hardware');
+            sensor_select_input.append("option").attr("value", "").text("");
+            for (var t_count = 0; t_count < data.hardware.length; t_count++) {
+                sensor_select_input.append("option").attr("value", data.hardware[t_count].pn).text(data.hardware[t_count].pn);
+            }
+        }
     }
 
     function set_validate_rules() {
@@ -400,6 +425,7 @@ function geoSetting() {
         source_port = "";//document.getElementById("source_port").value;
         target_node = "";//document.getElementById("target_node").value;
         target_port = "";//document.getElementById("target_port").value;
+        hardware = "";
 
         $('#node_form')[0].reset();
         
@@ -410,6 +436,7 @@ function geoSetting() {
             type_node: type_node,
             address: address_node,
             description: description_node,
+            hw: hardware
             //source: source_node,
             //source_port: source_port,
             //target: target_node,
@@ -465,6 +492,7 @@ function geoSetting() {
         target_node = document.getElementById("target_node").value;
         target_port = document.getElementById("target_port").value;
         sensor_node = document.getElementById("sensor_node").value;
+        hardware = document.getElementById("hardware").value;
 
         node = {};
         if (sensor_node == "") {
@@ -475,6 +503,7 @@ function geoSetting() {
                 type_node: type_node,
                 address: address_node,
                 description: description_node,
+                hw: hardware
             };
             nodes.push(node);
         }
@@ -486,6 +515,7 @@ function geoSetting() {
                     nodes[s_count].long = longitude;
                     nodes[s_count].address = address_node;
                     nodes[s_count].description = description_node;
+                    nodes[s_count].hardware = hardware;
                     break;
                 }
             }
@@ -520,6 +550,7 @@ function geoSetting() {
                 document.getElementById("longitude").value = nodes[s_count].long;
                 document.getElementById("address").value = nodes[s_count].address;
                 document.getElementById("description").value = nodes[s_count].description;
+                document.getElementById("hardware").value = nodes[s_count].hw;
                 break;
             }
         }
@@ -554,7 +585,14 @@ function geoSetting() {
             table_row.append("td").text(nodes[count].name);
             table_row.append("td").text(nodes[count].long);
             table_row.append("td").text(nodes[count].lat);
-            table_row.append("td").text(function () { return (nodes[count].type_node == "R") ? "Router" : "Sonda"; });
+            table_row.append("td").text(function () {
+                if (nodes[count].type_node == 'R')
+                    return "Router";
+                else if (nodes[count].hw == "")
+                    return "Sensor";
+                else
+                    return "Sensor (" + nodes[count].hw + ')';
+            });
             table_row.append("td").text(nodes[count].address);
             //table_row.append("td").text(n.description);
             table_row.append("td").append("input").attr("align", "center")
@@ -689,6 +727,7 @@ function geoSetting() {
             curr_node += '"properties": { "name": "' + nodes[count].name
                       + '", "type_node": "' + nodes[count].type_node
                       + '", "description": "' + nodes[count].description
+                      + '", "hw": "' + nodes[count].hw
                       + '", "address": "' + nodes[count].address + '"},';
             curr_node += '"type": "Feature" }';
             if (count != nodes.length - 1) { curr_node += ','; }

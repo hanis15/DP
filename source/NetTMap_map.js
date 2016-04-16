@@ -96,7 +96,9 @@ function mapTopo() {
         input_form = d3.select('#' + id).append("input");
 
         input_form.attr("type", "file")
-                  .attr("id", "input_geo_json_file");
+                  .attr("id", "input_geo_json_file")
+                  .attr("class", "btn-primary");
+
         document.getElementById('input_geo_json_file')
                 .addEventListener('change', readSingleFile, false);
     }

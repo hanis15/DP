@@ -1,0 +1,69 @@
+﻿{
+  "hardware": [
+    {
+      "pn": "IFP-1000-CU",
+      "model": "Flowmon Probe 1000",
+      "performance": "1.48 Mp/s"
+    },
+    {
+      "pn": "IFP-2000-CU",
+      "model": "Flowmon Probe 2000",
+      "performance": "1.48 Mp/s"
+    },
+    {
+      "pn": "IFP-4000-CU",
+      "model": "Flowmon Probe 4000",
+      "performance": "1.48 Mp/s"
+    },
+    {
+      "pn": "IFP-4000-SFP",
+      "model": "Flowmon Probe 4000 SFP",
+      "performance": "1.48 Mp/s"
+    },
+    {
+      "pn": "IFP-6000-SFP",
+      "model": "Flowmon Probe 6000 SFP",
+      "performance": "1.48 Mp/s"
+    },
+    {
+      "pn": "IFP-10000-SFP+",
+      "model": "Flowmon Probe 10000 SFP+",
+      "performance": "1.5 Mp/s"
+    },
+    {
+      "pn": "IFP-20000-SFP+",
+      "model": "Flowmon Probe 20000 SFP+",
+      "performance": "1.5 Mp/s"
+    },
+    {
+      "pn": "IFP-40000-SFP+",
+      "model": "Flowmon Probe 40000 SFP+",
+      "performance": "5 Mp/s"
+    },
+    {
+      "pn": "IFP-10000PRO-SFP+",
+      "model": "Flowmon Probe 10000 Pro SFP+",
+      "performance": "14.8 Mp/s"
+    },
+    {
+      "pn": "IFP-20000PRO-SFP+",
+      "model": "Flowmon Probe 20000 Pro SFP+",
+      "performance": "14.8 Mp/s"
+    },
+    {
+      "pn": "IFP-40000PRO-SFP+",
+      "model": "Flowmon Probe 40000 Pro SFP+",
+      "performance": "14.8 Mp/s"
+    },
+    {
+      "pn": "IFP-80000PRO-QSFP+",
+      "model": "Flowmon Probe 80000 Pro QSFP+",
+      "performance": "20 Mp/s / 5 Mp/s"
+    },
+    {
+      "pn": "IFP-100000PRO-CFP4",
+      "model": "Flowmon Probe 100000 Pro CFP4",
+      "performance": "148.8 Mp/s"
+    }
+  ]
+}
