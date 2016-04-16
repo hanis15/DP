@@ -29,7 +29,6 @@ function mapGraph() {
     var current_type;
     var current_item_index;
     this.create_graph = load_graph;
-    this.define_style = define_style;
     this.set_data = nacti_data;
     this.load_change = load_local_variable;
     this.initialize = init_graph;
@@ -40,7 +39,8 @@ function mapGraph() {
         input_form = d3.select('#' + id).append("input");
 
         input_form.attr("type", "file")
-                  .attr("id", "input_geo_json_file");
+                  .attr("id", "input_geo_json_file")
+                  .attr("class", "btn-primary");
         document.getElementById('input_geo_json_file')
                 .addEventListener('change', readSingleFile, false);
 
@@ -61,7 +61,6 @@ function mapGraph() {
     }
     
     function init_graph(i, w, h) {
-        define_style();
         init_local_variables();
         id = i;
         width = w;
@@ -143,26 +142,6 @@ function mapGraph() {
                       .style("fill", "#000000");
     }
 
-    // definovani css style
-    function define_style() {
-        style = document.createElement('style');
-        style.type = 'text/css';
-        style.innerHTML = ".ui-tooltip, .qtip{"
-                        + "position: absolute;"
-                        + "left: -28000px;"
-                        + "top: -28000px;"
-                        + "display: none;"
-                        + "max-width: 900px;"
-                        + "min-width: 6px;"
-                        + "font-size: 10.5px;"
-                        + "line-height: 12px;}"
-                        + ".color_spectrum {"
-                        + "height: 20px;"
-                        + "width: 30px;"
-                        + "stroke: black;}";
-        document.getElementsByTagName('head')[0].appendChild(style);
-    }
-
     function nacti_data(data) {
         init_local_variables();
         var json_data = jQuery.parseJSON(data);
@@ -174,7 +153,6 @@ function mapGraph() {
     }
 
     function load_graph() {
-        define_style();
         //d3.json("json/brno_school.geo.json", parse_data);
         //d3.json("json/cz_city.geo.json", parse_data);
         parse_data("");

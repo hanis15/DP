@@ -1,6 +1,6 @@
 // JavaScript source code
 
-function Graph(id, width, height) {
+function NetTMap_chart(id, width, height) {
     this.create_graph = load_graph;
     var nodes = [];
     var links = [];
@@ -31,20 +31,7 @@ function Graph(id, width, height) {
         }
     }
 
-
-    // definovani css style
-    function define_style() {
-        style = document.createElement('style');
-        style.type = 'text/css';
-        style.innerHTML = ".axis {"
-                        + "font-size: 12px;}"
-                        + ".bar {"
-                        + "fill: blue;}"
-        document.getElementsByTagName('head')[0].appendChild(style);
-    }
-
     function load_graph() {
-        define_style();
         load_local_variable();
         d3.selectAll("#sub_graph").remove();
         d3.select(id).append("p").attr("id", "sub_graph").text("Nacitam data ...");

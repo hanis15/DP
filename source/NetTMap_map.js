@@ -76,7 +76,6 @@ function mapTopo() {
 
 
     function init_map(i, w, h) {
-        define_style();
         init_local_variables();
         id = i;
         width = w;
@@ -172,23 +171,6 @@ function mapTopo() {
 
     }
 
-    // definovani css style
-    function define_style() {
-        style = document.createElement('style');
-        style.type = 'text/css';
-        style.innerHTML = ".ui-tooltip, .qtip{"
-                        + "position: absolute;"
-                        + "left: -28000px;"
-                        + "top: -28000px;"
-                        + "display: none;"
-                        + "max-width: 900px;"
-                        + "min-width: 600px;"
-                        + "font-size: 10.5px;"
-                        + "line-height: 12px;"
-                        + "}";
-        document.getElementsByTagName('head')[0].appendChild(style);
-    }
-
     function nacti_data(data) {
         var json_data = jQuery.parseJSON(data);
 
@@ -197,8 +179,7 @@ function mapTopo() {
     }
 
     // vytvori mapu
-    function load_graph() {
-        define_style();        
+    function load_graph() {       
         //d3.json("json/test.geo.json", parse_data);
         new_map(null);
     }

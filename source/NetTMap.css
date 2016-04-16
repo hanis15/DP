@@ -1,0 +1,40 @@
+﻿/*
+    NetTMap css.
+*/
+
+.ui-tooltip, .qtip{
+    position: absolute;
+    left: -28000px;
+    top: -28000px;
+    display: none;
+    max-width: 900px;
+    min-width: 6px;
+    font-size: 10.5px;
+    line-height: 12px;
+}
+
+.color_spectrum {
+    height: 20px;
+    width: 30px;
+    stroke: black;
+}
+
+form label.error { 
+    color:red; 
+}
+
+form input.error { 
+    border:1px solid red; 
+}
+
+table { 
+    white-space: nowrap; 
+}
+
+.axis {
+    font-size: 12px;
+}
+
+.bar {
+    fill: blue;
+}

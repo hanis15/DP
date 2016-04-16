@@ -23,7 +23,6 @@ function geoSetting() {
     var current_link_index;
     var speed_table = {};
 
-
     this.initialize = init;
     this.add_node = insert_node;
     this.add_link = insert_link;
@@ -77,28 +76,8 @@ function geoSetting() {
 
     }
 
-    function define_style() {
-        style = document.createElement('style');
-        style.type = 'text/css';
-        style.innerHTML = ".ui-tooltip, .qtip{"
-                        + "position: absolute;"
-                        + "left: -28000px;"
-                        + "top: -28000px;"
-                        + "display: none;"
-                        + "max-width: 900px;"
-                        + "min-width: 400px;"
-                        + "font-size: 10.5px;"
-                        + "line-height: 12px;"
-                        + "}"
-                        + "form label.error { color:red; }"
-                        + "form input.error { border:1px solid red; }"
-                        + "table { white-space: nowrap; }";
-        document.getElementsByTagName('head')[0].appendChild(style);
-    }
-
     function init(id) {
         init_local_variables();
-        define_style();
 
         // -------------------------------------------------------------------------------------------------------------------
         // formular pro vkladani uzlu
@@ -138,8 +117,8 @@ function geoSetting() {
 
         // 7.radek - tlacitko
         table_form.append("tr").append("td").attr("align", "right")
-                  .append("input").attr("type", "submit").attr("value", "Vlozit uzel");
-                  //.attr("onclick", "geoSetting.getInstance().add_node(this);");
+                  .append("input").attr("type", "submit").attr("value", "Vlozit uzel").attr("class", "btn-primary");
+                  //.attr("onclick", "NetTMap_setting.getInstance().add_node(this);");
 
         // -------------------------------------------------------------------------------------------------------------------
         // formular pro vkladani linek
@@ -182,8 +161,8 @@ function geoSetting() {
 
         // 7.radek 
         table_form.append("tr").append("td").attr("align", "right")
-                  .append("input").attr("type", "submit").attr("value", "Vlozit linku");
-                  //.attr("onclick", "geoSetting.getInstance().add_link();");
+                  .append("input").attr("type", "submit").attr("value", "Vlozit linku").attr("class", "btn-primary");
+                  //.attr("onclick", "NetTMap_setting.getInstance().add_link();");
 
         d3.select(id).append("hr");
         tables = d3.select(id).append("div").attr("id", "tables_block");
@@ -235,8 +214,8 @@ function geoSetting() {
         // tlacitko pro vytvoreni exportu
         d3.select(id).append("hr");
         d3.select(id).append("div").attr("id", "button_block")
-             .append("input").attr("type", "submit").attr("value", "Vytvor soubor")
-             .attr("onclick", "geoSetting.getInstance().create_geojson_file();");
+             .append("input").attr("type", "submit").attr("value", "Vytvor soubor").attr("class", "btn-success")
+             .attr("onclick", "NetTMap_setting.getInstance().create_geojson_file();");
         set_validate_rules();
 
         //document.onhaschange(alert("zmeneno!!!!"));
@@ -253,7 +232,7 @@ function geoSetting() {
         tr1.append("td").attr("align", "right").append("p").text("Nazev: ")
                   .append("input").attr("id", "sensor_name").attr("name", "sensor_name").attr("type", 'text');
         tr1.append("td").attr("align", "right").append("p").text("Sonda: ")
-          .append("select").attr("id", "sensor_node").attr("name", "sensor_node").attr("onchange", "geoSetting.getInstance().prepopulation_list_sensor();");
+          .append("select").attr("id", "sensor_node").attr("name", "sensor_node").attr("onchange", "NetTMap_setting.getInstance().prepopulation_list_sensor();");
 
         // 2. radek - popis, adresa
         tr1 = table_form.append("tr");
@@ -288,8 +267,8 @@ function geoSetting() {
         tr1 = table_form.append("tr");
         tr1.append("td");
         tr1.append("td").attr("align", "right")
-                  .append("input").attr("type", "submit").attr("value", "Vlozit senzor")
-                  .attr("onclick", "geoSetting.getInstance().add_sensor();");
+                  .append("input").attr("type", "submit").attr("value", "Vlozit senzor").attr("class", "btn-primary")
+                  .attr("onclick", "NetTMap_setting.getInstance().add_sensor();");
 
         load_local_variable();
         if (typeof (Storage) !== "undefined") {
@@ -565,8 +544,9 @@ function geoSetting() {
             table_row.append("td").attr("align", "center").append("input")
                 .attr("type", "submit")
                 .attr("value", "...")
+                .attr("class", "btn-danger")
                 .attr("id", "node_" + count + "_del")
-                .attr("onclick", 'geoSetting.getInstance().delete_node(this.id);');
+                .attr("onclick", 'NetTMap_setting.getInstance().delete_node(this.id);');
         }
         /*
         if ($("#node_setting_result").height() > $("#link_setting_result").height()) {
@@ -609,10 +589,12 @@ function geoSetting() {
             table_row.append("td").attr("align", "center").append("input")
                 .attr("type", "submit")
                 .attr("value", "...")
+                .attr("class", "btn-danger")
                 .attr("id", "link_" + count + "_del")
-                .attr("onclick", 'geoSetting.getInstance().delete_link(this.id);');
+                .attr("onclick", 'NetTMap_setting.getInstance().delete_link(this.id);');
             table_row.append("td").attr("align", "center").append("input")
                 .attr("type", "submit")
+                .attr("class", "btn-primary")
                 .attr("value", "+")
                 .attr("id", "link_btn_" + count);
 
