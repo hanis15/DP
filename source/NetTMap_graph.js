@@ -1,7 +1,29 @@
 // JavaScript source code
+var NetTMap_graph = (function () {
+    var graph_instance;
 
-function Graph(id, width, height) {
-    var svg;
+    // vrati instanci konkretniho typu, nebo vytvori novou
+    function create() {
+        graph_instance = new mapGraph();
+        return graph_instance;
+    }
+
+    return {
+        getInstance: function () {
+            if (graph_instance == null)
+                graph_instance = create();
+            return graph_instance;
+        }
+    };
+})();
+
+function mapGraph() {
+    var id;
+    var height;
+    var width;
+    var graph_block;
+    var color_spectrum_block;
+    var input_form;
     var nodes = [];
     var links = [];
     var current_type;
@@ -10,6 +32,47 @@ function Graph(id, width, height) {
     this.define_style = define_style;
     this.set_data = nacti_data;
     this.load_change = load_local_variable;
+    this.initialize = init_graph;
+    this.add_input_form = init_input_form;
+
+    // vlozi do stranky formular pro vlozeni souboru s geoJson obsahem
+    function init_input_form() {
+        input_form = d3.select('#' + id).append("input");
+
+        input_form.attr("type", "file")
+                  .attr("id", "input_geo_json_file");
+        document.getElementById('input_geo_json_file')
+                .addEventListener('change', readSingleFile, false);
+
+    }
+
+    // nacteni GEOJSON
+    function readSingleFile(e) {
+        var file = e.target.files[0];
+        if (!file) {
+            return;
+        }
+        var reader = new FileReader();
+        reader.onload = function (e) {
+            var contents = e.target.result;
+            nacti_data(contents);
+        };
+        reader.readAsText(file);
+    }
+    
+    function init_graph(i, w, h) {
+        define_style();
+        init_local_variables();
+        id = i;
+        width = w;
+        height = h;
+
+        if (graph_block != null) graph_block.remove();
+        if (color_spectrum_block != null) color_spectrum_block.remove();
+        if (input_form != null) input_form.remove();
+        init_input_form();
+        new_graph(null);
+    }
 
     function init_local_variables() {
         // nacteni z HTML5 lokalniho uloziste
@@ -51,7 +114,9 @@ function Graph(id, width, height) {
 
     // vykresleni vzorniku pro rychlost
     function add_color_spectrum() {
-        color_spectrum = d3.select(id).append("div").attr("id", "color_palete_spectrum").attr("align", "center").append("svg");
+        color_spectrum_block = d3.select('#' + id).append("div").attr("id", "color_palete_spectrum");
+
+        color_spectrum = color_spectrum_block.attr("align", "center").append("svg");
 
         color_spectrum.append("rect")
                       .attr("class", "color_spectrum")
@@ -80,7 +145,6 @@ function Graph(id, width, height) {
 
     // definovani css style
     function define_style() {
-        $.getScript("source/main_setting.js");
         style = document.createElement('style');
         style.type = 'text/css';
         style.innerHTML = ".ui-tooltip, .qtip{"
@@ -102,11 +166,10 @@ function Graph(id, width, height) {
     function nacti_data(data) {
         init_local_variables();
         var json_data = jQuery.parseJSON(data);
-        var setting = geoSetting.getInstance();
 
 
-        svg.remove();
-        d3.select("#color_palete_spectrum").remove();
+        if (graph_block != null) graph_block.remove();
+        if (color_spectrum_block != null) color_spectrum_block.remove();
         new_graph(json_data);
     }
 
@@ -136,7 +199,7 @@ function Graph(id, width, height) {
                 });
             });
 
-        svg = d3.select(id)
+        graph_block = d3.select('#' + id)
             .style("width", width)
             .style("height", height)
             .append("svg")
@@ -171,16 +234,12 @@ function Graph(id, width, height) {
             }
         }
         
-        // uvodni nacteni parametru ze sond
-        //get_all_token();
-        //load_parameter_from_sensors();
-
         force
             .nodes(nodes)
             .links(links)
             .start();
 
-        link = svg.selectAll(".link")
+        link = graph_block.selectAll(".link")
             .data(links)
             .enter().append("line")
             .attr("class", "link")
@@ -205,7 +264,7 @@ function Graph(id, width, height) {
             .attr("title", function (d) { return d.name; })
             .attr("id", function (d) { return d.name; });
 
-        node_g = svg.selectAll("g.node")
+        node_g = graph_block.selectAll("g.node")
             .data(nodes, function (d) { return d.name; });
             
         node = node_g.enter().append("g")

@@ -1,27 +1,27 @@
-// JavaScript source code
-var geoSetting = (function () {
-    var instance;
+var NetTMap_setting = (function () {
+    var graph_instance;
 
-    function createInstance() {
-        var object = new setting();
-        return object;
+    // vrati instanci konkretniho typu, nebo vytvori novou
+    function create() {
+        graph_instance = new geoSetting();
+        return graph_instance;
     }
 
     return {
         getInstance: function () {
-            if (!instance) {
-                instance = createInstance();
-            }
-            return instance;
+            if (graph_instance == null)
+                graph_instance = create();
+            return graph_instance;
         }
     };
 })();
 
-function setting() {
+
+function geoSetting() {
     var nodes = []; // seznam vsech uzlu
     var links = []; // seznam vsech linek mezi uzly
     var current_link_index;
-    var speed_table = {}
+    var speed_table = {};
 
 
     this.initialize = init;
@@ -178,7 +178,7 @@ function setting() {
 
 
         // 6.radek - prazdny
-        table_form.append("tr").attr("height", $('tr').eq(1).height()).append("td");
+        //table_form.append("tr").attr("height", $('tr').eq(1).height()).append("td");
 
         // 7.radek 
         table_form.append("tr").append("td").attr("align", "right")

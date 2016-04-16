@@ -1,15 +1,151 @@
 // JavaScript source code
+var NetTMap_map = (function () {
+    var graph_instance;
 
-function geo_Leaflet_graph(id, width, height) {
-    var mymap;
+    // vrati instanci konkretniho typu, nebo vytvori novou
+    function create() {
+        graph_instance = new mapTopo();
+        return graph_instance;
+    }
+
+    return {
+        getInstance: function () {
+            if (graph_instance == null)
+                graph_instance = create();
+            return graph_instance;
+        }
+    };
+})();
+
+
+
+function mapTopo() {
+    var id;
+    var width;
+    var height;
+    var map_block;
+    var color_spectrum_block;
+    var input_form;
     var zoom;
     var nodes = [];
     var links = [];
     var current_type;
     var current_item_index;
     this.create_map = load_graph;
-    this.set_center = nastav_stred;
     this.set_data = nacti_data;
+    this.initialize = init_map;
+    this.add_input_form = init_input_form;
+
+    function init_local_variables() {
+        // nacteni z HTML5 lokalniho uloziste
+        if (typeof (Storage) !== "undefined") {
+            sessionStorage.nodes = "";
+            sessionStorage.links = "";
+            sessionStorage.curr_link_index = "";
+        } else {
+            alert("Local storage isn't support");
+        }
+
+    }
+
+    function load_local_variable() {
+        // nacteni z HTML5 lokalniho uloziste
+        if (typeof (Storage) !== "undefined") {
+            nodes = jQuery.parseJSON(sessionStorage.nodes);
+            links = jQuery.parseJSON(sessionStorage.links);
+            current_item_index = sessionStorage.current_item_index;
+            current_type = sessionStorage.current_type;
+        } else {
+            alert("Local storage isn't support");
+        }
+    }
+
+    function save_local_variable() {
+        // nacteni z HTML5 lokalniho uloziste
+        if (typeof (Storage) !== "undefined") {
+            sessionStorage.nodes = JSON.stringify(nodes);
+            sessionStorage.links = JSON.stringify(links);
+            sessionStorage.current_type = current_type;
+            sessionStorage.current_item_index = current_item_index;
+        } else {
+            alert("Local storage isn't support");
+        }
+
+    }
+
+
+
+    function init_map(i, w, h) {
+        define_style();
+        init_local_variables();
+        id = i;
+        width = w;
+        height = h;
+
+        if (map_block != null) map_block.remove();
+        if (color_spectrum_block != null) color_spectrum_block.remove();
+        init_input_form();
+        d3.select('#' + id).append("div").attr("id", "map_canvas");
+        // nastaveni velikosti
+        $("#map_canvas").height(height);
+        $("#map_canvas").width(width);
+        new_map(null);
+    }
+
+    // vlozi do stranky formular pro vlozeni souboru s geoJson obsahem
+    function init_input_form() {
+        input_form = d3.select('#' + id).append("input");
+
+        input_form.attr("type", "file")
+                  .attr("id", "input_geo_json_file");
+        document.getElementById('input_geo_json_file')
+                .addEventListener('change', readSingleFile, false);
+    }
+
+    // vykresleni vzorniku pro rychlost
+    function add_color_spectrum() {
+        color_spectrum_block = d3.select('#' + id).append("div").attr("id", "color_palete_spectrum");
+
+        color_spectrum = color_spectrum_block.attr("align", "center").append("svg");
+
+        color_spectrum.append("rect")
+                      .attr("class", "color_spectrum")
+                      .style("fill", "#6f00ff");
+
+        color_spectrum.append("rect")
+                      .attr("x", "30")
+                      .attr("class", "color_spectrum")
+                      .style("fill", "#66cdaa");
+
+        color_spectrum.append("rect")
+                      .attr("x", "60")
+                      .attr("class", "color_spectrum")
+                      .style("fill", "#ffff66");
+
+        color_spectrum.append("rect")
+                      .attr("x", "90")
+                      .attr("class", "color_spectrum")
+                      .style("fill", "#ff4444");
+
+        color_spectrum.append("rect")
+                      .attr("x", "120")
+                      .attr("class", "color_spectrum")
+                      .style("fill", "#000000");
+    }
+
+    // nacteni GEOJSON
+    function readSingleFile(e) {
+        var file = e.target.files[0];
+        if (!file) {
+            return;
+        }
+        var reader = new FileReader();
+        reader.onload = function (e) {
+            var contents = e.target.result;
+            nacti_data(contents);
+        };
+        reader.readAsText(file);
+    }
 
     function load_local_variable() {
         // nacteni z HTML5 lokalniho uloziste
@@ -56,34 +192,15 @@ function geo_Leaflet_graph(id, width, height) {
     function nacti_data(data) {
         var json_data = jQuery.parseJSON(data);
 
-        mymap.remove();
+        map_block.remove();
         new_map(json_data);
-    }
-
-    // nastavi stred mapy
-    function nastav_stred(value) {
-        mymap.remove();
-        if (value == 'cz') {
-            zoom = 7;
-            d3.json("json/cz_city.geo.json", parse_data);
-        }
-        else {
-            zoom = 13;
-            d3.json("json/brno_school.geo.json", parse_data);
-        }
     }
 
     // vytvori mapu
     function load_graph() {
-        define_style();
-
-        // nastaveni velikosti
-        $("#" + id).height(height);
-        $("#" + id).width(width);
-        
-        zoom = 7;
-        error = null;
-        d3.json("json/test.geo.json", parse_data);
+        define_style();        
+        //d3.json("json/test.geo.json", parse_data);
+        new_map(null);
     }
 
     function parse_data(error, data) {
@@ -93,6 +210,14 @@ function geo_Leaflet_graph(id, width, height) {
     }
 
     function new_map(data) {
+        if (data == null) {
+            map_block = L.map("map_canvas").setView([0, 0], 1);
+            L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
+            }).addTo(map_block);
+            return;
+        }
+
         var x_data = [];
         var y_data = [];
         nodes = [];
@@ -108,11 +233,13 @@ function geo_Leaflet_graph(id, width, height) {
         }
 
         // zobrazeni mapy s ohledem na souradnice bodu
-        mymap = L.map(id).setView([d3.median(y_data), d3.median(x_data)], zoom);
+        zoom = 7;
+        error = null;
+        map_block = L.map('map_canvas').setView([d3.median(y_data), d3.median(x_data)], zoom);
 
         L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
             attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
-        }).addTo(mymap);
+        }).addTo(map_block);
 
         var myStyle1 = {
             "weight": "4",
@@ -171,7 +298,7 @@ function geo_Leaflet_graph(id, width, height) {
 
                 layer.bindPopup('<iframe height="180" width="640" src="template/data.html" />', popupOption);
             }
-        }).addTo(mymap);
+        }).addTo(map_block);
 
         geoJsonLayer.on("popupclose", function (e) {
             //alert("close");

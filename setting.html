@@ -12,7 +12,7 @@
     
     <script src="bootstrap/js/bootstrap.min.js" type="text/javascript"></script>
 
-    <script src="source/main_setting.js" type="text/javascript"></script>
+    <script src="source/NetTMap_setting.js" type="text/javascript"></script>
 
     <link href="bootstrap/css/bootstrap.css" type="text/css" rel="stylesheet" />
 
@@ -31,7 +31,7 @@
                 <div class="nav-collapse collapse">
                     <ul class="nav">
                         <li><a href="index.html">Topology map</a></li>
-                        <li><a href="graph_leaflet.html">Graph - Leaflet</a></li>
+                        <li><a href="map.html">Graph - Leaflet</a></li>
                         <li class="active"><a href="setting.html">Setting</a></li>
                         <li><a href="about.html">About</a></li>
                     </ul>
@@ -46,8 +46,10 @@
             <div id="my_setting"></div>
             <script>
                 var id = "#my_setting";
-                setting = geoSetting.getInstance();
-                setting.initialize(id);
+                var width = 800;
+                var height = 600;
+                var geoSetting = NetTMap_setting.getInstance();
+                geoSetting.initialize(id, width, height);
 
                 function closeIFrame() {
                     $('.qtip').hide();
