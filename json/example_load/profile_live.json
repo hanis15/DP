@@ -7,7 +7,7 @@
   "status": "OK",
   "history": false,
   "description": "",
-  "end": "2016-04-10 12:55",
+  "end": "2016-04-17 13:45",
   "maxsize": 593981,
   "channels": [
     {
@@ -32,6 +32,14 @@
       "sign": "+",
       "color": "#78c800",
       "parent": [ "147-251-14-44_p3000-b01b117" ],
+      "filter": "any"
+    },
+    {
+      "id": "192-168-113-7_p3003",
+      "name": "192.168.113.7 (flowmon-ics-cesnet-test.mgmt.ics.muni.cz)",
+      "sign": "+",
+      "color": "#2466f4",
+      "parent": [ "192-168-113-7_p3003" ],
       "filter": "any"
     },
     {
