@@ -31,10 +31,12 @@ function mapTopo() {
     var links = [];
     var current_type;
     var current_item_index;
+    var refresh_time;
     this.create_map = load_graph;
     this.set_data = nacti_data;
     this.initialize = init_map;
     this.add_input_form = init_input_form;
+
 
     function init_local_variables() {
         // nacteni z HTML5 lokalniho uloziste
@@ -73,8 +75,6 @@ function mapTopo() {
 
     }
 
-
-
     function init_map(i, w, h) {
         init_local_variables();
         id = i;
@@ -93,15 +93,64 @@ function mapTopo() {
 
     // vlozi do stranky formular pro vlozeni souboru s geoJson obsahem
     function init_input_form() {
-        input_form = d3.select('#' + id).append("input");
+        default_input_form = d3.select('#' + id).append("table").style("width", width + 'px');
+        row1 = default_input_form.append("tr");
+        row1.append("td").attr("align", "left").append("input")
+                            .attr("type", "file")
+                            .attr("id", "input_geo_json_file")
+                            .attr("class", "btn-primary");
 
-        input_form.attr("type", "file")
-                  .attr("id", "input_geo_json_file")
-                  .attr("class", "btn-primary");
+
+        refresh_time_form = row1.append("td").attr("align", "right").append("select").style("width", "120px")
+                            .attr("id", "refresh_time_input").attr("name", "refresh_time_input");
+
+        var text = document.createTextNode('Refresh time: ');
+        var child = document.getElementById('refresh_time_input');
+        child.parentNode.insertBefore(text, child);
+        refresh_time_form.append("option").attr("value", "30000").text("30 seconds");
+        refresh_time_form.append("option").attr("value", "60000").text("1 minute");
+        refresh_time_form.append("option").attr("value", "300000").text("5 minutes");
+        refresh_time_form.append("option").attr("value", "600000").text("10 minutes");
+        document.getElementById("refresh_time_input").value = "300000";
+
+        history_time_select = row1.append("td").attr("align", "right").append("select").style("width", "120px")
+                            .attr("id", "history_time_input").attr("name", "history_time_input");
+
+        var text = document.createTextNode('History interval: ');
+        var child = document.getElementById('history_time_input');
+        child.parentNode.insertBefore(text, child);
+        history_time_select.append("option").attr("value", "86400000").text("1 day");
+        history_time_select.append("option").attr("value", "43200000").text("12 hours");
+
+        load_global_setting();
+
+        document.getElementById('refresh_time_input')
+                .addEventListener('change', save_global_setting, false);
+        document.getElementById('history_time_input')
+        .addEventListener('change', save_global_setting, false);
 
         document.getElementById('input_geo_json_file')
-                .addEventListener('change', readSingleFile, false);
+        .addEventListener('change', readSingleFile, false);
     }
+
+    function save_global_setting(e) {
+        if (typeof (Storage) !== "undefined") {
+            refresh_time = sessionStorage.refresh_time = document.getElementById("refresh_time_input").value;
+            sessionStorage.history_interval = document.getElementById("history_time_input").value;
+        } else {
+            alert("Local storage isn't support");
+        }
+    }
+
+    function load_global_setting(e) {
+        if (typeof (Storage) !== "undefined") {
+            if (sessionStorage.refresh_time != null) refresh_time = document.getElementById("refresh_time_input").value = sessionStorage.refresh_time;
+            if (sessionStorage.history_interval != null) document.getElementById("history_time_input").value = sessionStorage.history_interval;
+        } else {
+            alert("Local storage isn't support");
+        }
+    }
+
 
     // vykresleni vzorniku pro rychlost
     function add_color_spectrum() {
@@ -254,9 +303,9 @@ function mapTopo() {
         var geoJsonLayer = L.geoJson(data.features, {
             pointToLayer: function (feature, latlng) {
                 var smallIcon = L.icon({
-                    iconSize: [30, 30],
+                    iconSize: [40, 40],
                     className: "node",
-                    iconUrl: (feature.properties.type_node == "R") ? "img/router.png" : "img/sensor.png"
+                    iconUrl: (feature.properties.type_node == "R") ? "img/router.svg" : "img/sensor.svg"
                 });
 
                 return L.marker(latlng, { icon: smallIcon });
@@ -279,7 +328,7 @@ function mapTopo() {
 
                 };
 
-                layer.bindPopup('<iframe height="180" width="640" src="template/data.html" />', popupOption);
+                layer.bindPopup('<iframe height="380" width="640" src="template/data.html" frameBorder="0" />', popupOption);
             }
         }).addTo(map_block);
 

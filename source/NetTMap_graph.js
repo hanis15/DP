@@ -28,6 +28,7 @@ function mapGraph() {
     var links = [];
     var current_type;
     var current_item_index;
+    var refresh_time;
     this.create_graph = load_graph;
     this.set_data = nacti_data;
     this.load_change = load_local_variable;
@@ -36,15 +37,62 @@ function mapGraph() {
 
     // vlozi do stranky formular pro vlozeni souboru s geoJson obsahem
     function init_input_form() {
-        input_form = d3.select('#' + id).append("input");
+        default_input_form = d3.select('#' + id).append("table").style("width", width + 'px');
+        row1 = default_input_form.append("tr");
+        row1.append("td").attr("align", "left").append("input")
+                            .attr("type", "file")
+                            .attr("id", "input_geo_json_file")
+                            .attr("class", "btn-primary");
+                            
 
-        input_form.attr("type", "file")
-                  .attr("id", "input_geo_json_file")
-                  .attr("class", "btn-primary");
+        refresh_time_form = row1.append("td").attr("align", "right").append("select").style("width", "120px")
+                            .attr("id", "refresh_time_input").attr("name", "refresh_time_input");
+
+        var text = document.createTextNode('Refresh time: ');
+        var child = document.getElementById('refresh_time_input');
+        child.parentNode.insertBefore(text, child);
+        refresh_time_form.append("option").attr("value", "30000").text("30 seconds");
+        refresh_time_form.append("option").attr("value", "60000").text("1 minute");
+        refresh_time_form.append("option").attr("value", "300000").text("5 minutes");
+        refresh_time_form.append("option").attr("value", "600000").text("10 minutes");
+        document.getElementById("refresh_time_input").value = "300000";
+
+        history_time_select = row1.append("td").attr("align", "right").append("select").style("width", "120px")
+                            .attr("id", "history_time_input").attr("name", "history_time_input");
+
+        var text = document.createTextNode('History interval: ');
+        var child = document.getElementById('history_time_input');
+        child.parentNode.insertBefore(text, child);
+        history_time_select.append("option").attr("value", "86400000").text("1 day");
+        history_time_select.append("option").attr("value", "43200000").text("12 hours");
+
+        load_global_setting();
+
+        document.getElementById('refresh_time_input')
+                .addEventListener('change', save_global_setting, false);
+        document.getElementById('history_time_input')
+        .addEventListener('change', save_global_setting, false);
 
         document.getElementById('input_geo_json_file')
-                .addEventListener('change', readSingleFile, false);
+        .addEventListener('change', readSingleFile, false);
+    }
 
+    function save_global_setting(e) {
+        if (typeof (Storage) !== "undefined") {
+            refresh_time = sessionStorage.refresh_time = document.getElementById("refresh_time_input").value;
+            sessionStorage.history_interval = document.getElementById("history_time_input").value;
+       } else {
+            alert("Local storage isn't support");
+        }
+    }
+
+    function load_global_setting(e) {
+        if (typeof (Storage) !== "undefined") {
+            if (sessionStorage.refresh_time != null) refresh_time = document.getElementById("refresh_time_input").value = sessionStorage.refresh_time;
+            if (sessionStorage.history_interval != null) document.getElementById("history_time_input").value = sessionStorage.history_interval;
+        } else {
+            alert("Local storage isn't support");
+        }
     }
 
     // nacteni GEOJSON
@@ -257,7 +305,7 @@ function mapGraph() {
             .style("fill", "#eee");            
 
         node.append("image")
-            .attr("xlink:href", function (d) { return (d.type_node == "R") ? "img/router.png" : "img/sensor.png" })
+            .attr("xlink:href", function (d) { return (d.type_node == "R") ? "img/router.svg" : "img/sensor.svg" })
             .attr("x", function (d) { return -25; })
             .attr("y", function (d) { return -25; })
             .attr("height", 50)
@@ -287,13 +335,13 @@ function mapGraph() {
                     save_local_variable();
                     return api.elements.target.attr("title");
                 },
-                text: $('<iframe height="180" width="640" src="template/data.html" />')
+                text: $('<iframe height="380" width="640" src="template/data.html" frameborder="0" />')
             },
             show: { solo: true },
             hide: 'unfocus',
             position: {
-                my: 'left top',
-                at: 'right top',
+                my: 'top left',  // Position my top left...
+                at: 'bottom center', // at the bottom right of...
                 adjust: {
                     screen: true
                 }
@@ -301,14 +349,13 @@ function mapGraph() {
             style: {
                 classes: 'qtip-bootstrap',
                 width: 660,
-                height: 230
+                height: 430
             },
             events: {
                 toggle: function (event, api) {
                     if (event.type == 'tooltiphide')
                         load_local_variable();
                 }
-
             }
         });
 

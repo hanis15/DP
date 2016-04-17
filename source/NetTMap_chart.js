@@ -10,6 +10,20 @@ function NetTMap_chart(id, width, height) {
     var current_token;
     var current_node_index; // pokud se jedna o linku, musim najit sondu
 
+    // vytvori zalozky
+    function create_tab() {
+        tabs = d3.select("#" + id).append("ul").attr("class", "nav nav-tabs");
+        tabs.append("li").attr("class", "active").append("a").attr("data-toggle", "tab").attr("href", "#traffic_chart").text("Traffic");
+        tabs.append("li").append("a").attr("data-toggle", "tab").attr("href", "#profile_live").text("Profile live");
+        tabs.append("li").append("a").attr("data-toggle", "tab").attr("href", "#device_info").text("Device info");
+        // mozna by slo pridat interface, profiles
+
+        contents = d3.select("#" + id).append("div").attr("class", "tab-content");
+        contents.append("div").attr("id", "traffic_chart").attr("class", "tab-pane fade in active").append("p").attr("id", "traffic_chart_content").text("Loading ...");
+        contents.append("div").attr("id", "device_info").attr("class", "tab-pane fade").append("p").attr("id", "device_info_content").text("Loading ...");
+        contents.append("div").attr("id", "profile_live").attr("class", "tab-pane fade").append("p").attr("id", "profile_live_content").text("Loading ...");
+    }
+
     function load_local_variable() {
         // nacteni z HTML5 lokalniho uloziste
         if (typeof (Storage) !== "undefined") {
@@ -33,8 +47,11 @@ function NetTMap_chart(id, width, height) {
 
     function load_graph() {
         load_local_variable();
-        d3.selectAll("#sub_graph").remove();
-        d3.select(id).append("p").attr("id", "sub_graph").text("Nacitam data ...");
+        d3.selectAll('#sub_graph').remove();
+        d3.selectAll('#device_info_content').remove();
+        d3.selectAll('#traffic_chart_content').remove();
+        d3.selectAll('#profile_live_content').remove();
+        create_tab();
 
         // ziska token
         if (current_type == "N") {
@@ -80,19 +97,46 @@ function NetTMap_chart(id, width, height) {
             success: function (msg) {
                 current_token = msg.access_token;
                 //save_local_variable();
-                get_data();
+                get_data_profile();
+                get_data_sensor();
+                get_data_traffic();
             },
 
             error: function (a, b, err) {
                 console.log(err);
-                d3.selectAll("#sub_graph").remove();
-                d3.select(id).append("p").attr("id", "sub_graph").text('Chyba: Z adresy "' + host + '" nelze ziskat pristupovy token.');
+                d3.selectAll("#traffic_chart_content").remove();
+                d3.selectAll("#device_info_content").remove();
+                d3.selectAll("#profile_live_content").remove();
+                d3.select('#traffic_chart').append("p").attr("id", "traffic_chart_content").text('Chyba: Z adresy "' + host + '" nelze ziskat pristupovy token.');
+                d3.select('#device_info').append("p").attr("id", "device_info_content").text('Chyba: Z adresy "' + host + '" nelze ziskat pristupovy token.');
+                d3.select('#profile_live').append("p").attr("id", "profile_live_content").text('Chyba: Z adresy "' + host + '" nelze ziskat pristupovy token.');
                 alert('Chyba: Z adresy "' + host + '" nelze ziskat pristupovy token.');
             },
         });
     }
 
-    function get_data() {
+    // vrati pocatecni casovy udaji zaznamu provozu ze sondy s ohledem na nastavenou konstantu obnovy
+    function get_start_dateTime() {
+        var refresh_time = null;
+        if (typeof (Storage) !== "undefined") {
+            refresh_time = sessionStorage.refresh_time;
+        } else {
+            alert("Local storage isn't support");
+        }
+        var start_time;
+        if (refresh_time == null) // defaultni hodnota je jeden den
+            start_time = new Date(new Date().setDate(new Date().getDate() - 1));
+        else
+            start_time = new Date(new Date() - refresh_time);
+        return start_time.toJSON().slice(0, 10) + ' ' + start_time.toJSON().slice(11, 16);
+    }
+
+    // vrati casovy udaj pro posledni zaznam datam provozu ze sondy
+    function get_end_dateTime() {
+        return new Date().toJSON().slice(0, 10) + ' ' + new Date().toJSON().slice(11, 16);
+    }
+
+    function get_data_traffic() {
         var host = "";
         if (current_address != null)
             host = current_address;
@@ -105,8 +149,8 @@ function NetTMap_chart(id, width, height) {
             headers: { "Authorization": "bearer " + current_token },
             data: {
                 search: JSON.stringify({
-                    "from": "2016-03-04 00:05",
-                    "to": "2016-03-04 14:20",
+                    "from": get_start_dateTime(),
+                    "to": get_end_dateTime(),
                     "profile": "live",// nazev profilu - geoJson
                     "chart": {
                         "measure": "traffic",
@@ -116,28 +160,145 @@ function NetTMap_chart(id, width, height) {
             },
             success: function (msg) {
                 // na obj je aplikovan json,ktery byl nacten
-                parse_data(msg);
+                parse_data_traffic(msg);
             },
             error: function (a, b, err) {
                 console.log(err);
-                d3.selectAll("#sub_graph").remove();
-                d3.select(id).append("p").attr("id", "sub_graph").text('Chyba ' + err.code + ': "' + err.message + '" .');
+                d3.selectAll("#traffic_chart_content").remove();
+                d3.select("#traffic_chart").append("p").attr("id", "traffic_chart_content").text('Error ' + err.code + ': "' + err.message + '" .');
+            },
+        });
+    }
+
+    function get_data_sensor() {
+        var host = "";
+        if (current_address != null)
+            host = current_address;
+        else
+            host = nodes[current_item_index].address
+
+        $.ajax({
+            type: "GET",
+            url: "https://" + host + "/rest/fcc/device", // typ zobrazovaneho grafu
+            headers: { "Authorization": "bearer " + current_token },
+            success: function (msg) {
+                // na obj je aplikovan json,ktery byl nacten
+                parse_data_device(msg);
+            },
+            error: function (a, b, err) {
+                console.log(err);
+                d3.selectAll("#device_info_content").remove();
+                d3.select("#device_info").append("p").attr("id", "device_info_content").text('Error ' + err.code + ': "' + err.message + '" .');
+            },
+        });
+    }
+
+    function get_data_profile() {
+        var host = "";
+        if (current_address != null)
+            host = current_address;
+        else
+            host = nodes[current_item_index].address
+
+        $.ajax({
+            type: "GET",
+            url: "https://" + host + "/rest/fmc/profiles/id", // typ zobrazovaneho grafu
+            headers: { "Authorization": "bearer " + current_token },
+            data: { id: "live" },
+            success: function (msg) {
+                // na obj je aplikovan json,ktery byl nacten
+                parse_data_profile(msg);
+            },
+            error: function (a, b, err) {
+                console.log(err);
+                d3.selectAll("#profile_live_content").remove();
+                d3.select("#profile_live").append("p").attr("id", "profile_live_content").text('Error ' + err.code + ': "' + err.message + '" .');
             },
         });
     }
 
     function show_router_info() {
-        d3.selectAll("#sub_graph").remove();
-        var output = d3.select(id).append("p").attr("id", "sub_graph").text("Zde se budou zobrazovat informace o routeru");
+        d3.selectAll('#device_info_content').remove();
+        var output = d3.select("#device_info").append("p").text("Zd se budou zobrazovat informace o routeru");
     }
 
     function show_link_info() {
-        d3.selectAll("#sub_graph").remove();
-        var output = d3.select(id).append("p").attr("id", "sub_graph").text("Zd se budou zobrazovat informace o lince");
+        d3.selectAll("#device_info_content").remove();
+        var output = d3.select("#device_info").append("p").text("Zd se budou zobrazovat informace o lince");
     }
 
-    function parse_data(data) {
-        d3.selectAll("#sub_graph").remove();
+    function formatSizeUnits(bytes) {
+        if (bytes >= 1000000000) { bytes = (bytes / 1000000000).toFixed(2) + ' GB'; }
+        else if (bytes >= 1000000) { bytes = (bytes / 1000000).toFixed(2) + ' MB'; }
+        else if (bytes >= 1000) { bytes = (bytes / 1000).toFixed(2) + ' KB'; }
+        else if (bytes > 1) { bytes = bytes + ' bytes'; }
+        else if (bytes == 1) { bytes = bytes + ' byte'; }
+        else { bytes = '0 byte'; }
+        return bytes;
+    }
+
+    // parsuje a zobrazuje prichozi json data s informacemi o zarizeni
+    function parse_data_device(data) {
+        d3.selectAll("#device_info_content").remove();
+        var info_table = d3.selectAll("#device_info").append("table").attr("id", "device_info_content").attr("class", "table borderless");
+
+        var row1 = info_table.append("tr");
+        row1.append("td").text("Device name: ");
+        row1.append("td").text(data.deviceInfo.deviceName);
+
+        row1 = info_table.append("tr");
+        row1.append("td").text("Online time: ");
+        row1.append("td").text(data.deviceInfo.onlineTime);
+
+        row1 = info_table.append("tr");
+        row1.append("td").text("Discs: ");
+        if (data.deviceInfo.disks.length > 0)
+            row1.append("td").text(data.deviceInfo.disks[0].name);
+        else
+            row1.append("td");
+        for (var count = 1; count < data.deviceInfo.disks; count++) {
+            row1 = info_table.append("tr");
+            row1.append("td");
+            row1.append("td").text(data.deviceInfo.disks[count].name);
+        }
+
+        row1 = info_table.append("tr");
+        row1.append("td").text("RAM total: ");
+        row1.append("td").text(formatSizeUnits(data.ramUsage.total));
+        
+        row1 = info_table.append("tr");
+        row1.append("td").text("RAM usage: ");
+        row1.append("td").text(formatSizeUnits(data.ramUsage.usage));
+
+        row1 = info_table.append("tr");
+        row1.append("td").text("System disc total: ");
+        row1.append("td").text(formatSizeUnits(data.systemDiskUsage.total));
+        
+        row1 = info_table.append("tr");
+        row1.append("td").text("System disc usage: ");
+        row1.append("td").text(formatSizeUnits(data.systemDiskUsage.usage));
+
+        row1 = info_table.append("tr");
+        row1.append("td").text("Boot disc total: ");
+        row1.append("td").text(formatSizeUnits(data.bootDiskUsage.total));
+        
+        row1 = info_table.append("tr");
+        row1.append("td").text("Boot disc usage: ");
+        row1.append("td").text(formatSizeUnits(data.bootDiskUsage.usage));
+
+        row1 = info_table.append("tr");
+        row1.append("td").text("Data disc total: ");
+        row1.append("td").text(formatSizeUnits(data.dataDiskUsage.total));
+        
+        row1 = info_table.append("tr");
+        row1.append("td").text("Data disc usage: ");
+        row1.append("td").text(formatSizeUnits(data.dataDiskUsage.usage));
+
+    }
+
+    // parsuje a zobrazuje json data s provozem site
+    function parse_data_traffic(data) {
+        d3.selectAll("#traffic_chart_content").remove();
         for (var count_result = 0; count_result < data.length; count_result++) {
             if (current_type == 'L') {
                 if ((links[current_item_index].source_port != data[count_result].channel.name) &&
@@ -158,8 +319,7 @@ function NetTMap_chart(id, width, height) {
 
 
             // meritko osy x
-            var x = d3.time.scale.utc()
-                                .domain([new Date(d3.min(x_data)), new Date(d3.max(x_data))])
+            var x = d3.time.scale.utc().domain([new Date(d3.min(x_data)), new Date(d3.max(x_data))])
                                 .range([0, graph_width]);
             //meritko osy y
             var y = d3.scale.linear()
@@ -175,36 +335,36 @@ function NetTMap_chart(id, width, height) {
                             .scale(y)
                             .orient("left");
 
-            var svgContainer = d3.select(id)
+            traffic_charts_content = d3.select('#traffic_chart')
                                     .append("svg")
-                                    .attr("id", "sub_graph")
+                                    .attr("id", "traffic_chart_content")
                                     .attr("width", graph_width + margin.left + margin.right)
                                     .attr("height", graph_height + margin.top + margin.bottom)
                                     .append("g")
                                     .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-            svgContainer.append("text")
+            traffic_charts_content.append("text")
                                 .attr("font-size", "20px")
                                 .attr("transform", "translate(20, -10)")
                                 .text(data[count_result].channel.name);
 
-            var barGraph = svgContainer.append("rect")
+            var barGraph = traffic_charts_content.append("rect")
                         .attr("width", graph_width)
                         .attr("height", graph_height)
                         .style("fill", "white");
 
-            var xGroupAxis = svgContainer.append("g")
+            var xGroupAxis = traffic_charts_content.append("g")
                                     .attr("class", "axis")
                                     .attr("transform", "translate(0," + graph_height + ")")
                                     .call(xAxis);
 
-            var yGroupAxis = svgContainer.append("g")
+            var yGroupAxis = traffic_charts_content.append("g")
                                     .attr("class", "axis")
                                     .call(yAxis);
 
             var barWidth = graph_width / data[count_result].values.length;
 
-            var bar = svgContainer.selectAll("g")
+            var bar = traffic_charts_content.selectAll("g")
                     .data(y_data)
                 .enter().append("g")
                     .attr("transform", function (d, i) { return "translate(" + i * barWidth + ",0)"; });
@@ -233,5 +393,33 @@ function NetTMap_chart(id, width, height) {
                 style: 'dark'
             });
         }
+    }
+
+    // parsuje a zobrazi json data o profile live ze sondy
+    function parse_data_profile(data) {
+        last_time = data.end;
+        d3.selectAll("#profile_live_content").remove();
+        d3.selectAll("#profile_live_content").remove();
+        var info_table = d3.selectAll("#profile_live").append("table").attr("id", "profile_live_content").attr("class", "table borderless");
+
+        var row1 = info_table.append("tr");
+        row1.append("td").text("Device name: ");
+        row1.append("td").text(data.name);
+
+        row1 = info_table.append("tr");
+        row1.append("td").text("Description: ");
+        row1.append("td").text(data.description);
+
+        row1 = info_table.append("tr");
+        row1.append("td").text("Type: ");
+        row1.append("td").text(data.type);
+
+        row1 = info_table.append("tr");
+        row1.append("td").text("Status: ");
+        row1.append("td").text(data.status);
+
+        row1 = info_table.append("tr");
+        row1.append("td").text("End time: ");
+        row1.append("td").text(data.end);
     }
 }
