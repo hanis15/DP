@@ -9,6 +9,7 @@ function NetTMap_chart(id, width, height) {
     var current_address;
     var current_token;
     var current_node_index; // pokud se jedna o linku, musim najit sondu
+    var history_interval;
 
     // vytvori zalozky
     function create_tab() {
@@ -58,7 +59,13 @@ function NetTMap_chart(id, width, height) {
             if (nodes[current_item_index].type_node == "R")
                 show_router_info();
             else
-                get_token();
+                if (nodes[current_item_index].token != null) {
+                    get_data_profile();
+                    get_data_sensor();
+                    get_data_traffic();
+                }
+                else
+                    get_token();
         }
         else if (current_type == "L") { // jedna se o linku
             if (links[current_item_index].node == "") // jedna se o linku mezi routery
@@ -67,7 +74,13 @@ function NetTMap_chart(id, width, height) {
                 for (var count = 0; count < nodes.length; count++) {
                     if (nodes[count].name == links[current_item_index].node) {
                         current_address = nodes[count].address;
-                        get_token();
+                        if (nodes[count].token != null) {
+                            get_data_profile();
+                            get_data_sensor();
+                            get_data_traffic();
+                        }
+                        else
+                            get_token();
                         break;
                     }
                 }
@@ -96,7 +109,8 @@ function NetTMap_chart(id, width, height) {
 
             success: function (msg) {
                 current_token = msg.access_token;
-                //save_local_variable();
+                nodes[current_node_index].token = msg.access_token;
+                save_local_variable();
                 get_data_profile();
                 get_data_sensor();
                 get_data_traffic();
@@ -119,15 +133,15 @@ function NetTMap_chart(id, width, height) {
     function get_start_dateTime() {
         var refresh_time = null;
         if (typeof (Storage) !== "undefined") {
-            refresh_time = sessionStorage.refresh_time;
+            history_interval = sessionStorage.history_interval;
         } else {
             alert("Local storage isn't support");
         }
         var start_time;
-        if (refresh_time == null) // defaultni hodnota je jeden den
+        if (history_interval == null) // defaultni hodnota je jeden den
             start_time = new Date(new Date().setDate(new Date().getDate() - 1));
         else
-            start_time = new Date(new Date() - refresh_time);
+            start_time = new Date(new Date() - history_interval);
         return start_time.toJSON().slice(0, 10) + ' ' + start_time.toJSON().slice(11, 16);
     }
 
@@ -142,6 +156,8 @@ function NetTMap_chart(id, width, height) {
             host = current_address;
         else
             host = nodes[current_item_index].address
+
+        if (nodes[current_node_index].token != null) current_token = nodes[current_node_index].token;
 
         $.ajax({
             type: "GET",
@@ -177,6 +193,8 @@ function NetTMap_chart(id, width, height) {
         else
             host = nodes[current_item_index].address
 
+        if (nodes[current_node_index].token != null) current_token = nodes[current_node_index].token;
+
         $.ajax({
             type: "GET",
             url: "https://" + host + "/rest/fcc/device", // typ zobrazovaneho grafu
@@ -199,6 +217,8 @@ function NetTMap_chart(id, width, height) {
             host = current_address;
         else
             host = nodes[current_item_index].address
+
+        if (nodes[current_node_index].token != null) current_token = nodes[current_node_index].token;
 
         $.ajax({
             type: "GET",
@@ -299,10 +319,21 @@ function NetTMap_chart(id, width, height) {
     // parsuje a zobrazuje json data s provozem site
     function parse_data_traffic(data) {
         d3.selectAll("#traffic_chart_content").remove();
+        var channel_name;
+        if (current_type == 'L') {
+            for (var count = 0; count < links.length; count++) {
+                if ((links[count].source.name == links[current_item_index].source.name) &&
+                    (links[count].target.name == links[current_item_index].target.name) &&
+                    (links[count].channel != links[current_item_index].channel))
+                    channel_name = links[count].channel;
+            }
+        }
+        
+
         for (var count_result = 0; count_result < data.length; count_result++) {
             if (current_type == 'L') {
-                if ((links[current_item_index].source_port != data[count_result].channel.name) &&
-                    (links[current_item_index].target_port != data[count_result].channel.name)) 
+                if ((links[current_item_index].channel != data[count_result].channel.name) &&
+                    (channel_name != data[count_result].channel.name))
                     continue;
             }
 

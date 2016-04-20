@@ -25,13 +25,15 @@ function mapTopo() {
     var height;
     var map_block;
     var color_spectrum_block;
+    var color_spectrum_scale;
     var input_form;
     var zoom;
     var nodes = [];
     var links = [];
     var current_type;
     var current_item_index;
-    var refresh_time;
+    var refresh_time = '0';
+    var history_interval;
     this.create_map = load_graph;
     this.set_data = nacti_data;
     this.initialize = init_map;
@@ -77,6 +79,7 @@ function mapTopo() {
 
     function init_map(i, w, h) {
         init_local_variables();
+        color_spectrum_scale = d3.scale.log().domain([0.1, 100]).range(["green", "red"]);
         id = i;
         width = w;
         height = h;
@@ -101,12 +104,13 @@ function mapTopo() {
                             .attr("class", "btn-primary");
 
 
-        refresh_time_form = row1.append("td").attr("align", "right").append("select").style("width", "120px")
+        refresh_time_form = row1.append("td").attr("align", "right").append("select").style("width", "150px")
                             .attr("id", "refresh_time_input").attr("name", "refresh_time_input");
 
         var text = document.createTextNode('Refresh time: ');
         var child = document.getElementById('refresh_time_input');
         child.parentNode.insertBefore(text, child);
+        refresh_time_form.append("option").attr("value", "0").text("Doesn't refreshed");
         refresh_time_form.append("option").attr("value", "30000").text("30 seconds");
         refresh_time_form.append("option").attr("value", "60000").text("1 minute");
         refresh_time_form.append("option").attr("value", "300000").text("5 minutes");
@@ -136,6 +140,10 @@ function mapTopo() {
     function save_global_setting(e) {
         if (typeof (Storage) !== "undefined") {
             refresh_time = sessionStorage.refresh_time = document.getElementById("refresh_time_input").value;
+            if (refresh_time == "0")
+                window.clearTimeout();
+            else
+                window.setTimeout(refresh_links, refresh_time);
             sessionStorage.history_interval = document.getElementById("history_time_input").value;
         } else {
             alert("Local storage isn't support");
@@ -144,7 +152,13 @@ function mapTopo() {
 
     function load_global_setting(e) {
         if (typeof (Storage) !== "undefined") {
-            if (sessionStorage.refresh_time != null) refresh_time = document.getElementById("refresh_time_input").value = sessionStorage.refresh_time;
+            if (sessionStorage.refresh_time != null) {
+                refresh_time = document.getElementById("refresh_time_input").value = sessionStorage.refresh_time;
+                if ((refresh_time == "0") || (refresh_time == null))
+                    window.clearTimeout();
+                else
+                    window.setTimeout(refresh_links, refresh_time);
+            }
             if (sessionStorage.history_interval != null) document.getElementById("history_time_input").value = sessionStorage.history_interval;
         } else {
             alert("Local storage isn't support");
@@ -197,31 +211,6 @@ function mapTopo() {
         reader.readAsText(file);
     }
 
-    function load_local_variable() {
-        // nacteni z HTML5 lokalniho uloziste
-        if (typeof (Storage) !== "undefined") {
-            nodes = jQuery.parseJSON(sessionStorage.nodes);
-            links = jQuery.parseJSON(sessionStorage.links);
-            current_item_index = sessionStorage.current_item_index;
-            current_type = sessionStorage.current_type;
-        } else {
-            alert("Local storage isn't support");
-        }
-    }
-
-    function save_local_variable() {
-        // nacteni z HTML5 lokalniho uloziste
-        if (typeof (Storage) !== "undefined") {
-            sessionStorage.nodes = JSON.stringify(nodes);
-            sessionStorage.links = JSON.stringify(links);
-            sessionStorage.current_type = current_type;
-            sessionStorage.current_item_index = current_item_index;
-        } else {
-            alert("Local storage isn't support");
-        }
-
-    }
-
     function nacti_data(data) {
         var json_data = jQuery.parseJSON(data);
 
@@ -264,6 +253,15 @@ function mapTopo() {
                 links.push(data.features[count].properties);
         }
 
+        for (count = 0; count < links.length; count++) {
+            links[count].index = count;
+            links[count].inPair = 'L';
+        }
+
+        // nastaveni typu prohnuti linky
+        set_type_path();
+
+
         // zobrazeni mapy s ohledem na souradnice bodu
         zoom = 7;
         error = null;
@@ -304,7 +302,12 @@ function mapTopo() {
             pointToLayer: function (feature, latlng) {
                 var smallIcon = L.icon({
                     iconSize: [40, 40],
-                    className: "node",
+                    id: "node_" + function () {
+                        for (var count = 0; count < nodes.length; count++) {
+                            if (nodes[count].name == feature.properties.name)
+                                return count;
+                        }
+                    },
                     iconUrl: (feature.properties.type_node == "R") ? "img/router.svg" : "img/sensor.svg"
                 });
 
@@ -332,6 +335,14 @@ function mapTopo() {
             }
         }).addTo(map_block);
 
+        geoJsonLayer.eachLayer(function (layer) {
+            if (layer.feature.geometry.type == 'LineString')
+                layer._path.id = 'line_' + layer.feature.properties.index;
+        });
+
+        save_local_variable();
+        load_global_setting();
+
         geoJsonLayer.on("popupclose", function (e) {
             //alert("close");
             load_local_variable();
@@ -341,12 +352,7 @@ function mapTopo() {
             // najdu odpovidajici linku pro aktualni feature
             if (e.popup._source.feature.geometry.type == "LineString") {
                 current_type = 'L';
-                for (var count = 0; count < links.length; count++) {
-                    if (e.popup._source.feature.properties.name == links[count].name) {
-                        current_item_index = count;
-                        break;
-                    }
-                }
+                current_item_index = e.popup._source.feature.properties.index;
             }
             else {
                 current_type = 'N';
@@ -357,9 +363,123 @@ function mapTopo() {
                     }
                 }
             }
-
             save_local_variable();
         });
 
+        function set_type_path() {
+            for (var count = 0; count < links.length; count++) {
+                for (var i_count = count + 1; i_count < links.length; i_count++) {
+                    if (links[count].channel == links[i_count].channel) links[count].inPair = 'R';
+                }
+            }
+        }
+
     }
+
+    function refresh_links() {
+        load_local_variable();
+        for (count = 0; count < nodes.length; count++) {
+            if (nodes[count].type_node == 'R') continue;
+
+            // pokud existuje token, provede se pouze nacteni dat
+            if (nodes[count].token == null)
+                get_token(count);
+            else
+                get_data_traffic(nodes[count].token, count);
+        }
+    }
+
+    function get_token(node_index) {
+        var host = nodes[node_index].address
+        //var host = "collector-devel.ics.muni.cz";//"147.251.14.50";////"192.168.51.145";// collector-devel.ics.muni.cz
+        $.ajax({
+            type: "POST",
+            url: "https://" + host + "/resources/oAuth/token",
+            contentType: "application/x-www-form-urlencoded",
+            data: {
+                "username": "rest",// UCO
+                "password": "r3st&ful",// sekundarni heslo
+                "client_id": "invea-tech",
+                "grant_type": "password"
+            },
+
+            success: function (msg) {
+                token = msg.access_token;
+                nodes[node_index].token = msg.access_token;
+                get_data_traffic(token, node_index);
+            },
+
+            error: function (a, b, err) {
+                console.log(err);
+            },
+        });
+    }
+
+    function get_data_traffic(token, node_index) {
+        var host = nodes[node_index].address;
+        $.ajax({
+            type: "GET",
+            url: "https://" + host + "/rest/fmc/analysis/chart", // typ zobrazovaneho grafu
+            headers: { "Authorization": "bearer " + token },
+            data: {
+                search: JSON.stringify({
+                    "from": get_start_dateTime(),
+                    "to": get_end_dateTime(),
+                    "profile": "live",// nazev profilu - geoJson
+                    "chart": {
+                        "measure": "traffic",
+                        "protocol": 1
+                    }
+                })
+            },
+            success: function (msg) {
+                // na obj je aplikovan json,ktery byl nacten
+                parse_data_traffic(msg, node_index);
+            },
+            error: function (a, b, err) {
+                console.log(err);
+            },
+        });
+    }
+
+    function parse_data_traffic(data, node_index) {
+        for (var count = 0; count < links.length; count++) {
+            if (nodes[node_index].name == links[count].node) {
+                for (var count_result = 0; count_result < data.length; count_result++) {
+                    // preskocim channels kterych se to netyka
+                    if (links[count].channel != data[count_result].channel.name)
+                        continue;
+
+                    // aktualni data = stav linky
+                    //var x_data = data[count_result].values[0][0];
+                    update_link(count, data[count_result].values[0][1]);
+                    //update_last_time_update(data[count_result].values[0][0]);
+                }
+            }
+        }
+    }
+
+    // provede update linky podle ziskanych dat
+    function update_link(link_index, data) {
+        console.log("update channel: " + links[link_index].channel + ', data: ' + data);
+        d3.select("#link_" + link_index).style("stroke", function (d) {
+            var result = (links[d.index].speed * 1024) / data;
+            console.log('result: ' + result * 100);
+            return color_spectrum_scale(result * 100);
+        })
+    }
+
+    // vrati pocatecni casovy udaji zaznamu provozu ze sondy s ohledem na nastavenou konstantu obnovy
+    function get_start_dateTime() {
+        var refresh_time = null;
+        var start_time = new Date(new Date() - 600000); // default hodnota = 10 minut
+        return start_time.toJSON().slice(0, 10) + ' ' + start_time.toJSON().slice(11, 16);
+    }
+
+    // vrati casovy udaj pro posledni zaznam datam provozu ze sondy
+    function get_end_dateTime() {
+        return new Date().toJSON().slice(0, 10) + ' ' + new Date().toJSON().slice(11, 16);
+    }
+
+
 }

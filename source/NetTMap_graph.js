@@ -23,12 +23,14 @@ function mapGraph() {
     var width;
     var graph_block;
     var color_spectrum_block;
+    var color_spectrum_scale;
     var input_form;
     var nodes = [];
     var links = [];
     var current_type;
     var current_item_index;
-    var refresh_time;
+    var refresh_time = '0';
+    var last_time_update; // posledni cas refresh
     this.create_graph = load_graph;
     this.set_data = nacti_data;
     this.load_change = load_local_variable;
@@ -45,12 +47,13 @@ function mapGraph() {
                             .attr("class", "btn-primary");
                             
 
-        refresh_time_form = row1.append("td").attr("align", "right").append("select").style("width", "120px")
+        refresh_time_form = row1.append("td").attr("align", "right").append("select").style("width", "150px")
                             .attr("id", "refresh_time_input").attr("name", "refresh_time_input");
 
         var text = document.createTextNode('Refresh time: ');
         var child = document.getElementById('refresh_time_input');
         child.parentNode.insertBefore(text, child);
+        refresh_time_form.append("option").attr("value", "0").text("Doesn't refreshed");
         refresh_time_form.append("option").attr("value", "30000").text("30 seconds");
         refresh_time_form.append("option").attr("value", "60000").text("1 minute");
         refresh_time_form.append("option").attr("value", "300000").text("5 minutes");
@@ -80,6 +83,10 @@ function mapGraph() {
     function save_global_setting(e) {
         if (typeof (Storage) !== "undefined") {
             refresh_time = sessionStorage.refresh_time = document.getElementById("refresh_time_input").value;
+            if (refresh_time == "0")
+                window.clearTimeout();
+            else
+                window.setTimeout(refresh_links, refresh_time);
             sessionStorage.history_interval = document.getElementById("history_time_input").value;
        } else {
             alert("Local storage isn't support");
@@ -88,7 +95,13 @@ function mapGraph() {
 
     function load_global_setting(e) {
         if (typeof (Storage) !== "undefined") {
-            if (sessionStorage.refresh_time != null) refresh_time = document.getElementById("refresh_time_input").value = sessionStorage.refresh_time;
+            if (sessionStorage.refresh_time != null) {
+                refresh_time = document.getElementById("refresh_time_input").value = sessionStorage.refresh_time;
+                if ((refresh_time == "0") || (refresh_time == null))
+                    window.clearTimeout();
+                else
+                    window.setTimeout(refresh_links, refresh_time);
+            }
             if (sessionStorage.history_interval != null) document.getElementById("history_time_input").value = sessionStorage.history_interval;
         } else {
             alert("Local storage isn't support");
@@ -114,6 +127,7 @@ function mapGraph() {
         id = i;
         width = w;
         height = h;
+        color_spectrum_scale = d3.scale.log().domain([0.1, 100]).range(["green", "red"]);
 
         if (graph_block != null) graph_block.remove();
         if (color_spectrum_block != null) color_spectrum_block.remove();
@@ -261,6 +275,17 @@ function mapGraph() {
             }
         }
         
+        for (count = 0; count < links.length; count++) {
+            links[count].index = count;
+            links[count].inPair = 'L';
+        }
+
+        // nastaveni typu prohnuti linky
+        set_type_path();
+
+        for (count = 0; count < nodes.length; count++) 
+            nodes[count].index = count;
+
         force
             .nodes(nodes)
             .links(links)
@@ -268,9 +293,10 @@ function mapGraph() {
 
         link = graph_block.selectAll(".link")
             .data(links)
-            .enter().append("line")
+            .enter().append("path")
             .attr("class", "link")
-            .style("stroke", function (d) {
+            .style("fill", "white")
+            .style("stroke", "#000000")/*function (d) {
                 switch (d.speed) {
                     case "100": return "#6f00ff";
                     case "1000": return "#66cdaa";
@@ -278,8 +304,8 @@ function mapGraph() {
                     case "40000": return "#ff4444";
                     case "100000": return "#000000";
                 }
-            })
-            .style("stroke-width", function (d) {
+            })*/
+            .style("stroke-width", "6px")/*function (d) {
                 switch (d.speed) {
                     case "100": return "2px";
                     case "1000": return "4px";
@@ -287,15 +313,16 @@ function mapGraph() {
                     case "40000": return "8px";
                     case "100000": return "10px";
                 }
-            })
+            })*/
             .attr("title", function (d) { return d.name; })
-            .attr("id", function (d) { return d.name; });
+            .attr("id", function (d) { return "link_" + d.index; });
 
         node_g = graph_block.selectAll("g.node")
             .data(nodes, function (d) { return d.name; });
             
         node = node_g.enter().append("g")
                              .attr("class", "node")
+                             .attr("id", function (d) { return "node_" + d.index; })
                              .attr("title", function (d) { return d.name; })
                              .attr("transform", function (d) { return "translate(" + d.x + "," + d.y + ")"; })
                              .call(force.drag);
@@ -316,6 +343,7 @@ function mapGraph() {
             content: {
                 button: 'Close',
                 title: function (event, api) {
+                    var title = api.elements.target.attr("title");
                     if (api.elements.target.attr("class") == "node") {
                         current_type = "N";
                         for (var count = 0; count < nodes.length; count++)
@@ -326,18 +354,14 @@ function mapGraph() {
                     }
                     else {
                         current_type = "L";
-                        for (var count = 0; count < links.length; count++)
-                            if (links[count].name == api.elements.target.attr("title")) {
-                                current_item_index = count;
-                                break;
-                            }
+                        current_item_index = api.elements.target.attr("id").split('_')[1];
                     }
                     save_local_variable();
-                    return api.elements.target.attr("title");
+                    return title;
                 },
                 text: $('<iframe height="380" width="640" src="template/data.html" frameborder="0" />')
             },
-            show: { solo: true },
+            show: 'click',
             hide: 'unfocus',
             position: {
                 my: 'top left',  // Position my top left...
@@ -372,6 +396,40 @@ function mapGraph() {
             force.resume();
         }
 
+        function set_type_path() {
+            for (var count = 0; count < links.length; count++) {
+                for (var i_count = count + 1; i_count < links.length; i_count++) {
+                    if (links[count].channel == links[i_count].channel) links[count].inPair = 'R';
+                }
+            }
+        }
+
+        function tick() {
+            link.attr("d", function (d) {
+                var dx = d.target.x - d.source.x,
+                    dy = d.target.y - d.source.y,
+                    dr = 0;
+                if (d.node != '')
+                    dr = Math.sqrt((dx * dx + dy * dy) * 10);
+
+                if (d.inPair == 'R')
+                    p = "M" + d.source.x + "," + d.source.y +
+                        "A" + dr + "," + dr + " 0 0 1," + d.target.x + "," + d.target.y +
+                        "A" + dr + "," + dr + " 0 0 1," + d.source.x + "," + d.source.y;
+                else
+                    p = "M" + d.source.x + "," + d.source.y +
+                        "A" + dr + "," + dr + " 1 0 0," + d.target.x + "," + d.target.y +
+                        "A" + dr + "," + dr + " 1 0 0," + d.source.x + "," + d.source.y;
+
+                return p;
+            });
+
+            node.attr("cx", function (d) { return d.x; })
+                 .attr("cy", function (d) { return d.y; })
+                 .attr("transform", function (d) { return "translate(" + d.x + "," + d.y + ")"; });
+        }
+
+        /*
         function tick() {
             link.attr("x1", function (d) { return d.source.x; })
                 .attr("y1", function (d) { return d.source.y; })
@@ -382,31 +440,31 @@ function mapGraph() {
                 .attr("cy", function (d) { return d.y; })
                 .attr("transform", function (d) { return "translate(" + d.x + "," + d.y + ")"; });
         }
+        */
+        load_global_setting();
     }
 
-    // ziska pristupove tokeny ke vsem sondam a ulozi do properties
-    function get_all_token() {
-        for (var count = 0; count < nodes.length; count ++) {
-            if (nodes[count].type_node == 'S') { // pouze u uzlu typu sonda
+    function refresh_links() {
+        load_local_variable();
+        for (count = 0; count < nodes.length; count++) {
+            if (nodes[count].type_node == 'R') continue;
+
+            // pokud existuje token, provede se pouze nacteni dat
+            if (nodes[count].token == null)
                 get_token(count);
-            }
+            else
+                get_data_traffic(nodes[count].token, count);
         }
     }
 
-    // projde vsechny uzly a linky a pokud je to sonda tak nacte data
-    function load_parameter_from_sensors() {
-        // prochazi vsehny 
-        for (var count = 0; count < nodes.length; count ++) {
-            if (nodes[count].type_node == 'S') { // pouze u uzlu typu sonda
-                //load_parameter("collector-devel.ics.muni.cz", );
-                null;
-            }
-        }
-    }
-
-    // provede update obj pomoci nactenych dat
-    function update_sensor(obj, data) {
-        null;
+    // provede update linky podle ziskanych dat
+    function update_link(link_index, data) {
+        console.log("update channel: " + links[link_index].channel + ', data: ' + data);
+        d3.select("#link_" + link_index).style("stroke", function (d) {
+            var result = (links[d.index].speed * 1024) / data;
+            console.log('result: ' + result * 100);
+            return color_spectrum_scale(result * 100);
+        })
     }
 
     function get_token(node_index) {
@@ -425,6 +483,8 @@ function mapGraph() {
 
             success: function (msg) {
                 token = msg.access_token;
+                nodes[node_index].token = msg.access_token;
+                get_data_traffic(token, node_index);
             },
 
             error: function (a, b, err) {
@@ -432,34 +492,65 @@ function mapGraph() {
             },
         });
     }
-    // nacte data z konkretni sondy
-    function load_parameter(address, type_data) {
-        // nastaveni adresy = addresss
 
-        function getResults(t) {
-            $.ajax({
-                type: "GET",
-                url: "https://" + host + "/rest/fmc/analysis/chart", // typ zobrazovaneho grafu
-                headers: { "Authorization": "bearer " + t },
-                data: {
-                    search: JSON.stringify({
-                        "from": "2016-03-04 00:05",
-                        "to": "2016-03-04 14:20",
-                        "profile": "live",// nazev profilu - geoJson
-                        "chart": {
-                            "measure": "traffic",
-                            "protocol": 1
-                        }
-                    })
-                },
-                success: function (msg) {
-                    // na obj je aplikovan json,ktery byl nacten
-                    update_sensor(obj, JSON.stringify(msg));
-                },
-                error: function (a, b, err) {
-                    console.log(err);
-                },
-            });
+    // vrati pocatecni casovy udaji zaznamu provozu ze sondy s ohledem na nastavenou konstantu obnovy
+    function get_start_dateTime() {
+        var refresh_time = null;
+        var start_time = new Date(new Date() - 600000); // default hodnota = 10 minut
+        return start_time.toJSON().slice(0, 10) + ' ' + start_time.toJSON().slice(11, 16);
+    }
+
+    // vrati casovy udaj pro posledni zaznam datam provozu ze sondy
+    function get_end_dateTime() {
+        return new Date().toJSON().slice(0, 10) + ' ' + new Date().toJSON().slice(11, 16);
+    }
+
+    function get_data_traffic(token, node_index) {
+        var host = nodes[node_index].address;
+        $.ajax({
+            type: "GET",
+            url: "https://" + host + "/rest/fmc/analysis/chart", // typ zobrazovaneho grafu
+            headers: { "Authorization": "bearer " + token },
+            data: {
+                search: JSON.stringify({
+                    "from": get_start_dateTime(),
+                    "to": get_end_dateTime(),
+                    "profile": "live",// nazev profilu - geoJson
+                    "chart": {
+                        "measure": "traffic",
+                        "protocol": 1
+                    }
+                })
+            },
+            success: function (msg) {
+                // na obj je aplikovan json,ktery byl nacten
+                parse_data_traffic(msg, node_index);
+            },
+            error: function (a, b, err) {
+                console.log(err);
+            },
+        });
+    }
+
+    // provede update labelu s poslednim update refresh
+    function update_last_time_update(time) {
+        console.log(new Date(time));
+    }
+
+    function parse_data_traffic(data, node_index) {
+        for (var count = 0; count < links.length; count++) {
+            if (nodes[node_index].name == links[count].node) {
+                for (var count_result = 0; count_result < data.length; count_result++) {
+                    // preskocim channels kterych se to netyka
+                    if (links[count].channel != data[count_result].channel.name)
+                        continue;
+
+                    // aktualni data = stav linky
+                    //var x_data = data[count_result].values[0][0];
+                    update_link(count, data[count_result].values[0][1]);
+                    update_last_time_update(data[count_result].values[0][0]);
+                }
+            }
         }
     }
 }

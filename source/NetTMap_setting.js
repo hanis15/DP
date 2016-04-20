@@ -765,12 +765,21 @@ function geoSetting() {
 
                 var sensor_coordinates = '[' + nodes[sensor_index].long + ', ' + nodes[sensor_index].lat + ' ]';
 
-                // vytvorim 2 linky
+                // vytvorim 4 linky - 2 pro jeden smer, 2 pro druhy smer
                 curr_node = '{ "geometry": { "type": "LineString", "coordinates": [ ' + source_coordinates + ', ' + sensor_coordinates + ' ]},';
                 curr_node += '"properties": { "source": "' + links[count].source
                             + '", "target": "' + nodes[sensor_index].name
-                            + '", "target_port": "' + links[count].target_port
-                            + '", "source_port": "' + links[count].source_port
+                            + '", "channel": "' + links[count].source_port
+                            + '", "speed": "' + links[count].speed
+                            + '", "node": "' + links[count].node
+                            + '", "name": "' + links[count].name + '"},';
+                curr_node += '"type": "Feature" },';
+                content += curr_node;
+
+                curr_node = '{ "geometry": { "type": "LineString", "coordinates": [ ' + source_coordinates + ', ' + sensor_coordinates + ' ]},';
+                curr_node += '"properties": { "source": "' + links[count].source
+                            + '", "target": "' + nodes[sensor_index].name
+                            + '", "channel": "' + links[count].target_port
                             + '", "speed": "' + links[count].speed
                             + '", "node": "' + links[count].node
                             + '", "name": "' + links[count].name + '"},';
@@ -780,8 +789,17 @@ function geoSetting() {
                 curr_node = '{ "geometry": { "type": "LineString", "coordinates": [ ' + sensor_coordinates + ', ' + dest_coordinates + ' ]},';
                 curr_node += '"properties": { "source": "' + nodes[sensor_index].name
                             + '", "target": "' + links[count].target
-                            + '", "target_port": "' + links[count].target_port
-                            + '", "source_port": "' + links[count].source_port
+                            + '", "channel": "' + links[count].source_port
+                            + '", "speed": "' + links[count].speed
+                            + '", "node": "' + links[count].node
+                            + '", "name": "' + links[count].name + '"},';
+                curr_node += '"type": "Feature" },';
+                content += curr_node;
+
+                curr_node = '{ "geometry": { "type": "LineString", "coordinates": [ ' + sensor_coordinates + ', ' + dest_coordinates + ' ]},';
+                curr_node += '"properties": { "source": "' + nodes[sensor_index].name
+                            + '", "target": "' + links[count].target
+                            + '", "channel": "' + links[count].target_port
                             + '", "speed": "' + links[count].speed
                             + '", "node": "' + links[count].node
                             + '", "name": "' + links[count].name + '"},';
@@ -793,8 +811,7 @@ function geoSetting() {
                 curr_node = '{ "geometry": { "type": "LineString", "coordinates": [ ' + source_coordinates + ', ' + dest_coordinates + ' ]},';
                 curr_node += '"properties": { "source": "' + links[count].source
                             + '", "target": "' + links[count].target
-                            + '", "target_port": "' + links[count].target_port
-                            + '", "source_port": "' + links[count].source_port
+                            + '", "channel": "' + links[count].source_port
                             + '", "speed": "' + links[count].speed
                             + '", "node": "'
                             + '", "name": "' + links[count].name + '"},';

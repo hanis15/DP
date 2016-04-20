@@ -9,7 +9,8 @@
       "properties": {
         "name": "Brno",
         "type_node": "R",
-        "description": "",
+        "description": "Brnensky uzel",
+        "hw": "",
         "address": ""
       },
       "type": "Feature"
@@ -22,7 +23,8 @@
       "properties": {
         "name": "Ostrava",
         "type_node": "R",
-        "description": "",
+        "description": "Ostravsky uzel",
+        "hw": "",
         "address": ""
       },
       "type": "Feature"
@@ -35,7 +37,8 @@
       "properties": {
         "name": "Praha",
         "type_node": "R",
-        "description": "",
+        "description": "Prazsku uzel",
+        "hw": "",
         "address": ""
       },
       "type": "Feature"
@@ -46,9 +49,10 @@
         "coordinates": [ 15.495666, 49.013079 ]
       },
       "properties": {
-        "name": "hammond",
+        "name": "Voyager 1",
         "type_node": "S",
-        "description": "testovaci sonda",
+        "description": "Prvni sonda",
+        "hw": "IFP-20000-SFP+",
         "address": "collector-devel.ics.muni.cz"
       },
       "type": "Feature"
@@ -64,8 +68,7 @@
       "properties": {
         "source": "Ostrava",
         "target": "Brno",
-        "target_port": "",
-        "source_port": "",
+        "channel": "",
         "speed": "100000",
         "node": "",
         "name": "Ostrava_Brno"
@@ -82,11 +85,28 @@
       },
       "properties": {
         "source": "Brno",
-        "target": "hammond",
-        "target_port": "127.0.0.1 (collector-devel.ics.muni.cz)",
-        "source_port": "147.251.14.44",
+        "target": "Voyager 1",
+        "channel": "127.0.0.1 (collector-devel.ics.muni.cz)",
         "speed": "1000",
-        "node": "hammond",
+        "node": "Voyager 1",
+        "name": "Brno_Praha"
+      },
+      "type": "Feature"
+    },
+    {
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [ 16.612972, 49.196153 ],
+          [ 15.495666, 49.013079 ]
+        ]
+      },
+      "properties": {
+        "source": "Brno",
+        "target": "Voyager 1",
+        "channel": "147.251.14.44",
+        "speed": "1000",
+        "node": "Voyager 1",
         "name": "Brno_Praha"
       },
       "type": "Feature"
@@ -100,12 +120,29 @@
         ]
       },
       "properties": {
-        "source": "hammond",
+        "source": "Voyager 1",
         "target": "Praha",
-        "target_port": "127.0.0.1 (collector-devel.ics.muni.cz)",
-        "source_port": "147.251.14.44",
+        "channel": "127.0.0.1 (collector-devel.ics.muni.cz)",
         "speed": "1000",
-        "node": "hammond",
+        "node": "Voyager 1",
+        "name": "Brno_Praha"
+      },
+      "type": "Feature"
+    },
+    {
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [ 15.495666, 49.013079 ],
+          [ 14.420251, 50.087442 ]
+        ]
+      },
+      "properties": {
+        "source": "Voyager 1",
+        "target": "Praha",
+        "channel": "147.251.14.44",
+        "speed": "1000",
+        "node": "Voyager 1",
         "name": "Brno_Praha"
       },
       "type": "Feature"
@@ -121,11 +158,10 @@
       "properties": {
         "source": "Praha",
         "target": "Ostrava",
-        "target_port": "",
-        "source_port": "",
+        "channel": "",
         "speed": "40000",
         "node": "",
-        "name": "Praha Ostrava"
+        "name": "Praha - Ostrava"
       },
       "type": "Feature"
     }
