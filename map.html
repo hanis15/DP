@@ -3,17 +3,23 @@
 <html lang="en" xmlns="http://www.w3.org/1999/xhtml">
 <head>
     <meta charset="utf-8" />
-    <title>NetTMap_v3</title>
-    <script src="//d3js.org/d3.v3.min.js" charset="utf-8"></script>
+    <title>NetTMap_v4</title>
+    <script src="d3/d3.js" charset="utf-8"></script>
     <script src="jQuery/jquery-1.12.1.min.js" type="text/javascript"></script>
-    <script src="jQuery/jquery.qtip.min.js" type="text/javascript"></script>
-    <link href="jQuery/jquery.qtip.min.css" type="text/css" rel="stylesheet" />
 
-    <script src="Leaflet/leaflet.js" type="text/javascript"></script>
+    <link href="qTip2/jquery.qtip.css" type="text/css" rel="stylesheet" />
+    <script src="qTip2/jquery.qtip.js" type="text/javascript"></script>
+
+    <link href="bootstrap/css/bootstrap.css" type="text/css" rel="stylesheet" />
+    <script src="bootstrap/js/bootstrap.js" type="text/javascript"></script>
+
     <link href="Leaflet/leaflet.css" type="text/css" rel="stylesheet" />
-    <link href="bootstrap/css/bootstrap.min.css" rel="stylesheet" media="screen">
+    <script src="Leaflet/leaflet.js" type="text/javascript"></script>
+    <script src='//api.mapbox.com/mapbox.js/plugins/arc.js/v0.1.0/arc.js'></script>
+    <!--<script src="Leaflet/Leaflet.arc.js" type="text/javascript"></script>-->
+
     <link href="source/NetTMap.css" type="text/css" rel="stylesheet" />
-    <script src="source/NetTMap_map.js"></script>
+    <script src="source/NetTMap.js" type="text/javascript"></script>
 </head>
 <body>
     <div class="navbar navbar-inverse navbar-fixed-top">
@@ -25,11 +31,11 @@
                     <span class="icon-bar"></span>
                     <span class="icon-bar"></span>
                 </button>
-                <a class="brand" href="index.html">NetTMap_v3</a>
+                <a class="brand" href="index.html">NetTMap_v4</a>
                 <div class="nav-collapse collapse">
                     <ul class="nav">
-                        <li><a href="index.html">Topology map</a></li>
-                        <li class="active"><a href="map.html">Graph - Leaflet</a></li>
+                        <li><a href="index.html">Graph</a></li>
+                        <li class="active"><a href="map.html">Map</a></li>
                         <li><a href="setting.html">Setting</a></li>
                         <li><a href="about.html">About</a></li>
                    </ul>
@@ -39,15 +45,16 @@
 
         <!-- Obsah stranky -->
         <div class="container">
-            <h1>Graph - mapa</h1>
+            <h1>Map</h1>
             <div id="graph_map" align="center"></div>
             <script>
                 var height = 500;
                 var width = 800;
                 var id = "graph_map";
 
-                var map_graph = NetTMap_map.getInstance();
-                map_graph.initialize(id, width, height);
+                //var map_graph = NetTMap.getInstance();
+                var map_graph = new NetTMap();
+                map_graph.initialize(id, width, height, "map");
 
             </script>
         </div>

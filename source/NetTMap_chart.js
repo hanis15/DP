@@ -59,7 +59,8 @@ function NetTMap_chart(id, width, height) {
             if (nodes[current_item_index].type_node == "R")
                 show_router_info();
             else
-                if (nodes[current_item_index].token != null) {
+                current_node_index = current_item_index;
+                if ((nodes[current_item_index].token != "") && (nodes[current_item_index].token != null)) {
                     get_data_profile();
                     get_data_sensor();
                     get_data_traffic();
@@ -74,7 +75,7 @@ function NetTMap_chart(id, width, height) {
                 for (var count = 0; count < nodes.length; count++) {
                     if (nodes[count].name == links[current_item_index].node) {
                         current_address = nodes[count].address;
-                        if (nodes[count].token != null) {
+                        if ((nodes[count].token != "") && (nodes[count].token != null)) {
                             get_data_profile();
                             get_data_sensor();
                             get_data_traffic();
@@ -110,6 +111,7 @@ function NetTMap_chart(id, width, height) {
             success: function (msg) {
                 current_token = msg.access_token;
                 nodes[current_node_index].token = msg.access_token;
+                nodes[current_node_index].token_refresh = msg.refresh_token;
                 save_local_variable();
                 get_data_profile();
                 get_data_sensor();
@@ -117,6 +119,7 @@ function NetTMap_chart(id, width, height) {
             },
 
             error: function (a, b, err) {
+                // nutno osetrit pokud se vrati chyba 401 - token expired
                 console.log(err);
                 d3.selectAll("#traffic_chart_content").remove();
                 d3.selectAll("#device_info_content").remove();
@@ -157,7 +160,7 @@ function NetTMap_chart(id, width, height) {
         else
             host = nodes[current_item_index].address
 
-        if (nodes[current_node_index].token != null) current_token = nodes[current_node_index].token;
+        if (nodes[current_node_index].token != "") current_token = nodes[current_node_index].token;
 
         $.ajax({
             type: "GET",
@@ -193,7 +196,7 @@ function NetTMap_chart(id, width, height) {
         else
             host = nodes[current_item_index].address
 
-        if (nodes[current_node_index].token != null) current_token = nodes[current_node_index].token;
+        if (nodes[current_node_index].token != "") current_token = nodes[current_node_index].token;
 
         $.ajax({
             type: "GET",
@@ -218,7 +221,7 @@ function NetTMap_chart(id, width, height) {
         else
             host = nodes[current_item_index].address
 
-        if (nodes[current_node_index].token != null) current_token = nodes[current_node_index].token;
+        if (nodes[current_node_index].token != "") current_token = nodes[current_node_index].token;
 
         $.ajax({
             type: "GET",
