@@ -6,22 +6,11 @@ svg {
   position: relative;
 }
 
-path {
-  fill: #000;
-  fill-opacity: .2;
-  stroke: #fff;
-  stroke-width: 8px;
-}
-
-path:hover {
-  fill: brown;
-  fill-opacity: .7;
-}
-
 #map_canvas {
   width: 800px;
   height: 500px;
 }
+
 
 .ui-tooltip, .qtip{
     position: absolute;

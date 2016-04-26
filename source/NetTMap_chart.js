@@ -14,14 +14,14 @@ function NetTMap_chart(id, width, height) {
     // vytvori zalozky
     function create_tab() {
         tabs = d3.select("#" + id).append("ul").attr("class", "nav nav-tabs");
-        tabs.append("li").attr("class", "active").append("a").attr("data-toggle", "tab").attr("href", "#traffic_chart").text("Traffic");
-        tabs.append("li").append("a").attr("data-toggle", "tab").attr("href", "#profile_live").text("Profile live");
-        tabs.append("li").append("a").attr("data-toggle", "tab").attr("href", "#device_info").text("Device info");
+        tabs.append("li").attr("id", "device_info_tab").attr("class", "active").append("a").attr("data-toggle", "tab").attr("href", "#device_info").text("Device info");
+        tabs.append("li").attr("id", "traffic_chart_tab").append("a").attr("data-toggle", "tab").attr("href", "#traffic_chart").text("Traffic");
+        tabs.append("li").attr("id", "profile_live_tab").append("a").attr("data-toggle", "tab").attr("href", "#profile_live").text("Profile live");
         // mozna by slo pridat interface, profiles
 
         contents = d3.select("#" + id).append("div").attr("class", "tab-content");
-        contents.append("div").attr("id", "traffic_chart").attr("class", "tab-pane fade in active").append("p").attr("id", "traffic_chart_content").text("Loading ...");
-        contents.append("div").attr("id", "device_info").attr("class", "tab-pane fade").append("p").attr("id", "device_info_content").text("Loading ...");
+        contents.append("div").attr("id", "device_info").attr("class", "tab-pane fade in active").append("p").attr("id", "device_info_content").text("Loading ...");
+        contents.append("div").attr("id", "traffic_chart").attr("class", "tab-pane fade").append("p").attr("id", "traffic_chart_content").text("Loading ...");
         contents.append("div").attr("id", "profile_live").attr("class", "tab-pane fade").append("p").attr("id", "profile_live_content").text("Loading ...");
     }
 
@@ -58,7 +58,7 @@ function NetTMap_chart(id, width, height) {
         if (current_type == "N") {
             if (nodes[current_item_index].type_node == "R")
                 show_router_info();
-            else
+            else {
                 current_node_index = current_item_index;
                 if ((nodes[current_item_index].token != "") && (nodes[current_item_index].token != null)) {
                     get_data_profile();
@@ -67,6 +67,7 @@ function NetTMap_chart(id, width, height) {
                 }
                 else
                     get_token();
+            }
         }
         else if (current_type == "L") { // jedna se o linku
             if (links[current_item_index].node == "") // jedna se o linku mezi routery
@@ -76,6 +77,7 @@ function NetTMap_chart(id, width, height) {
                     if (nodes[count].name == links[current_item_index].node) {
                         current_address = nodes[count].address;
                         if ((nodes[count].token != "") && (nodes[count].token != null)) {
+                            current_node_index = count;
                             get_data_profile();
                             get_data_sensor();
                             get_data_traffic();
@@ -124,10 +126,10 @@ function NetTMap_chart(id, width, height) {
                 d3.selectAll("#traffic_chart_content").remove();
                 d3.selectAll("#device_info_content").remove();
                 d3.selectAll("#profile_live_content").remove();
-                d3.select('#traffic_chart').append("p").attr("id", "traffic_chart_content").text('Chyba: Z adresy "' + host + '" nelze ziskat pristupovy token.');
-                d3.select('#device_info').append("p").attr("id", "device_info_content").text('Chyba: Z adresy "' + host + '" nelze ziskat pristupovy token.');
-                d3.select('#profile_live').append("p").attr("id", "profile_live_content").text('Chyba: Z adresy "' + host + '" nelze ziskat pristupovy token.');
-                alert('Chyba: Z adresy "' + host + '" nelze ziskat pristupovy token.');
+                d3.select('#traffic_chart').append("p").attr("id", "traffic_chart_content").text("Error: From address '" + host + "' can't get access token.");
+                d3.select('#device_info').append("p").attr("id", "device_info_content").text("Error: From address '" + host + "' can't get access token.");
+                d3.select('#profile_live').append("p").attr("id", "profile_live_content").text("Error: From address '" + host + "' can't get access token.");
+                alert("Error: From address '" + host + "' can't get access token.");
             },
         });
     }
@@ -173,7 +175,7 @@ function NetTMap_chart(id, width, height) {
                     "profile": "live",// nazev profilu - geoJson
                     "chart": {
                         "measure": "traffic",
-                        "protocol": 1
+                        "protocol": 0
                     }
                 })
             },
@@ -241,13 +243,58 @@ function NetTMap_chart(id, width, height) {
     }
 
     function show_router_info() {
-        d3.selectAll('#device_info_content').remove();
-        var output = d3.select("#device_info").append("p").text("Zd se budou zobrazovat informace o routeru");
+        d3.selectAll("#traffic_chart_content").remove();
+        var info_table = d3.selectAll("#traffic_chart").append("p").attr("id", "traffic_chart_content").text("No data traffic");
+
+        d3.selectAll("#profile_live_content").remove();
+        info_table = d3.selectAll("#profile_live").append("p").attr("id", "profile_live_content").text("No data for profile live");
+
+        d3.selectAll("#device_info_content").remove();
+        info_table = d3.selectAll("#device_info").append("table").attr("id", "device_info_content").attr("class", "table borderless");
+
+        var row = info_table.append("tr");
+        row.append("td").text("Router name: ");
+        row.append("td").text(nodes[current_item_index].name);
+
+        row = info_table.append("tr");
+        row.append("td").text("Description: ");
+        row.append("td").text(nodes[current_item_index].description);
+
+        row = info_table.append("tr");
+        row.append("td").text("Longitude: ");
+        row.append("td").text(nodes[current_item_index].long);
+
+        row = info_table.append("tr");
+        row.append("td").text("Latitude: ");
+        row.append("td").text(nodes[current_item_index].lat);
     }
 
     function show_link_info() {
+        d3.selectAll("#traffic_chart_content").remove();
+        var info_table = d3.selectAll("#traffic_chart").append("p").attr("id", "traffic_chart_content").text("No data traffic");
+
+        d3.selectAll("#profile_live_content").remove();
+        var info_table = d3.selectAll("#profile_live").append("p").attr("id", "profile_live_content").text("No data for profile live");
+
         d3.selectAll("#device_info_content").remove();
-        var output = d3.select("#device_info").append("p").text("Zd se budou zobrazovat informace o lince");
+        var info_table = d3.selectAll("#device_info").append("table").attr("id", "device_info_content").attr("class", "table borderless");
+
+        var row = info_table.append("tr");
+        row.append("td").text("Link name: ");
+        row.append("td").text(links[current_item_index].name);
+
+        row = info_table.append("tr");
+        row.append("td").text("Speed: ");
+        row.append("td").text(links[current_item_index].speed);
+
+        row = info_table.append("tr");
+        row.append("td").text("Source: ");
+        row.append("td").text(links[current_item_index].source);
+
+        row = info_table.append("tr");
+        row.append("td").text("Target: ");
+        row.append("td").text(links[current_item_index].targer);
+
     }
 
     function formatSizeUnits(bytes) {
@@ -344,7 +391,7 @@ function NetTMap_chart(id, width, height) {
             var y_data = [];
             for (var count = 0; count < data[count_result].values.length; count++) {
                 x_data.push(data[count_result].values[count][0]);
-                y_data.push(data[count_result].values[count][1]);
+                y_data.push((data[count_result].values[count][1] / 1000000).toFixed(2));
             }
 
             var margin = { top: 40, right: 40, bottom: 40, left: 60 },
@@ -362,11 +409,12 @@ function NetTMap_chart(id, width, height) {
             // osa x
             var xAxis = d3.svg.axis()
                             .scale(x)
-                            .ticks(8)
+                            .ticks(6)
                             .orient("bottom");
             // osa y
             var yAxis = d3.svg.axis()
                             .scale(y)
+                            .ticks(4)
                             .orient("left");
 
             traffic_charts_content = d3.select('#traffic_chart')

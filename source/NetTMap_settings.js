@@ -87,18 +87,18 @@ function geoSetting() {
         table_form = div_form.append("form").attr("id", "node_form").append("table").style("width", "45%");
         table_form.style("float", "left").attr("id", "input_form_node").style("margin-right", "1cm");
         // 0.radek - nadpis
-        table_form.append("tr").append("h3").text("Uzel");
+        table_form.append("tr").append("h3").text("Node");
 
         // 1.radek - nazev
-        table_form.append("tr").append("td").attr("align", "right").append("p").text("Nazev: ")
+        table_form.append("tr").append("td").attr("align", "right").append("p").text("Name: ")
                   .append("input").attr("id", "name_node").attr("name", "name_node").attr("type", 'text');
 
         // 2.radek - zemepisna delka
-        table_form.append("tr").append("td").attr("align", "right").append("p").text("Zem. delka: ")
+        table_form.append("tr").append("td").attr("align", "right").append("p").text("Longitude: ")
                   .append("input").attr("id", "longitude").attr("name", "longitude").attr("type", 'text');
 
         // 3.radek - zemepisna sirka
-        table_form.append("tr").append("td").attr("align", "right").append("p").text("Zem. sirka: ")
+        table_form.append("tr").append("td").attr("align", "right").append("p").text("Latitude: ")
                   .append("input").attr("id", "latitude").attr("name", "latitude").attr("type", 'text');
 
         // 4.radek - typ uzlu = sonda / router
@@ -114,12 +114,12 @@ function geoSetting() {
         */
 
         // 6.radek - popis
-        table_form.append("tr").append("td").attr("align", "right").append("p").text("Popis: ")
+        table_form.append("tr").append("td").attr("align", "right").append("p").text("Description: ")
           .append("input").attr("id", "description_node").attr("name", "description_node").attr("type", 'text');
 
         // 7.radek - tlacitko
         table_form.append("tr").append("td").attr("align", "right")
-                  .append("input").attr("type", "submit").attr("value", "Vlozit uzel").attr("class", "btn-primary");
+                  .append("input").attr("type", "submit").attr("value", "Insert node").attr("class", "btn-primary");
                   //.attr("onclick", "NetTMap_setting.getInstance().add_node(this);");
 
         // -------------------------------------------------------------------------------------------------------------------
@@ -127,14 +127,14 @@ function geoSetting() {
         table_form = div_form.append("form").attr("id", "link_form").append("table").style("width", "45%")
         table_form.attr("id", "input_form_link");
         // 0.radek - nadpis
-        table_form.append("tr").append("h3").text("Linka");
+        table_form.append("tr").append("h3").text("Link");
 
         // 1.radek - nazev
-        table_form.append("tr").append("td").attr("align", "right").append("p").text("Nazev: ")
+        table_form.append("tr").append("td").attr("align", "right").append("p").text("Name: ")
           .append("input").attr("id", "name_link").attr("name", "name_link").attr("type", 'text');
 
         // 2.radek - zdrojovy uzel
-        table_form.append("tr").append("td").attr("align", "right").append("p").text("Zdroj: ")
+        table_form.append("tr").append("td").attr("align", "right").append("p").text("Source: ")
                   .append("select").attr("id", "source_node").attr("name", "source_node");
 
         // 3.radek - zdrojovy port
@@ -143,11 +143,11 @@ function geoSetting() {
           .append("input").attr("id", "source_port").attr("name", "source_port").attr("type", 'text');
         */
         // 4 radek - cilovy uzel
-        table_form.append("tr").append("td").attr("align", "right").append("p").text("Cil: ")
+        table_form.append("tr").append("td").attr("align", "right").append("p").text("Target: ")
                   .append("select").attr("id", "target_node").attr("name", "target_node");
 
         // 5.radek - rychlost linky
-        table_form.append("tr").append("td").attr("align", "right").append("p").text("Rychlost: ")
+        table_form.append("tr").append("td").attr("align", "right").append("p").text("Speed: ")
                   .append("select").attr("id", "speed_link").attr("name", "speed_link");
         speed_select = d3.select("#speed_link");
         speed_select.append("option").attr("value", "").text("");
@@ -163,7 +163,7 @@ function geoSetting() {
 
         // 7.radek 
         table_form.append("tr").append("td").attr("align", "right")
-                  .append("input").attr("type", "submit").attr("value", "Vlozit linku").attr("class", "btn-primary");
+                  .append("input").attr("type", "submit").attr("value", "Insert link").attr("class", "btn-primary");
                   //.attr("onclick", "NetTMap_setting.getInstance().add_link();");
 
         d3.select('#' + id).append("hr");
@@ -171,7 +171,7 @@ function geoSetting() {
 
         // -------------------------------------------------------------------------------------------------------------------
         // tabulka pro zobrazeni uzlu
-        tables.append("h3").text("Uzly");
+        tables.append("h3").text("Nodes");
         title = tables
             .append("table")
             .attr("class", "table table-hover")
@@ -181,19 +181,19 @@ function geoSetting() {
             .attr("border", "1")
             .attr("width", $("#input_form_node").width());
         table_head = title.append("thead").append("tr");
-        table_head.append("th").text("Nazev");
-        table_head.append("th").text("Zem. delka");
-        table_head.append("th").text("Zem. sirka");
-        table_head.append("th").text("Typ");
-        table_head.append("th").text("Adresa");
-        //table_head.append("td").text("Popis");
-        table_head.append("th").text("Smazat");
+        table_head.append("th").text("Name");
+        table_head.append("th").text("Longitude");
+        table_head.append("th").text("Latitude");
+        table_head.append("th").text("Type");
+        table_head.append("th").text("Address");
+        //table_head.append("td").text("Description");
+        table_head.append("th").text("Delete");
 
         update_table_node();
 
         // -------------------------------------------------------------------------------------------------------------------
         // tabulka pro zobrazeni linek
-        tables.append("h3").text("Linky");
+        tables.append("h3").text("Links");
         title_link = tables
              .append("table")
              .attr("class", "table table-hover")
@@ -201,14 +201,14 @@ function geoSetting() {
              .attr("border", "1")
              .attr("width", $("#input_form_link").width());
         table_head = title_link.append("thead").append("tr");
-        table_head.append("th").text("Nazev");
-        table_head.append("th").text("Rychlost");
-        table_head.append("th").text("Zdrojovy uzel");
-        table_head.append("th").text("Zdrojovy port");
-        table_head.append("th").text("Cilovy uzel");
-        table_head.append("th").text("Cilovy port");
-        table_head.append("th").text("Smazat");
-        table_head.append("th").text("Sonda");
+        table_head.append("th").text("Name");
+        table_head.append("th").text("Speed");
+        table_head.append("th").text("Source node");
+        table_head.append("th").text("Source channel");
+        table_head.append("th").text("Target node");
+        table_head.append("th").text("Target channel");
+        table_head.append("th").text("Delete");
+        table_head.append("th").text("NetFlow probe");
 
         update_table_link();
 
@@ -216,7 +216,7 @@ function geoSetting() {
         // tlacitko pro vytvoreni exportu
         d3.select('#' + id).append("hr");
         d3.select('#' + id).append("div").attr("id", "button_block")
-             .append("input").attr("type", "submit").attr("value", "Vytvor soubor").attr("class", "btn-success")
+             .append("input").attr("type", "submit").attr("value", "Create geoJson file").attr("class", "btn-success")
              .attr("onclick", "NetTMap_setting.getInstance().create_geojson_file();");
         set_validate_rules();
 
@@ -231,38 +231,38 @@ function geoSetting() {
 
         // 1.radek - nazev, listbox s existujicima sondama
         tr1 = table_form.append("tr");
-        tr1.append("td").attr("align", "right").append("p").text("Nazev: ")
+        tr1.append("td").attr("align", "right").append("p").text("Name: ")
                   .append("input").attr("id", "sensor_name").attr("name", "sensor_name").attr("type", 'text');
-        tr1.append("td").attr("align", "right").append("p").text("Sonda: ")
+        tr1.append("td").attr("align", "right").append("p").text("NetFlow probe: ")
           .append("select").attr("id", "sensor_node").attr("name", "sensor_node").attr("onchange", "NetTMap_setting.getInstance().prepopulation_list_sensor();");
 
         // 2. radek - popis, adresa
         tr1 = table_form.append("tr");
-        tr1.append("td").attr("align", "right").append("p").text("Popis: ")
+        tr1.append("td").attr("align", "right").append("p").text("Description: ")
                   .append("input").attr("id", "description").attr("name", "description").attr("type", 'text');
-        tr1.append("td").attr("align", "right").append("p").text("Adresa: ")
+        tr1.append("td").attr("align", "right").append("p").text("Address: ")
                   .append("input").attr("id", "address").attr("name", "address").attr("type", 'text');
 
         // 3.radek - zemepisna delka, sirka
         tr1 = table_form.append("tr");
-        tr1.append("td").attr("align", "right").append("p").text("Zem. delka: ")
+        tr1.append("td").attr("align", "right").append("p").text("Longitude: ")
                   .append("input").attr("id", "longitude").attr("name", "longitude").attr("type", 'text');
-        tr1.append("td").attr("align", "right").append("p").text("Zem. sirka: ")
+        tr1.append("td").attr("align", "right").append("p").text("Latitude: ")
                   .append("input").attr("id", "latitude").attr("name", "latitude").attr("type", 'text');
 
         // 4.radek - zdrojovy uzel, cilovy uzel
         tr1 = table_form.append("tr");
-        tr1.append("td").attr("align", "right").append("p").text("Zdrojovy uzel: ")
+        tr1.append("td").attr("align", "right").append("p").text("Source node: ")
                   .append("input").attr("id", "source_node").attr("name", "source_node").attr("type", 'text');
-        tr1.append("td").attr("align", "right").append("p").text("Cilovy uzel: ")
+        tr1.append("td").attr("align", "right").append("p").text("Target node: ")
           .append("input").attr("id", "target_node").attr("name", "target_node").attr("type", 'text');
 
 
         // 5.radek - zdrojovy port, cilovy port
         tr1 = table_form.append("tr");
-        tr1.append("td").attr("align", "right").append("p").text("Zdrojovy port: ")
+        tr1.append("td").attr("align", "right").append("p").text("Source channel: ")
                   .append("input").attr("id", "source_port").attr("name", "source_port").attr("type", 'text');
-        tr1.append("td").attr("align", "right").append("p").text("Cilovy port: ")
+        tr1.append("td").attr("align", "right").append("p").text("Target channel: ")
                   .append("input").attr("id", "target_port").attr("name", "target_port").attr("type", 'text');
 
         // 6.radek - HW sondy
@@ -277,7 +277,7 @@ function geoSetting() {
         tr1 = table_form.append("tr");
         tr1.append("td");
         tr1.append("td").attr("align", "right")
-                  .append("input").attr("type", "submit").attr("value", "Vlozit senzor").attr("class", "btn-primary")
+                  .append("input").attr("type", "submit").attr("value", "Insert NetFlow probe").attr("class", "btn-primary")
                   .attr("onclick", "NetTMap_setting.getInstance().add_sensor();");
 
         load_local_variable();
@@ -313,18 +313,18 @@ function geoSetting() {
                 target_port: "required"
             },
             messages: {
-                sensor_name: "Vlozte nazev",
-                address: "Vlozte adresu sondy",
+                sensor_name: "Insert name",
+                address: "Insert probe's address ",
                 latitude: {
-                    required: "Vlozte zemepisnou sirku",
-                    number: "Hodnota musi byt ciselna"
+                    required: "Insert latitude",
+                    number: "Value must be number"
                 },
                 longitude: {
-                    required: "Vlozte zemepisnou delku",
-                    number: "Hodnota musi byt ciselna"
+                    required: "Insert longitude",
+                    number: "Value must be number"
                 },
-                source_port: "Vlozte nazev pro linku ve smeru ke zdrojovemu uzlu",
-                target_port: "Vlozte nazev pro linku ve smeru k cilovemu uzlu"
+                source_port: "Insert name of link for way from source node to NetFlow probe",
+                target_port: "Insert name of link for way from target node to NetFlow probe"
             },
             submitHandler: function (form) {
                 // do other things for a valid form
@@ -354,7 +354,7 @@ function geoSetting() {
             rules: {
                 name_node: "required",
                 //type_node: "required",
-                address_node: "required",
+                //address_node: "required",
                 latitude: {
                     required: true,
                     number: true
@@ -365,16 +365,16 @@ function geoSetting() {
                 }
             },
             messages: {
-                name_node: "Vlozte nazev",
-                type_node: "Vyberte typ uzlu",
-                //address_node: "Vlozte adresu uzlu",
+                name_node: "Insert name",
+                //type_node: "Vyberte typ uzlu",
+                //address_node: "Insert address",
                 latitude: {
-                    required: "Vlozte zemepisnou sirku",
-                    number: "Hodnota musi byt ciselna"
+                    required: "Insert latitude",
+                    number: "Value must be number"
                 },
                 longitude: {
-                    required: "Vlozte zemepisnou delku",
-                    number: "Hodnota musi byt ciselna"
+                    required: "Insert longitude",
+                    number: "Value must be number"
                 }
             },
             submitHandler: function (form) {
@@ -390,16 +390,16 @@ function geoSetting() {
                 //target_port: "required",
                 source_node: "required",
                 //source_port: "required",
-                name_link: "required",
+                //name_link: "required",
                 speed_link: "required"
             },
             messages: {
-                target_node: "Vyberte cil",
+                target_node: "Select a target node",
                 //target_port: "Vyberte cilovy port",
-                source_node: "Vyberte zdroj",
+                source_node: "Select a source node",
                 //source_port: "Vyberte zdrojovy port",
-                name_link: "Zadejte nazev linky",
-                speed_link: "Zadejte rychlost linky"
+                //name_link: "Zadejte nazev linky",
+                speed_link: "Select a speed of link"
             },
             submitHandler: function (form) {
                 // do other things for a valid form
@@ -765,21 +765,12 @@ function geoSetting() {
 
                 var sensor_coordinates = '[' + nodes[sensor_index].long + ', ' + nodes[sensor_index].lat + ' ]';
 
-                // vytvorim 4 linky - 2 pro jeden smer, 2 pro druhy smer
+                // vytvorim 2 linky
                 curr_node = '{ "geometry": { "type": "LineString", "coordinates": [ ' + source_coordinates + ', ' + sensor_coordinates + ' ]},';
                 curr_node += '"properties": { "source": "' + links[count].source
                             + '", "target": "' + nodes[sensor_index].name
-                            + '", "channel": "' + links[count].source_port
-                            + '", "speed": "' + links[count].speed
-                            + '", "node": "' + links[count].node
-                            + '", "name": "' + links[count].name + '"},';
-                curr_node += '"type": "Feature" },';
-                content += curr_node;
-
-                curr_node = '{ "geometry": { "type": "LineString", "coordinates": [ ' + source_coordinates + ', ' + sensor_coordinates + ' ]},';
-                curr_node += '"properties": { "source": "' + links[count].source
-                            + '", "target": "' + nodes[sensor_index].name
-                            + '", "channel": "' + links[count].target_port
+                            + '", "channel1": "' + links[count].source_port
+                            + '", "channel2": "' + links[count].target_port
                             + '", "speed": "' + links[count].speed
                             + '", "node": "' + links[count].node
                             + '", "name": "' + links[count].name + '"},';
@@ -789,17 +780,8 @@ function geoSetting() {
                 curr_node = '{ "geometry": { "type": "LineString", "coordinates": [ ' + sensor_coordinates + ', ' + dest_coordinates + ' ]},';
                 curr_node += '"properties": { "source": "' + nodes[sensor_index].name
                             + '", "target": "' + links[count].target
-                            + '", "channel": "' + links[count].source_port
-                            + '", "speed": "' + links[count].speed
-                            + '", "node": "' + links[count].node
-                            + '", "name": "' + links[count].name + '"},';
-                curr_node += '"type": "Feature" },';
-                content += curr_node;
-
-                curr_node = '{ "geometry": { "type": "LineString", "coordinates": [ ' + sensor_coordinates + ', ' + dest_coordinates + ' ]},';
-                curr_node += '"properties": { "source": "' + nodes[sensor_index].name
-                            + '", "target": "' + links[count].target
-                            + '", "channel": "' + links[count].target_port
+                            + '", "channel1": "' + links[count].target_port
+                            + '", "channel2": "' + links[count].source_port
                             + '", "speed": "' + links[count].speed
                             + '", "node": "' + links[count].node
                             + '", "name": "' + links[count].name + '"},';
@@ -811,7 +793,8 @@ function geoSetting() {
                 curr_node = '{ "geometry": { "type": "LineString", "coordinates": [ ' + source_coordinates + ', ' + dest_coordinates + ' ]},';
                 curr_node += '"properties": { "source": "' + links[count].source
                             + '", "target": "' + links[count].target
-                            + '", "channel": "' + links[count].source_port
+                            + '", "channel1": "' + links[count].source_port
+                            + '", "channel2": "' + links[count].target_port
                             + '", "speed": "' + links[count].speed
                             + '", "node": "'
                             + '", "name": "' + links[count].name + '"},';

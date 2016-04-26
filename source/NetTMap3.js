@@ -28,6 +28,7 @@ function NetTMap() {
     var input_form;                         // hlavicka stranky - zobrazuje se nad grafem
     var color_spectrum_block;               // paticka stranky - zobrazuje se pod grafem
     var color_spectrum_scale;               // barevna skala pro zobrazeni vytizeni linky
+    var stroke_width_scale;
     var nodes = [];                         // pole vsech nactenych uzlu
     var links = [];                         // pole vsech nactenych linek
     var current_type;                       // urcuje typ zobrazovanych dat v popup ('L' = linka, 'N' = uzel)
@@ -38,10 +39,10 @@ function NetTMap() {
     var type_visual_data;                   // uchovava typ zobrazeneho grafu ('map' = leaflet mapa, 'graph' = d3 graf)
 
     var zoom;                               // urcuje uroven zoom na mape
-// ------------------------------------------------------------------------------------------------------------
+    // ------------------------------------------------------------------------------------------------------------
     // verejne funkce
     this.initialize = init_graph;
-    
+
     // inicializuje box pro zobrazeni grafu / mapy
     function init_graph(i, w, h, type) {
         init_local_variables();
@@ -49,7 +50,8 @@ function NetTMap() {
         width = w;
         height = h;
         //color_spectrum_scale = d3.scale.log().domain([0.1, 100]).range(["green", "red"]);
-        color_spectrum_scale = d3.scale.linear().domain([0.1, 100]).range(["green", "red"]);
+        color_spectrum_scale = d3.scale.linear().domain([0, 100]).range(["green", "red"]);
+        //stroke_width_scale = d3.scale.linear().domain([0, 100]).range([2, 10]);
 
         if (main_block != null) main_block.remove();
         if (color_spectrum_block != null) color_spectrum_block.remove();
@@ -73,7 +75,7 @@ function NetTMap() {
         }
     }
 
-// ------------------------------------------------------------------------------------------------------------
+    // ------------------------------------------------------------------------------------------------------------
     // globalni funkce v ramci modulu
 
     // vlozi do stranky formular pro vlozeni souboru s geoJson obsahem
@@ -155,11 +157,7 @@ function NetTMap() {
     function update_last_time_update(time) {
         console.log(new Date(time));
         var curr_time = new Date(time);
-        d3.select('#last_refresh_time_label').text("Last refresh: "
-                    + ((curr_time.getHours() < 10) ? '0' + curr_time.getHours() : curr_time.getHours())
-                    + ':'
-                    + ((curr_time.getMinutes() < 10) ? '0' + curr_time.getMinutes() : curr_time.getMinutes())
-                    + ':' + curr_time.getSeconds());
+        d3.select('#last_refresh_time_label').text("Last refresh: " + curr_time.getHours() + ':' + curr_time.getMinutes() + ':' + curr_time.getSeconds());
     }
     // nacteni GEOJSON
     function readSingleFile(e) {
@@ -271,7 +269,7 @@ function NetTMap() {
                     "profile": "live",// nazev profilu - geoJson
                     "chart": {
                         "measure": "traffic",
-                        "protocol": 0
+                        "protocol": 1
                     }
                 })
             },
@@ -306,12 +304,14 @@ function NetTMap() {
         result = (links[link_index].speed) / data;
         console.log('result: ' + result * 100);
 
-        d3.select("#link_" + link_index).attr("stroke", color_spectrum_scale(result * 100))
+        d3.select("#link_" + link_index).attr("stroke", color_spectrum_scale(result * 100));
+        //d3.select("#link_" + link_index).attr("stroke", "red");
+        d3.select("#link_" + link_index).attr("opacity", result * 100);
     }
 
-// ------------------------------------------------------------------------------------------------------------
+    // ------------------------------------------------------------------------------------------------------------
     // funkce pro zobrazeni grafu = NetTMap GRAPH
-    
+
     // vytvori graf
     function new_graph(data) {
         force = d3.layout.force()
@@ -520,7 +520,7 @@ function NetTMap() {
         }
     }
 
-// ------------------------------------------------------------------------------------------------------------
+    // ------------------------------------------------------------------------------------------------------------
     // funkce pro zobrazeni mapy = NetTMap MAP
 
     // vytvori mapu
@@ -538,7 +538,7 @@ function NetTMap() {
         var y_data = [];
 
         // rozdeleni geoJson linek a uzlu
-        var nodes_feature = []; 
+        var nodes_feature = [];
         var links_feature = [];
         nodes = [];
         links = [];
@@ -614,7 +614,7 @@ function NetTMap() {
                 layer._icon.title = layer.feature.properties.name;
             }
         });
-       
+
         save_local_variable();
         load_global_setting();
 
@@ -739,7 +739,7 @@ function NetTMap() {
         */
     }
 
-// ------------------------------------------------------------------------------------------------------------
+    // ------------------------------------------------------------------------------------------------------------
 
     // vykresleni vzorniku pro rychlost
     function add_color_spectrum() {

@@ -1,0 +1,53 @@
+﻿<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js" /> </script>
+    <title>REST API</title>
+    <script>
+        $(document).ready(function() { 
+            var host = "collector-devel.ics.muni.cz";//"147.251.14.50";////"192.168.51.145";// collector-devel.ics.muni.cz
+            $.ajax({
+                type: "POST",
+                url: "https://" + host + "/resources/oAuth/token",
+                contentType: "application/x-www-form-urlencoded",
+                data: {
+                    "username": "rest",// UCO
+                    "password": "r3st&ful",// sekundarni heslo
+                    "client_id": "invea-tech",
+                    "grant_type": "password"
+                },
+
+                success: function(msg) { 
+                    token = msg.access_token; getResults(msg.access_token);
+                    alert("Mam token: "+msg.access_token);
+                }, 
+                
+                error: function(a, b, err) { console.log(err ); },
+            });
+            function getResults(t) { 
+                $.ajax({ type: "GET", 
+                    url: "https://"+host+"/rest/fmc/analysis/chart", 
+                    headers: { "Authorization" : "bearer "+t },
+                    data: {
+                        search: JSON.stringify({
+                            "from": "2016-04-24 22:13",
+                            "to": "2016-04-24 22:20",
+                            "profile": "live",// nazev profilu - geoJson
+                            "chart": {
+                                "measure": "traffic",
+                                "protocol": 1
+                            }
+                        })
+                    },
+                    //data: { id: "live" },
+                    success: function (msg) {
+                        $("body").html(JSON.stringify(msg));
+                    },
+                    error: function (a, b, err) { console.log(err); },
+                });
+                }
+        });
+    </script>
+</head>
+<body>
+</body>
+</html>
