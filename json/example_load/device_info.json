@@ -1,0 +1,48 @@
+{
+  "deviceInfo": {
+    "deviceName": "collector-devel.ics.muni.cz",
+    "onlineTime": 72,
+    "disks": [
+      {
+        "name": "/dev/sda",
+        "isSmart": 1,
+        "smartError": 0
+      }
+    ]
+  },
+  "cpuLoad": {
+    "avg1Min": "1.47",
+    "avg5Min": "1.37",
+    "avg15Min": "1.26"
+  },
+  "ramUsage": {
+    "total": 15792,
+    "used": 13311
+  },
+  "systemDiskUsage": {
+    "total": 5165645824,
+    "used": 4550070272
+  },
+  "bootDiskUsage": {
+    "total": 253869056,
+    "used": 146995200
+  },
+  "dataDiskUsage": {
+    "total": 978047496192,
+    "used": 678564622336,
+    "consumers": [
+      {
+        "name": "Monitoring center",
+        "used": 453885661184
+      },
+      {
+        "name": "Plugins",
+        "used": 0
+      },
+      {
+        "name": "Others",
+        "used": 224678961152
+      }
+    ]
+  }
+}

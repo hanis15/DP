@@ -1,0 +1,137 @@
+﻿{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "geometry": {
+        "type": "Point",
+        "coordinates": [ 16.612972, 49.196153 ]
+      },
+      "properties": {
+        "name": "Brno",
+        "type_node": "R",
+        "description": "Brnensky uzel",
+        "hw": "",
+        "address": ""
+      },
+      "type": "Feature"
+    },
+    {
+      "geometry": {
+        "type": "Point",
+        "coordinates": [ 18.266226, 49.820100 ]
+      },
+      "properties": {
+        "name": "Ostrava",
+        "type_node": "R",
+        "description": "Ostravsky uzel",
+        "hw": "",
+        "address": ""
+      },
+      "type": "Feature"
+    },
+    {
+      "geometry": {
+        "type": "Point",
+        "coordinates": [ 14.420251, 50.087442 ]
+      },
+      "properties": {
+        "name": "Praha",
+        "type_node": "R",
+        "description": "Prazsky uzel",
+        "hw": "",
+        "address": ""
+      },
+      "type": "Feature"
+    },
+    {
+      "geometry": {
+        "type": "Point",
+        "coordinates": [ 15.495666, 49.013079 ]
+      },
+      "properties": {
+        "name": "Voyager 1",
+        "type_node": "S",
+        "description": "Prvni sonda nahore",
+        "hw": "IFP-40000PRO-SFP+",
+        "address": "collector-devel.ics.muni.cz"
+      },
+      "type": "Feature"
+    },
+    {
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [ 18.266226, 49.820100 ],
+          [ 16.612972, 49.196153 ]
+        ]
+      },
+      "properties": {
+        "source": "Ostrava",
+        "target": "Brno",
+        "channel1": "",
+        "channel2": "",
+        "speed": "40000",
+        "node": "",
+        "name": "Ostrava <=> Brno"
+      },
+      "type": "Feature"
+    },
+    {
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [ 16.612972, 49.196153 ],
+          [ 15.495666, 49.013079 ]
+        ]
+      },
+      "properties": {
+        "source": "Brno",
+        "target": "Voyager 1",
+        "channel1": "127.0.0.1 (collector-devel.ics.muni.cz)",
+        "channel2": "147.251.14.44",
+        "speed": "1000",
+        "node": "Voyager 1",
+        "name": "Brno_Praha"
+      },
+      "type": "Feature"
+    },
+    {
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [ 15.495666, 49.013079 ],
+          [ 14.420251, 50.087442 ]
+        ]
+      },
+      "properties": {
+        "source": "Voyager 1",
+        "target": "Praha",
+        "channel2": "127.0.0.1 (collector-devel.ics.muni.cz)",
+        "channel1": "147.251.14.44",
+        "speed": "1000",
+        "node": "Voyager 1",
+        "name": "Brno_Praha"
+      },
+      "type": "Feature"
+    },
+    {
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [ 18.266226, 49.820100 ],
+          [ 14.420251, 50.087442 ]
+        ]
+      },
+      "properties": {
+        "source": "Ostrava",
+        "target": "Praha",
+        "channel1": "",
+        "channel2": "",
+        "speed": "100000",
+        "node": "",
+        "name": "Praha - Ostrava"
+      },
+      "type": "Feature"
+    }
+  ]
+}

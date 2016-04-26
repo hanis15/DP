@@ -1,0 +1,46 @@
+[
+  {
+    "id": "eth0",
+    "type": 1,
+    "linkDetected": 1,
+    "mac": "00:1E:67:14:EC:3C",
+    "ip": "147.251.14.50",
+    "speed": 1000,
+    "rxBytes": 1440510854924,
+    "txBytes": 532705639398,
+    "mtu": 1500
+  },
+  {
+    "id": "eth1",
+    "type": 3,
+    "linkDetected": 0,
+    "mac": "00:1E:67:14:EC:3D",
+    "ip": "",
+    "speed": 0,
+    "rxBytes": 0,
+    "txBytes": 0,
+    "mtu": 1500
+  },
+  {
+    "id": "eth2",
+    "type": 2,
+    "linkDetected": 1,
+    "mac": "00:15:17:73:02:D2",
+    "ip": "",
+    "speed": 1000,
+    "rxBytes": 140,
+    "txBytes": 0,
+    "mtu": 1500
+  },
+  {
+    "id": "eth3",
+    "type": 2,
+    "linkDetected": 1,
+    "mac": "00:15:17:73:02:D3",
+    "ip": "",
+    "speed": 1000,
+    "rxBytes": 683541804167,
+    "txBytes": 0,
+    "mtu": 1500
+  }
+]
