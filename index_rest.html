@@ -4,18 +4,17 @@
     <title>REST API</title>
     <script>
         $(document).ready(function() { 
-            var host = "collector-devel.ics.muni.cz";//"147.251.14.50";////"192.168.51.145";// collector-devel.ics.muni.cz
+            var host = "flowmon-cps-cesnet.mgmt.ics.muni.cz";//"collector-devel.ics.muni.cz";//"147.251.14.50";////"192.168.51.145";// collector-devel.ics.muni.cz
             $.ajax({
                 type: "POST",
                 url: "https://" + host + "/resources/oAuth/token",
                 contentType: "application/x-www-form-urlencoded",
                 data: {
-                    "username": "rest",// UCO
-                    "password": "r3st&ful",// sekundarni heslo
+                    "username": "nettmap",// UCO - rest
+                    "password": "N3tTM4p&h3sl0",// sekundarni heslo - r3st&ful
                     "client_id": "invea-tech",
                     "grant_type": "password"
                 },
-
                 success: function(msg) { 
                     token = msg.access_token; getResults(msg.access_token);
                     alert("Mam token: "+msg.access_token);
@@ -25,16 +24,17 @@
             });
             function getResults(t) { 
                 $.ajax({ type: "GET", 
-                    url: "https://"+host+"/rest/fmc/analysis/chart", 
+                    //url: "https://"+host+"/rest/fmc/profiles/id", 
+                    url: "https://" + host + "/rest/fmc/analysis/chart",
                     headers: { "Authorization" : "bearer "+t },
                     data: {
                         search: JSON.stringify({
-                            "from": "2016-04-24 22:13",
-                            "to": "2016-04-24 22:20",
+                            "from": "2016-04-29 12:13",
+                            "to": "2016-04-29 12:20",
                             "profile": "live",// nazev profilu - geoJson
                             "chart": {
                                 "measure": "traffic",
-                                "protocol": 1
+                                "protocol": 0
                             }
                         })
                     },

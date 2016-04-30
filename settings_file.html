@@ -51,15 +51,23 @@
 
         <!-- Obsah stranky -->
         <div class="container">
-            <h1>Settings</h1>
-            <div id="my_setting"></div>
+            <h1>Configure file</h1>
+            <div id="configure"></div>
             <script>
-                var id = "my_setting";
-                var width = 600;
+                var id = "configure";
+                var width = 800;
                 var height = 600;
 
+                //var geoSetting = NetTMap_setting.getInstance();
                 var map_graph = new NetTMap();
-                map_graph.initialize(id, "setting", width, height);
+                map_graph.initialize(id, "configure", width, height);
+
+
+                function closeQTip() {
+                    $('.qtip').hide();
+                    geoSetting.update();
+                }
+
             </script>
 
         </div>

@@ -5,6 +5,7 @@
     <meta charset="utf-8" />
     <title>NetTMap_v4</title>
     <link href="bootstrap/css/bootstrap.min.css" rel="stylesheet" media="screen">
+    <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
 </head>
 <body>
     <div class="navbar navbar-inverse navbar-fixed-top">
@@ -20,10 +21,16 @@
                 <div class="nav-collapse collapse">
                     <ul class="nav">
                         <li><a href="index.html">Graph</a></li>
-                        <li><a href="index2.html">Graph2</a></li>
-                        <li><a href="index3.html">Graph3</a></li>
+                        <!--<li><a href="index2.html">Graph2</a></li>
+                        <li><a href="index3.html">Graph3</a></li>-->
                         <li><a href="map.html">Map</a></li>
-                        <li><a href="settings.html">Settings</a></li>
+                        <li class="dropdown">
+                            <a class="dropdown-toggle" data-toggle="dropdown" href="settings.html">Settings <span class="fa fa-caret-down"></span> </a>
+                            <ul class="dropdown-menu">
+                                <li><a href="settings_file.html"><i class="fa fa-area-chart fa-fw" aria-hidden="true"></i>&nbsp;Settings topology</a></li>
+                                <li><a href="settings.html"><i class="fa fa-cog fa-fw fa-spin" aria-hidden="true"></i>&nbsp; Settings app</a></li>
+                            </ul>
+                        </li>
                         <li class="active"><a href="about.html">About</a></li>
                     </ul>
                 </div>
