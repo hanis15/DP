@@ -1,13 +1,13 @@
 /* NetTMap library
  * Paremter
  */
-
-var NetTMap = (function () {
+/*
+var NetTMap_graph = (function () {
     var graph_instance;
 
     // vrati instanci konkretniho typu, nebo vytvori novou
     function create() {
-        graph_instance = new NetTMap_module();
+        graph_instance = new mapGraph();
         return graph_instance;
     }
 
@@ -19,8 +19,8 @@ var NetTMap = (function () {
         }
     };
 })();
-
-function NetTMap_module() {
+*/
+function NetTMap() {
     var id;                                 // id elementu v HTML ve kterem se ma graf vykreslit
     var height;                             // vyska elementu
     var width;                              // sirka elementu
@@ -43,34 +43,25 @@ function NetTMap_module() {
     var path_hw_type = 'probe_type.json'; // cesta k souboru s typem hardware sond
 
     var type_visual_data;                   // uchovava typ zobrazeneho grafu ('map' = leaflet mapa, 'graph' = d3 graf, 'setting' = nastaveni zobrazeni)
-    var type_action;                        // udava jake akce se maji provest pro danny dialog ('new', 'edit')
 
     var zoom;                               // urcuje uroven zoom na mape
     var raw_json = '';                      // nezpracovany obsah souboru
 // ------------------------------------------------------------------------------------------------------------
     // verejne funkce
     this.initialize = init_graph;
-    this.save_router = save_router;
-    this.prepare_router_form = prepare_router;
-
-    this.save_probe = save_probe;
-    this.prepare_probe_form = prepare_probe;
-
-    this.save_link = save_link;
-    this.prepare_link_form = prepare_link;
     
     // inicializuje box pro zobrazeni grafu / mapy
     function init_graph(i, type, w, h) {
         load_local_variable();
         id = i;
         if (typeof (w) === 'undefined')
-            width = $('.navbar-inverse').width();
+            width = window.innerWidth;
         else
             width = w;
         if (typeof (h) === 'undefined') {
-            height = window.innerHeight - $('.navbar-inverse').height();
-            if ($('.navbar-inverse').height() == null)
-                height -= $('.navbar-inverse').height();
+            height = window.innerHeight - $('.navbar').height();
+            if ($('.navbar-inner').height() == null)
+                height -= $('.navbar-inner').height();
         }
         else
             height = h;
@@ -755,112 +746,284 @@ function NetTMap_module() {
     }
     // vytvoreni formularu pro vkladani uzlu, linek, tabulky s existujicimi linkami, uzly
     function create_main_form() {
+        // -------------------------------------------------------------------------------------------------------------------
+        // formular pro vkladani uzlu
+        div_form = d3.select('#' + id).append("div").attr("id", "forms_block");
+        table_form = div_form.append("form").attr("id", "node_form").append("table").style("width", "45%");
+        table_form.style("float", "left").attr("id", "input_form_node").style("margin-right", "1cm");
+        // 0.radek - nadpis
+        table_form.append("tr").append("h3").text("Node");
+
+        // 1.radek - nazev
+        table_form.append("tr").append("td").attr("align", "right").append("p").text("Name: ")
+                  .append("input").attr("id", "name_node").attr("name", "name_node").attr("type", 'text');
+
+        // 2.radek - zemepisna delka
+        table_form.append("tr").append("td").attr("align", "right").append("p").text("Longitude: ")
+                  .append("input").attr("id", "longitude").attr("name", "longitude").attr("type", 'text');
+
+        // 3.radek - zemepisna sirka
+        table_form.append("tr").append("td").attr("align", "right").append("p").text("Latitude: ")
+                  .append("input").attr("id", "latitude").attr("name", "latitude").attr("type", 'text');
+
+        // 4.radek - typ uzlu = sonda / router
+        /*
+        type_node = table_form.append("tr").append("td").attr("align", "right").append("p").text("Typ: ")
+                  .append("select").attr("id", "type_node").attr("name", "type_node");
+        type_node.append("option").attr("value", "S").text("Sonda");
+        type_node.append("option").attr("value", "R").text("Router");
+        
+        // 5.radek - adresa
+        table_form.append("tr").append("td").attr("align", "right").append("p").text("Adresa: ")
+                  .append("input").attr("id", "address_node").attr("name", "address_node").attr("type", 'text');
+        */
+
+        // 6.radek - popis
+        table_form.append("tr").append("td").attr("align", "right").append("p").text("Description: ")
+          .append("input").attr("id", "description_node").attr("name", "description_node").attr("type", 'text');
+
+        // 7.radek - tlacitko
+        table_form.append("tr").append("td").attr("align", "right")
+                  .append("input").attr("type", "submit").attr("value", "Add").attr("class", "btn btn-primary");
+        //.attr("onclick", "NetTMap_setting.getInstance().add_node(this);");
+
+        // -------------------------------------------------------------------------------------------------------------------
+        // formular pro vkladani linek
+        table_form = div_form.append("form").attr("id", "link_form").append("table").style("width", "45%")
+        table_form.attr("id", "input_form_link");
+        // 0.radek - nadpis
+        table_form.append("tr").append("h3").text("Link");
+
+        // 1.radek - nazev
+        table_form.append("tr").append("td").attr("align", "right").append("p").text("Name: ")
+          .append("input").attr("id", "name_link").attr("name", "name_link").attr("type", 'text');
+
+        // 2.radek - zdrojovy uzel
+        table_form.append("tr").append("td").attr("align", "right").append("p").text("Source: ")
+                  .append("select").attr("id", "source_node").attr("name", "source_node");
+
+        // 3.radek - zdrojovy port
+        /*
+        table_form.append("tr").append("td").attr("align", "right").append("p").text("Zdrojovy port: ")
+          .append("input").attr("id", "source_port").attr("name", "source_port").attr("type", 'text');
+        */
+        // 4 radek - cilovy uzel
+        table_form.append("tr").append("td").attr("align", "right").append("p").text("Target: ")
+                  .append("select").attr("id", "target_node").attr("name", "target_node");
+
+        // 5.radek - rychlost linky
+        table_form.append("tr").append("td").attr("align", "right").append("p").text("Speed: ")
+                  .append("select").attr("id", "speed_link").attr("name", "speed_link");
+        speed_select = d3.select("#speed_link");
+        speed_select.append("option").attr("value", "").text("");
+        speed_select.append("option").attr("value", "100").text("100M");
+        speed_select.append("option").attr("value", "1000").text("1G");
+        speed_select.append("option").attr("value", "10000").text("10G");
+        speed_select.append("option").attr("value", "40000").text("40G");
+        speed_select.append("option").attr("value", "100000").text("100G");
+
+
+        // 6.radek - prazdny
+        //table_form.append("tr").attr("height", $('tr').eq(1).height()).append("td");
+
+        // 7.radek 
+        table_form.append("tr").append("td").attr("align", "right")
+                  .append("input").attr("type", "submit").attr("value", 'Add').attr("class", "btn btn-primary");
+        //.attr("onclick", "NetTMap_setting.getInstance().add_link();");
+
+        d3.select('#' + id).append("hr");
         tables = d3.select('#' + id).append("div").attr("id", "tables_block");
 
         // -------------------------------------------------------------------------------------------------------------------
         // tabulka pro zobrazeni linek
-        head = tables.append("table").append("tr");
-        head.append("th").append("h2").text("Links");
-        head.append("th").style("width", "20px");
-        head.append("th").append("a").attr("href", "template/link.html").attr("class", "btn btn-success btn-sm")
-            .attr("data-toggle", "modal").attr("data-target", "#detailModal").attr("id", "add_link_button").attr("title", "New link");
-        $("#add_link_button").html('<i class="fa fa-plus fa-fw" />');
+        tables.append("h3").text("Links");
         title_link = tables
              .append("table")
              .attr("class", "table table-hover")
              .attr("id", "link_setting_result")
-             .attr("border", "1");
+             .attr("border", "1")
+             .attr("width", $("#input_form_link").width());
         table_head = title_link.append("thead").append("tr");
         table_head.append("th").text("Name");
         table_head.append("th").text("Speed");
-        table_head.append("th").text("Source router");
-        table_head.append("th").text("Target router");
-        table_head.append("th").text("Channel 1");
-        table_head.append("th").text("Channel 2");
-        table_head.append("th").text("Actions");
+        table_head.append("th").text("Source node");
+        table_head.append("th").text("Source channel");
+        table_head.append("th").text("Target node");
+        table_head.append("th").text("Target channel");
+        table_head.append("th").text("Delete");
+        table_head.append("th").text("NetFlow probe");
 
         update_table_link();
 
         // -------------------------------------------------------------------------------------------------------------------
-        // tabulka pro zobrazeni sond
-        head = tables.append("table").append("tr");
-        head.append("th").append("h2").text("NetFlow probe");
-        head.append("th").style("width", "20px");
-        head.append("th").append("a").attr("href", "template/probe.html").attr("class", "btn btn-success btn-sm")
-            .attr("data-toggle", "modal").attr("data-target", "#detailModal").attr("id", "add_probe_button").attr("title", "New NetFlow probe");
-        $("#add_probe_button").html('<i class="fa fa-plus fa-fw" />');
+        // tabulka pro zobrazeni uzlu
+        tables.append("h3").text("Routers");
         title = tables
             .append("table")
             .attr("class", "table table-hover")
-            .attr("id", "probe_setting_result")
-            .attr("border", "1");
-        table_head = title.append("thead").append("tr");
-        table_head.append("th").text("Hostname");
-        table_head.append("th").text("Longitude");
-        table_head.append("th").text("Latitude");
-        table_head.append("th").text("Address");
-        table_head.append("th").text("Description");
-        table_head.append("th").text("Actions");
-
-        update_table_probe();
-        // -------------------------------------------------------------------------------------------------------------------
-        // tabulka pro zobrazeni routeru
-        head = tables.append("table").append("tr");
-        head.append("th").append("h2").text("Routers");
-        head.append("th").style("width", "20px");
-        head.append("th").append("a").attr("href", "template/router.html").attr("class", "btn btn-success btn-sm")
-            .attr("data-toggle", "modal").attr("data-target", "#detailModal").attr("id", "add_router_button").attr("title", "New router");
-        $("#add_router_button").html('<i class="fa fa-plus fa-fw" />');
-
-        title = tables
-            .append("table")
-            .attr("class", "table table-hover")
-            .attr("id", "router_setting_result")
-            .attr("border", "1");
-            //.attr("width", $("#input_form_router").width());
+            .attr("id", "node_setting_result")
+            .style("float", "left")
+            .style("margin-right", "1cm")
+            .attr("border", "1")
+            .attr("width", $("#input_form_node").width());
         table_head = title.append("thead").append("tr");
         table_head.append("th").text("Name");
         table_head.append("th").text("Longitude");
         table_head.append("th").text("Latitude");
+        table_head.append("th").text("Type");
         table_head.append("th").text("Address");
-        table_head.append("th").text("Description");
-        table_head.append("th").text("Actions");
+        //table_head.append("td").text("Description");
+        table_head.append("th").text("Delete");
 
-        update_table_router();
+        update_table_node();
         // -------------------------------------------------------------------------------------------------------------------
-        // tlacitko pro vytvoreni exportu, ulozeni nastaveni
-        tables.append("hr");
-        button_div =tables.append("div").attr("id", "button_block").attr("class", "btn-toolbar");
-
-        button_div.append("button").attr("type", "button").attr("class", "btn btn-primary")
-            .attr("id", "save_settings_button").attr("title", "Save settings");
-        $("#save_settings_button").html('<i class="fa fa-floppy-o" />&nbsp Save');
-        document.getElementById('save_settings_button').addEventListener('click', save_local_variable, false);
-
-        button_div.append("button").attr("type", "button").attr("class", "btn btn-secondary")
-            .attr("id", "save_file_button").attr("title", "Create file and download it");
+        // tlacitko pro vytvoreni exportu
+        d3.select('#' + id).append("hr");
+        d3.select('#' + id).append("div").attr("id", "button_block")
+             .append("button").attr("type", "button").attr("class", "btn btn-success").attr("id", "save_file_button");
         $("#save_file_button").html('<i class="fa fa-download" />&nbsp Save file');
-        document.getElementById('save_file_button').addEventListener('click', create_file, false);
+        document.getElementById('button_block').addEventListener('click', create_file, false);
 
-        // odebrani nactenych dat po skryti modal dialogu
-        $(document).on('hidden.bs.modal', function (e) {
-            $(e.target).removeData('bs.modal');
-            type_action = '';
-            current_item_index = '';
-        });
+        set_validate_rules();
 
-        // nastaveni parametru pro naplneni modal dialogu
-        $(document).on('show.bs.modal', function (e) {
-            var id_part = [];
-            if (e.relatedTarget.id.indexOf('add') != -1)
-                type_action = 'new';
-            else {
-                id_part = e.relatedTarget.id.split("_");
-                type_action = 'detail';
-                current_item_index = id_part[3];
+        //document.onhaschange(alert("zmeneno!!!!"));
+    }
+    function set_validate_rules() {
+        $("#node_form").validate({
+            rules: {
+                name_node: "required",
+                //type_node: "required",
+                //address_node: "required",
+                latitude: {
+                    required: true,
+                    number: true
+                },
+                longitude: {
+                    required: true,
+                    number: true
+                }
+            },
+            messages: {
+                name_node: "Insert name",
+                //type_node: "Vyberte typ uzlu",
+                //address_node: "Insert address",
+                latitude: {
+                    required: "Insert latitude",
+                    number: "Value must be number"
+                },
+                longitude: {
+                    required: "Insert longitude",
+                    number: "Value must be number"
+                }
+            },
+            submitHandler: function (form) {
+                // do other things for a valid form
+                //form.submit();
+                insert_node();
             }
         });
+
+        $("#link_form").validate({
+            rules: {
+                target_node: "required",
+                //target_port: "required",
+                source_node: "required",
+                //source_port: "required",
+                //name_link: "required",
+                speed_link: "required"
+            },
+            messages: {
+                target_node: "Select a target node",
+                //target_port: "Vyberte cilovy port",
+                source_node: "Select a source node",
+                //source_port: "Vyberte zdrojovy port",
+                //name_link: "Zadejte nazev linky",
+                speed_link: "Select a speed of link"
+            },
+            submitHandler: function (form) {
+                // do other things for a valid form
+                //form.submit();
+                insert_link();
+            }
+        });
+
     }
+
+    // aktualizace tabulky uzlu
+    function update_table_node() {
+        update_list_node();
+        table = d3.select("#node_setting_result");
+        table.selectAll("tbody").remove();
+
+        table_body = table.append("tbody");
+        for (count = 0; count < nodes.length; count++) {
+            table_row = table_body.append("tr");
+            table_row.attr("id", "node_" + count);
+            table_row.append("td").text(nodes[count].name);
+            table_row.append("td").text(nodes[count].long);
+            table_row.append("td").text(nodes[count].lat);
+            table_row.append("td").text(function () {
+                if (nodes[count].type_node == 'R')
+                    return "Router";
+                else if (nodes[count].hw == "")
+                    return "NetFlow probe";
+                else
+                    return "NetFlow probe (" + nodes[count].hw + ')';
+            });
+            table_row.append("td").text(nodes[count].address);
+            //table_row.append("td").text(n.description);
+            table_row.append("td").append("input").attr("align", "center")
+                .attr("type", "submit")
+                .attr("value", "...")
+                .attr("class", "btn-danger")
+                .attr("id", "node_" + count + "_del")
+            //.attr("onclick", 'NetTMap_setting.getInstance().delete_node(this.id);');
+
+            document.getElementById("node_" + count + "_del")
+                .addEventListener('click', function (d) { delete_node(d.target.id); }, false);
+        }
+        /*
+        if ($("#node_setting_result").height() > $("#link_setting_result").height()) {
+            d3.select("#tables_block").style("height", $("#node_setting_result").height() + "px");
+        }
+        else {
+            d3.select("#tables_block").style("height", $("#link_setting_result").height() + "px");
+        }
+        */
+
+        console.log('window: ' + window.innerWidth + ', ' + window.innerHeight);
+        var body = document.body,
+        html = document.documentElement;
+        /*
+        window.innerHeight = window.innerHeight + 20;
+        var height = Math.max(body.scrollHeight, body.offsetHeight,
+                               html.clientHeight, html.scrollHeight, html.offsetHeight);
+        console.log('body.scrollHeight: ' + body.scrollHeight);
+        console.log('body.offsetHeight: ' + body.offsetHeight);
+        console.log('html.clientHeight: ' + html.clientHeight);
+        console.log('html.scrollHeight: ' + html.scrollHeight);
+        console.log('html.offsetHeight: ' + html.offsetHeight);
+        */
+    }
+    function update_list_node() {
+        source_node_box = d3.select("#source_node");
+
+        source_node_box.selectAll("option").remove();
+        source_node_box.append("option").attr("value", "").text("");
+        for (count = 0; count < nodes.length; count++) {
+            source_node_box.append("option").attr("value", nodes[count].name).text(nodes[count].name);
+        }
+
+        target_node_box = d3.select("#target_node");
+
+        target_node_box.selectAll("option").remove();
+        target_node_box.append("option").attr("value", "").text("");
+        for (count = 0; count < nodes.length; count++) {
+            target_node_box.append("option").attr("value", nodes[count].name).text(nodes[count].name);
+        }
+    }
+
+    // aktualizace tabulky linek
     function update_table_link() {
         table = d3.select("#link_setting_result");
         table.selectAll("tbody").remove();
@@ -872,31 +1035,27 @@ function NetTMap_module() {
             table_row.append("td").text(links[count].name);
             table_row.append("td").text(function () { return (links[count].speed / 1000) + 'G'; });
             table_row.append("td").text(links[count].source);
+            table_row.append("td").text(links[count].source_port);
             table_row.append("td").text(links[count].target);
-            table_row.append("td").text(links[count].channel1);
-            table_row.append("td").text(links[count].channel2);
-            action_td = table_row.append("td").attr("align", "center").append("div").attr("class", "btn-group");
-            action_td.append("button") // pridani sondy
-                .attr("type", "button")
-                .attr("class", "btn btn-xs btn-warning")
-                .attr("title", "Add NetFlow probe")
-                .attr("id", "link_probe_btn_" + count);
-            $("#link_probe_btn_" + count).html('<i class="fa fa-plug fa-fw"></>');
-
-            action_td.append("button")  // detail linky
-                .attr("href", "template/link.html").attr("data-toggle", "modal").attr("data-target", "#detailModal")
-                .attr("class", "btn btn-xs btn-info").attr("title", "Info about link").attr("id", "link_info_btn_" + count);
-            $("#link_info_btn_" + count).html('<i class="fa fa-info fa-fw"></>');
-
-            action_td.append("button")  // smazani linky
-                .attr("type", "button")
-                .attr("class", "btn btn-xs btn-danger")
-                .attr("title", "Delete link")
+            table_row.append("td").text(links[count].target_port);
+            table_row.append("td").attr("align", "center").append("input")
+                .attr("type", "submit")
+                .attr("value", "...")
+                .attr("class", "btn-danger")
                 .attr("id", "link_" + count + "_del");
-            $("#link_" + count + "_del").html('<i class="fa fa-minus fa-fw"></>');
-            document.getElementById("link_" + count + "_del").addEventListener('click', function (d) { delete_link(d.target.id); }, false);
 
-            $("#link_probe_btn_" + count).qtip({
+            document.getElementById("link_" + count + "_del")
+                .addEventListener('click', function (d) { delete_link(d.target.id); }, false);
+
+                //.attr("onclick", 'NetTMap_setting.getInstance().delete_link(this.id);');
+            table_row.append("td").attr("align", "center").append("input")
+                .attr("type", "submit")
+                .attr("class", "btn-primary")
+                .attr("value", "+")
+                .attr("title", links[count].name)
+                .attr("id", "link_btn_" + count);
+
+            $("#link_btn_" + count).qtip({
                 content: {
                     button: 'Close',
                     title: function (event, api) {
@@ -948,191 +1107,387 @@ function NetTMap_module() {
                 }
             });
         }
-    }
-    function update_table_probe() {
-        //update_list_node();
-        table = d3.select("#probe_setting_result");
-        table.selectAll("tbody").remove();
-
-        table_body = table.append("tbody");
-        for (count = 0; count < nodes.length; count++) {
-            if (nodes[count].type_node == 'R') continue;
-            table_row = table_body.append("tr");
-            table_row.attr("id", "probe_" + count);
-            table_row.append("td").text(nodes[count].hostname);
-            table_row.append("td").text(nodes[count].long);
-            table_row.append("td").text(nodes[count].lat);
-            table_row.append("td").text(nodes[count].address);
-            table_row.append("td").text(nodes[count].description);
-            action_td = table_row.append("td").attr("align", "center").append("div").attr("class", "btn-group");
-
-            action_td.append("a")  // detail sondy
-                .attr("href", "template/probe.html").attr("data-toggle", "modal").attr("data-target", "#detailModal")
-                .attr("class", "btn btn-xs btn-info").attr("title", "Info about NetFlow probe").attr("id", "probe_info_btn_" + count);
-            $("#probe_info_btn_" + count).html('<i class="fa fa-info fa-fw"></>');
-
-            action_td.append("button")  // smazani sondy
-                .attr("type", "button")
-                .attr("class", "btn btn-xs btn-danger")
-                .attr("title", "Delete NetFlow probe")
-                .attr("id", "probe_del_btn_" + count);
-            $("#probe_del_btn_" + count).html('<i class="fa fa-minus fa-fw"></>');
-            document.getElementById("probe_del_btn_" + count).addEventListener('click', function (d) { delete_probe(d.target.id); }, false);
+        /*
+        if ($("#node_setting_result").height() > $("#link_setting_result").height()) {
+            d3.select("#tables_block").style("height", $("#node_setting_result").height() + "px");
         }
-    }
-    function update_table_router() {
-        //update_list_node();
-        table = d3.select("#router_setting_result");
-        table.selectAll("tbody").remove();
-
-        table_body = table.append("tbody");
-        for (count = 0; count < nodes.length; count++) {
-            if (nodes[count].type_node == 'P') continue;
-            table_row = table_body.append("tr");
-            table_row.attr("id", "router_" + count);
-            table_row.append("td").text(nodes[count].hostname);
-            table_row.append("td").text(nodes[count].long);
-            table_row.append("td").text(nodes[count].lat);
-            table_row.append("td").text(nodes[count].address);
-            table_row.append("td").text(nodes[count].description);
-            action_td = table_row.append("td").attr("align", "center").append("div").attr("class", "btn-group");
-
-            action_td.append("a")  // detail routeru
-                .attr("href", "template/router.html").attr("data-toggle", "modal").attr("data-target", "#detailModal")
-                .attr("class", "btn btn-xs btn-info").attr("title", "Info about router").attr("id", "router_info_btn_" + count);
-            $("#router_info_btn_" + count).html('<i class="fa fa-info fa-fw"></>');
-
-            action_td.append("button")  // smazani routeru
-                .attr("type", "button")
-                .attr("class", "btn btn-xs btn-danger")
-                .attr("title", "Delete router")
-                .attr("id", "router_del_btn_" + count);
-            $("#router_del_btn_" + count).html('<i class="fa fa-minus fa-fw"></>');
-            document.getElementById("router_del_btn_" + count).addEventListener('click', function (d) { delete_router(d.target.id); }, false);
+        else {
+            d3.select("#tables_block").style("height", $("#link_setting_result").height() + "px");
         }
+        */
     }
 
-    function create_file() {
-
-    }
-
-    // predvyplni formular pro editaci
-    function prepare_router() {
-        if (type_action == 'detail') {
-            document.getElementById('modal_title').innerHTML = 'Detail router';
-            document.getElementById('name_router').value = nodes[current_item_index].hostname;
-            document.getElementById('description').value = nodes[current_item_index].description;
-            document.getElementById('address').value = nodes[current_item_index].address;
-            document.getElementById('longitude').value = nodes[current_item_index].long;
-            document.getElementById('latitude').value = nodes[current_item_index].lat;
+    function insert_node() {
+        if ($('#node_form').valid() == false) {
+            return;
         }
-    }
-    // podle ulozenych nastaveni rozhodnu zda se router vytvori nebo jen upravi
-    function save_router() {
-        hostname = document.getElementById("name_router").value;
+
+        name = document.getElementById("name_node").value;
         latitude = document.getElementById("latitude").value;
         longitude = document.getElementById("longitude").value;
         type_node = "R";//document.getElementById("type_node").value;
-        address = document.getElementById("address").value;
-        description = document.getElementById("description").value;
+        address_node = "";//document.getElementById("address_node").value;
+        description_node = document.getElementById("description_node").value;
+        source_node = "";//document.getElementById("source_node").value;
+        source_port = "";//document.getElementById("source_port").value;
+        target_node = "";//document.getElementById("target_node").value;
+        target_port = "";//document.getElementById("target_port").value;
+        hardware = "";
+
+        $('#node_form')[0].reset();
 
         node = {
-            name: hostname,
+            name: name,
             lat: latitude,
             long: longitude,
             type_node: type_node,
-            address: address,
-            description: description
+            address: address_node,
+            description: description_node,
+            hw: hardware
+            //source: source_node,
+            //source_port: source_port,
+            //target: target_node,
+            //target_port: target_port
         };
-        if (type_action == 'new')
-            nodes.push(node);
-        else
-            nodes[current_item_index] = node;
-
-        $('#detailModal').modal('toggle');
-
-        update_table_router();
+        nodes.push(node);
+        update_table_node();
     }
-
-    // predvyplni formular pro editaci
-    function prepare_probe() {
-        if (type_action == 'detail') {
-            document.getElementById('modal_title').innerHTML = 'Detail probe';
-            document.getElementById('hostname_probe').value = nodes[current_item_index].hostname;
-            document.getElementById('description').value = nodes[current_item_index].description;
-            document.getElementById('address').value = nodes[current_item_index].address;
-            document.getElementById('longitude').value = nodes[current_item_index].long;
-            document.getElementById('latitude').value = nodes[current_item_index].lat;
+    function insert_link() {
+        if ($('#link_form').valid() == false) {
+            return;
         }
-    }
 
-    function save_probe() {
-        hostname = document.getElementById("hostname_probe").value;
-        latitude = document.getElementById("latitude").value;
-        longitude = document.getElementById("longitude").value;
-        type_node = "P";//document.getElementById("type_node").value;
-        address = document.getElementById("address").value;
-        description = document.getElementById("description").value;
-
-        node = {
-            name: hostname,
-            lat: latitude,
-            long: longitude,
-            type_node: type_node,
-            address: address,
-            description: description
-        };
-        if (type_action == 'new')
-            nodes.push(node);
-        else
-            nodes[current_item_index] = node;
-
-        $('#detailModal').modal('toggle');
-
-        update_table_probe();
-    }
-
-    // predvyplni formular pro editaci
-    function prepare_link() {
-        if (type_action == 'detail') {
-            document.getElementById('modal_title').innerHTML = 'Detail link';
-            document.getElementById('name_link').value = links[current_item_index].name;
-            document.getElementById('description').value = links[current_item_index].description;
-            document.getElementById('source_router').value = links[current_item_index].source_router;
-            document.getElementById('target_router').value = links[current_item_index].target_router;
-            document.getElementById('speed_link').value = links[current_item_index].speed_link;
-        }
-    }
-
-    function save_link() {
         name_link = document.getElementById("name_link").value;
-        description = document.getElementById("description").value;
-        source = document.getElementById("source_router").value;
-        target = document.getElementById("target_router").value;
+        source = document.getElementById("source_node").value;
+        source_port = "";//document.getElementById("source_port").value;
+        target = document.getElementById("target_node").value;
+        target_port = "";//document.getElementById("target_port").value;
         speed_link = document.getElementById("speed_link").value;
-        channel1 = '';
-        channel2 = '';
+
+        $('#link_form')[0].reset();
 
         link = {
             source: source,
+            source_port: source_port,
             speed: speed_link,
-            channel1: channel1,
-            channel2: channel2,
             target: target,
-            description: description,
+            target_port: target_port,
             name: name_link,
-            probe: ""
+            node: ""
         };
-
-        if (type_action == 'new')
-            links.push(link);
-        else
-            links[current_item_index] = link;
-
-        $('#detailModal').modal('toggle');
+        links.push(link);
 
         update_table_link();
+    }
+
+    function delete_node(count) {
+        nodes.splice(count, 1);
+        //d3.select("#" + id).remove();
+        update_list_node();
+        update_table_node();
+    }
+    function delete_link(id) {
+        var count;
+        for (count = 0; count < links.length; count++) {
+            if ('link_' + count + '_del' == id) {
+                break;
+            }
+        }
+        links.splice(count, 1);
+        d3.select("#" + id).remove();
+        update_list_node();
+        update_table_link();
+    }
+
+    // vytvoreni formulare pro vlozeni sondy
+    function create_probe_form() {
+        d3.select('#' + id).attr("width", width).attr("height", height);
+
+        div_form = d3.select('#' + id).append("div");
+        table_form = div_form.append("form").attr("id", "probe_form").append("table");
+
+        // 1.radek - nazev, listbox s existujicima sondama
+        tr1 = table_form.append("tr");
+        tr1.append("td").attr("align", "right").append("p").text("Name: ")
+                  .append("input").attr("id", "probe_name").attr("name", "probe_name").attr("type", 'text');
+        tr1.append("td").attr("align", "right").append("p").text("NetFlow probe: ")
+          .append("select").attr("id", "probe_node").attr("name", "probe_node");
+        document.getElementById("probe_node").addEventListener('change', prepopulation_list_probe, false);
+
+        // 2. radek - popis, adresa
+        tr1 = table_form.append("tr");
+        tr1.append("td").attr("align", "right").append("p").text("Description: ")
+                  .append("input").attr("id", "description").attr("name", "description").attr("type", 'text');
+        tr1.append("td").attr("align", "right").append("p").text("Address: ")
+                  .append("input").attr("id", "address").attr("name", "address").attr("type", 'text');
+
+        // 3.radek - zemepisna delka, sirka
+        tr1 = table_form.append("tr");
+        tr1.append("td").attr("align", "right").append("p").text("Longitude: ")
+                  .append("input").attr("id", "longitude").attr("name", "longitude").attr("type", 'text');
+        tr1.append("td").attr("align", "right").append("p").text("Latitude: ")
+                  .append("input").attr("id", "latitude").attr("name", "latitude").attr("type", 'text');
+
+        // 4.radek - zdrojovy uzel, cilovy uzel
+        tr1 = table_form.append("tr");
+        tr1.append("td").attr("align", "right").append("p").text("Source node: ")
+                  .append("input").attr("id", "source_node").attr("name", "source_node").attr("type", 'text');
+        tr1.append("td").attr("align", "right").append("p").text("Target node: ")
+          .append("input").attr("id", "target_node").attr("name", "target_node").attr("type", 'text');
+
+
+        // 5.radek - zdrojovy port, cilovy port
+        tr1 = table_form.append("tr");
+        tr1.append("td").attr("align", "right").append("p").text("Source channel: ")
+                  .append("input").attr("id", "source_port").attr("name", "source_port").attr("type", 'text');
+        tr1.append("td").attr("align", "right").append("p").text("Target channel: ")
+                  .append("input").attr("id", "target_port").attr("name", "target_port").attr("type", 'text');
+
+        // 6.radek - HW sondy
+        tr1 = table_form.append("tr");
+        tr1.append("td").attr("align", "right").append("p").text("Hardware: ").append("select").attr("id", "hardware").attr("name", "hardware");
+        load_hw_type();
+        tr1.append("td");
+
+
+        // 7.radek - tlacitko
+        tr1 = table_form.append("tr");
+        tr1.append("td");
+        tr1.append("td").attr("align", "right")
+                  .append("input").attr("type", "submit").attr("value", "Insert NetFlow probe").attr("class", "btn-primary").attr("id", "insert_probe_btn");
+        document.getElementById("insert_probe_btn").addEventListener('onchange', insert_probe, false);
+
+        update_list_probe();
+
+        d3.select("#target_node")
+            .attr("value", links[current_item_index].target)
+            .attr("readonly", "readonly");
+        d3.select("#source_node")
+            .attr("value", links[current_item_index].source)
+            .attr("readonly", "readonly");
+
+        // validace formulare
+        $("#probe_form").validate({
+            rules: {
+                probe_name: "required",
+                address: "required",
+                latitude: {
+                    required: true,
+                    number: true
+                },
+                longitude: {
+                    required: true,
+                    number: true
+                },
+                source_port: "required",
+                target_port: "required"
+            },
+            messages: {
+                probe_name: "Insert name",
+                address: "Insert probe's address ",
+                latitude: {
+                    required: "Insert latitude",
+                    number: "Value must be number"
+                },
+                longitude: {
+                    required: "Insert longitude",
+                    number: "Value must be number"
+                },
+                source_port: "Insert name of link for way from source node to NetFlow probe",
+                target_port: "Insert name of link for way from target node to NetFlow probe"
+            },
+            submitHandler: function (form) {
+                // do other things for a valid form
+                form.submit();
+            }
+        });
 
     }
+    // vyplneni dostupnych sond do list boxu
+    function update_list_probe() {
+        probe_node_box = d3.select("#probe_node");
+
+        probe_node_box.selectAll("option").remove();
+        probe_node_box.append("option").attr("value", "").text("");
+        for (count = 0; count < nodes.length; count++) {
+            if (nodes[count].type_node == "S")
+                probe_node_box.append("option").attr("value", nodes[count].name).text(nodes[count].name);
+        }
+    }
+    // predvyplneni dostupnych udaju o existujici sonde
+    function prepopulation_list_probe() {
+        curr_val = document.getElementById("probe_node").value;
+
+        for (s_count = 0; s_count < nodes.length; s_count++) {
+            if (nodes[s_count].name == curr_val) {
+                document.getElementById("probe_name").value = nodes[s_count].name;
+                document.getElementById("latitude").value = nodes[s_count].lat;
+                document.getElementById("longitude").value = nodes[s_count].long;
+                document.getElementById("address").value = nodes[s_count].address;
+                document.getElementById("description").value = nodes[s_count].description;
+                document.getElementById("hardware").value = nodes[s_count].hw;
+                break;
+            }
+        }
+    }
+    // nacte do listboxu jmena HW zarizeni z json souboru
+    function load_hw_type() {
+        d3.json(path_hw_type, load_type);
+
+        function load_type(error, data) {
+            if (error) throw error;
+
+            var probe_select_input = d3.select('#hardware');
+            probe_select_input.append("option").attr("value", "").text("");
+            for (var t_count = 0; t_count < data.hardware.length; t_count++) {
+                probe_select_input.append("option").attr("value", data.hardware[t_count].pn).text(data.hardware[t_count].pn);
+            }
+        }
+    }
+
+    function insert_probe() {
+        if ($('#probe_form').valid() == false) {
+            return;
+        }
+        // uprava linky -> rozdeleni linky na dve, vlozeni uzlu typu sonda
+        name = document.getElementById("probe_name").value;
+        latitude = document.getElementById("latitude").value;
+        longitude = document.getElementById("longitude").value;
+        type_node = "S";//document.getElementById("type_node").value;
+        address_node = document.getElementById("address").value;
+        description_node = document.getElementById("description").value;
+        source_node = document.getElementById("source_node").value;
+        source_port = document.getElementById("source_port").value;
+        target_node = document.getElementById("target_node").value;
+        target_port = document.getElementById("target_port").value;
+        probe_node = document.getElementById("probe_node").value;
+        hardware = document.getElementById("hardware").value;
+
+        node = {};
+        if (probe_node == "") {
+            node = {
+                name: name,
+                lat: latitude,
+                long: longitude,
+                type_node: type_node,
+                address: address_node,
+                description: description_node,
+                hw: hardware
+            };
+            nodes.push(node);
+        }
+        else {
+            for (s_count = 0; s_count < nodes.length; s_count++) {
+                if (nodes[s_count].name == probe_node) {
+                    nodes[s_count].name = name;
+                    nodes[s_count].lat = latitude;
+                    nodes[s_count].long = longitude;
+                    nodes[s_count].address = address_node;
+                    nodes[s_count].description = description_node;
+                    nodes[s_count].hardware = hardware;
+                    break;
+                }
+            }
+        }
+
+        links[current_item_index].source_port = source_port;
+        links[current_item_index].target_port = target_port;
+        links[current_item_index].node = name;
+
+        save_local_variable();
+        parent.closeQTip();
+    }
+
+    function create_file() {
+        content = '{ "type": "FeatureCollection", "features": ['; // start
+        curr_node = "";
+
+        // uklada uzly
+        for (count = 0; count < nodes.length; count++) {
+            curr_node = '{ "geometry": { "type": "Point", "coordinates": [ '
+                        + nodes[count].long + ', ' + nodes[count].lat + ' ]},';
+            curr_node += '"properties": { "name": "' + nodes[count].name
+                      + '", "type_node": "' + nodes[count].type_node
+                      + '", "description": "' + nodes[count].description
+                      + '", "hw": "' + nodes[count].hw
+                      + '", "address": "' + nodes[count].address + '"},';
+            curr_node += '"type": "Feature" }';
+            if (count != nodes.length - 1) { curr_node += ','; }
+            content += curr_node;
+        }
+
+        if (links.length != 0) { content += ','; }
+
+        // uklada linky
+        for (count = 0; count < links.length; count++) {
+            source_coordinates = "";
+            for (s_count = 0; s_count < nodes.length; s_count++) {
+                if (nodes[s_count].name == links[count].source) {
+                    source_coordinates = '[ ' + nodes[s_count].long + ', ' + nodes[s_count].lat + ' ]';
+                    break;
+                }
+            }
+
+            dest_coordinates = "";
+            for (d_count = 0; d_count < nodes.length; d_count++) {
+                if (nodes[d_count].name == links[count].target) {
+                    dest_coordinates = '[ ' + nodes[d_count].long + ', ' + nodes[d_count].lat + ' ]';
+                    break;
+                }
+            }
+
+            if (links[count].node != '') { // linka spojuje 2 uzly -> je na ni sonda
+                var probe_index = 0;
+                for (p_count = 0; p_count < nodes.length; p_count++) {
+                    if ((nodes[p_count].name == links[count].node) && (nodes[p_count].type_node == 'S')) {
+                        probe_index = p_count;
+                        break;
+                    }
+                }
+
+                var probe_coordinates = '[' + nodes[probe_index].long + ', ' + nodes[probe_index].lat + ' ]';
+
+                // vytvorim 2 linky
+                curr_node = '{ "geometry": { "type": "LineString", "coordinates": [ ' + source_coordinates + ', ' + probe_coordinates + ' ]},';
+                curr_node += '"properties": { "source": "' + links[count].source
+                            + '", "target": "' + nodes[probe_index].name
+                            + '", "source_channel": "' + links[count].source_port
+                            + '", "target_channel": "' + links[count].target_port
+                            + '", "speed": "' + links[count].speed
+                            + '", "node": "' + links[count].node
+                            + '", "name": "' + links[count].name + '"},';
+                curr_node += '"type": "Feature" },';
+                content += curr_node;
+
+                curr_node = '{ "geometry": { "type": "LineString", "coordinates": [ ' + probe_coordinates + ', ' + dest_coordinates + ' ]},';
+                curr_node += '"properties": { "source": "' + nodes[probe_index].name
+                            + '", "target": "' + links[count].target
+                            + '", "source_channel": "' + links[count].source_port
+                            + '", "target_channel": "' + links[count].target_port
+                            + '", "speed": "' + links[count].speed
+                            + '", "node": "' + links[count].node
+                            + '", "name": "' + links[count].name + '"},';
+                curr_node += '"type": "Feature" }';
+                if (count != links.length - 1) { curr_node += ','; }
+                content += curr_node;
+            }
+            else {
+                curr_node = '{ "geometry": { "type": "LineString", "coordinates": [ ' + source_coordinates + ', ' + dest_coordinates + ' ]},';
+                curr_node += '"properties": { "source": "' + links[count].source
+                            + '", "target": "' + links[count].target
+                            + '", "source_channel": "' + links[count].source_port
+                            + '", "target_channel": "' + links[count].target_port
+                            + '", "speed": "' + links[count].speed
+                            + '", "node": "'
+                            + '", "name": "' + links[count].name + '"},';
+                curr_node += '"type": "Feature" }';
+                if (count != links.length - 1) { curr_node += ','; }
+                content += curr_node;
+            }
+        }
+        content += ']}';    // end
+        window.open('data:text/json;charset=utf-8,' + escape(content))
+    }
+
 // ------------------------------------------------------------------------------------------------------------
 }

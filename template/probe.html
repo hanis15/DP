@@ -1,37 +1,101 @@
 ﻿<!DOCTYPE html>
-
-<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<html>
 <head>
-    <meta charset="utf-8" />
-    <script src="../jQuery/jquery-1.12.1.min.js" type="text/javascript"></script>
-    <script src="http://jqueryvalidation.org/files/dist/jquery.validate.min.js"></script>
-    <script src="//d3js.org/d3.v3.min.js" charset="utf-8"></script>
-
-    <link href="../source/NetTMap.css" type="text/css" rel="stylesheet" />
-    <script src="../source/NetTMap.js" type="text/javascript" charset="utf-8"></script>
-    
-    <script src="../bootstrap/js/bootstrap.min.js" type="text/javascript"></script>
-    <link href="../bootstrap/css/bootstrap.css" type="text/css" rel="stylesheet" />
-    <style>
-        table td {
-            padding-left: 60px;
-        }
-    </style>
-
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <title>Remote file for create/edit NetFlow probe</title>
 </head>
 <body>
-    <p>
-        <div id="probe_detail"></div>
-        <script type="text/javascript">
+    <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h4 id="modal_title" class="modal-title">New NetFlow probe</h4>
+    </div>
+    <div class="modal-body">
+        <div>
+            <form id="probe_form">
+                <table id="input_probe_form" class="table">
+                    <tr>
+                        <td>
+                            <p>
+                                <label>Hostname:</label>
+                                <input id="hostname_probe" name="name_probe" type="text" class="form-control"/>
+                            </p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <p>
+                                <label>Description:</label>
+                                <input id="description" name="description" type="text" class="form-control"/>
+                            </p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <p>
+                                <label>Address:</label>
+                                <input id="address" name="address" type="text" class="form-control"/>
+                            </p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <p>
+                                <label>Longitude:</label>
+                                <input id="longitude" name="longitude" type="text" class="form-control"/>
+                            </p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <p>
+                                <label>Latitude:</label>
+                                <input id="latitude" name="latitude" type="text" class="form-control"/>
+                            </p>
+                        </td>
+                    </tr>
+                </table>
+            </form>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary" id="save_probe_button">Create</button>
+    </div>
+    <script>
+        // validace formulare
+        $("#probe_form").validate({
+            rules: {
+                probe_name: "required",
+                latitude: {
+                    required: true,
+                    number: true
+                },
+                longitude: {
+                    required: true,
+                    number: true
+                },
+            },
+            messages: {
+                probe_name: "Insert name",
+                latitude: {
+                    required: "Insert latitude",
+                    number: "Value must be number"
+                },
+                longitude: {
+                    required: "Insert longitude",
+                    number: "Value must be number"
+                },
+            }
+        });
 
-            var width = 600;//document.getElementById('d3_graph').getBoundingClientRect().width;
-            var height = 150;
-            var id = "probe_detail";
+        // kontrola zda se jedna o editaci, pokud ano predvyplni formular
+        NetTMap.getInstance().prepare_probe_form();
 
-            var map_graph = new NetTMap();
-            map_graph.initialize(id, "configure-probe", width, height);
+        document.getElementById('save_probe_button').addEventListener('click', function () {
+            if ($('#probe_form').valid()) NetTMap.getInstance().save_probe();
+        });
 
-        </script>
-    </p>
-    </body>
+    </script>
+
+</body>
 </html>

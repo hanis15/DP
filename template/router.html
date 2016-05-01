@@ -1,0 +1,98 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <title>Remote file for create/edit router</title>
+</head>
+<body>
+    <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h4 id="modal_title" class="modal-title">New router</h4>
+    </div>			<!-- /modal-header -->
+    <div class="modal-body">
+        <div>
+            <form id="router_form" class="table-responsive">
+                <table class="table" id="input_router_form">
+                    <tr>
+                        <td>
+                            <p>
+                                <label>Name:</label>
+                                <input id="name_router" name="name_router" type="text" class="form-control" value=""/>
+                            </p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <p>
+                                <label>Description:</label>
+                                <input id="description" name="description" type="text" rows="5" class="form-control"/>
+                            </p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <p>
+                                <label>Address:</label>
+                                <input id="address" name="address" type="text" class="form-control" />
+                            </p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <p>
+                                <label>Longitude:</label>
+                                <input id="longitude" name="longitude" type="text" class="form-control"/>
+                            </p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <p>
+                                <label>Latitude:</label>
+                                <input id="latitude" name="latitude" type="text" class="form-control"/>
+                            </p>
+                        </td>
+                    </tr>
+                </table>
+            </form>
+        </div>    
+    </div>			<!-- /modal-body -->
+    <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        <button id="save_router_button"type="button" class="btn btn-primary">Create</button>
+    </div>			<!-- /modal-footer -->
+        <script>
+            $("#router_form").validate({
+                rules: {
+                    name_node: "required",
+                    latitude: {
+                        required: true,
+                        number: true
+                    },
+                    longitude: {
+                        required: true,
+                        number: true
+                    }
+                },
+                messages: {
+                    name_node: "Insert name",
+                    latitude: {
+                        required: "Insert latitude",
+                        number: "Value must be number"
+                    },
+                    longitude: {
+                        required: "Insert longitude",
+                        number: "Value must be number"
+                    }
+                }
+            });
+
+            // kontrola zda se jedna o editaci, pokud ano predvyplni formular
+            NetTMap.getInstance().prepare_router_form();
+
+        document.getElementById('save_router_button').addEventListener('click', function () {
+            if ($('#router_form').valid()) NetTMap.getInstance().save_router();
+        });
+    </script>
+</body>
+</html>

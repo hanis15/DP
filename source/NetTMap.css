@@ -37,8 +37,12 @@ form input.error {
     border:1px solid red; 
 }
 
-table { 
-    white-space: nowrap; 
+#tables_block {
+    margin-left: 5%;
+    margin-right: 5%; 
+    display: block;
+    width: 90%;
+    table-layout: fixed;
 }
 
 .axis {

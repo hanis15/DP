@@ -1,0 +1,98 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <title>Remote file for create/edit link</title>
+</head>
+<body>
+    <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h4 id="modal_title" class="modal-title">New link</h4>
+    </div>			<!-- /modal-header -->
+    <div class="modal-body">
+        <div>
+            <form id="link_form">
+                <table id="input_link_form" class="table">
+                    <tr>
+                        <td>
+                            <p>
+                                <label>Name:</label>
+                                <input id="name_link" name="link_name" type="text" class="form-control"/>
+                            </p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <p>
+                                <label>Description:</label>
+                                <input id="description" name="description" type="text" rows="5" class="form-control" />
+                            </p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <p>
+                                <label>Source:</label>
+                                <select id="source_router" name="source_router" class="form-control"/>
+                            </p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <p>
+                                <label>Target:</label>
+                                <select id="target_router" name="target_router" class="form-control"/>
+                            </p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <p>
+                                <label>Speed:</label>
+                                <select id="speed_link" name="speed_link" class="form-control">
+                                    <option value="" text=""></option>
+                                    <option value="100">100M</option>
+                                    <option value="1000">1G</option>
+                                    <option value="10000">10G</option>
+                                    <option value="40000">40G</option>
+                                    <option value="100000">100G</option>
+                                </select>
+                            </p>
+                        </td>
+                    </tr>
+                </table>
+            </form>
+        </div>
+    </div>			<!-- /modal-body -->
+    <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary" id="save_link_button">Create</button>
+    </div>			<!-- /modal-footer -->
+    <script>
+        $("#link_form").validate({
+            rules: {
+                target_router: "required",
+                source_router: "required",
+                speed_link: "required"
+            },
+            messages: {
+                target_router: "Select a target node",
+                source_router: "Select a source node",
+                speed_link: "Select a speed of link"
+            },
+            submitHandler: function (form) {
+                insert_link();
+            }
+        });
+
+        // kontrola zda se jedna o editaci, pokud ano predvyplni formular
+        NetTMap.getInstance().prepare_link_form();
+
+        document.getElementById('save_link_button').addEventListener('click', function () {
+            if ($('#link_form').valid()) NetTMap.getInstance().save_link();
+        });
+
+    </script>
+
+</body>
+</html>
