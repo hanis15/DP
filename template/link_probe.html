@@ -1,0 +1,74 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <title>Remote file for add/edit probe to link</title>
+</head>
+<body>
+    <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h4 id="modal_title" class="modal-title">Add NetFlow probe</h4>
+    </div>			<!-- /modal-header -->
+    <div class="modal-body">
+        <div>
+            <form id="link_probe_form">
+                <table id="input_link_probe_form" class="table">
+                    <tr>
+                        <td>
+                            <p>
+                                <label>NetFlow probe:</label>
+                                <select id="probe_link_select" name="probe_link_select" class="form-control"/>
+                            </p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <p>
+                                <label>Channel 1:</label>
+                                <select id="channel1_select" name="channel1_select" class="form-control" />
+                            </p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <p>
+                                <label>Channel 2:</label>
+                                <select id="channel2_select" name="channel2_select" class="form-control"/>
+                            </p>
+                        </td>
+                    </tr>
+                </table>
+            </form>
+        </div>
+    </div>			<!-- /modal-body -->
+    <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary" id="save_link_probe_button">Save</button>
+    </div>			<!-- /modal-footer -->
+    <script>
+        $("#link_probe_form").validate({
+            rules: {
+                probe_link_select: "required",
+                channel1_select: "required",
+                channel2_select: "required"
+            },
+            messages: {
+                probe_link_select: "Select a NetFlow probe",
+                channel1_select: "Select a channel 1",
+                channel2_select: "Select a channel 2"
+            }
+        });
+
+        // kontrola zda se jedna o editaci, pokud ano predvyplni formular
+        NetTMap.getInstance().prepare_link_probe_form();
+        document.getElementById('probe_link_select').addEventListener('change', function () { NetTMap.getInstance().load_channel_name(); });
+
+
+        document.getElementById('save_link_probe_button').addEventListener('click', function () {
+            if ($('#link_probe_form').valid()) NetTMap.getInstance().save_link_probe();
+        });
+
+    </script>
+
+</body>
+</html>
