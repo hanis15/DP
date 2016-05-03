@@ -33,8 +33,6 @@ function NetTMap_module() {
     var nodes_count = 0;                    // citac uzlu - pouziva se pro jednoznacnou identifikaci uzlu
     var links = [];                         // pole vsech nactenych linek
     var links_count = 0;                    // citac linek - pouziva se pro jednoznacnou identifikaci linek
-    var nodes_feature = [];                 // geoJson uzlu
-    var links_feature = [];                 // geoJson linek
     var current_type;                       // urcuje typ zobrazovanych dat v popup ('L' = linka, 'N' = uzel)
     var current_item_index;                 // index prenaseny do popup, urcuje index v danem poli
     var refresh_time = '0';                 // interval po kterem se maji update stavu linek
@@ -238,7 +236,6 @@ function NetTMap_module() {
             },
         });
     }
-
 
     // projde vsechny uzly a provede refresh dat - refresh
     function refresh_links() {
@@ -497,12 +494,7 @@ function NetTMap_module() {
             }
             else {
                 current_type = 'N';
-                for (var count = 0; count < nodes.length; count++) {
-                    if (e.popup._source.feature.properties.id == nodes[count].id) {
-                        current_item_index = count;
-                        break;
-                    }
-                }
+                current_item_index = get_index_node_by_id(e.popup._source.feature.properties.id);
             }
             save_local_variable();
         });
@@ -645,7 +637,6 @@ function NetTMap_module() {
 
     }
 
-    
     // inicializuje lokalni promenne, inicializuje lokalni pamet
     function init_local_variables() {
         // nacteni z HTML5 lokalniho uloziste
@@ -661,8 +652,6 @@ function NetTMap_module() {
             sessionStorage.source_file_name = "";
             nodes = [];
             links = [];
-            nodes_feature = [];
-            links_feature = [];
             current_item_index = "";
             current_type = "";
             refresh_time = '0';
@@ -680,8 +669,6 @@ function NetTMap_module() {
             if ((sessionStorage.nodes_count != null) && (sessionStorage.nodes_count != "")) nodes_count = parseInt(sessionStorage.nodes_count);
             if ((sessionStorage.links != null) && (sessionStorage.links != "")) links = jQuery.parseJSON(sessionStorage.links);
             if ((sessionStorage.links_count != null) && (sessionStorage.links_count != "")) links_count = parseInt(sessionStorage.links_count);
-            if ((sessionStorage.nodes_feature != null) && (sessionStorage.nodes_feature != "")) nodes_feature = jQuery.parseJSON(sessionStorage.nodes_feature);
-            if ((sessionStorage.links_feature != null) && (sessionStorage.links_feature != "")) links_feature = jQuery.parseJSON(sessionStorage.links_feature);
             if ((sessionStorage.current_item_index != null) && (sessionStorage.current_item_index != "")) current_item_index = sessionStorage.current_item_index;
             if ((sessionStorage.current_type != null) && (sessionStorage.current_type != "")) current_type = sessionStorage.current_type;
             if ((sessionStorage.refresh_time != null) && (sessionStorage.refresh_time != "")) refresh_time = sessionStorage.refresh_time;
@@ -698,8 +685,6 @@ function NetTMap_module() {
             sessionStorage.nodes_count = nodes_count.toString();
             sessionStorage.links = JSON.stringify(links);
             sessionStorage.links_count = links_count.toString();
-            sessionStorage.nodes_feature = JSON.stringify(nodes_feature);
-            sessionStorage.links_feature = JSON.stringify(links_feature);
             sessionStorage.current_type = current_type;
             sessionStorage.current_item_index = current_item_index;
             sessionStorage.refresh_time = refresh_time;
@@ -717,8 +702,7 @@ function NetTMap_module() {
             function (e) { console.log('Error', e); }
         );*/
     }
-
-
+    
     function save_setting() {
         refresh_time = document.getElementById("refresh_time_input").value;
         history_interval = document.getElementById("history_time_input").value;

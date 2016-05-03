@@ -9,20 +9,62 @@ function NetTMap_chart(id, width, height) {
     var current_address;
     var current_token;
     var current_node_index; // pokud se jedna o linku, musim najit sondu
-    var history_interval;
+    var history_interval = '86400000';
+
+    function get_index_node_by_id(id) {
+        for (var count = 0; count < nodes.length; count++) {
+            if (nodes[count].id == id) return count;
+        }
+    }
+    function get_index_link_by_id(id) {
+        for (var count = 0; count < links.length; count++) {
+            if (links[count].id == id) return count;
+        }
+    }
 
     // vytvori zalozky
     function create_tab() {
         tabs = d3.select("#" + id).append("ul").attr("class", "nav nav-tabs");
-        tabs.append("li").attr("id", "device_info_tab").attr("class", "active").append("a").attr("data-toggle", "tab").attr("href", "#device_info").text("Device info");
-        tabs.append("li").attr("id", "traffic_chart_tab").append("a").attr("data-toggle", "tab").attr("href", "#traffic_chart").text("Traffic");
-        tabs.append("li").attr("id", "profile_live_tab").append("a").attr("data-toggle", "tab").attr("href", "#profile_live").text("Profile live");
+        if (current_type == 'L') {
+            if (links[current_item_index].probe != '') { // linka + sonda
+                tabs.append("li").attr("id", "traffic_chart_tab").attr("class", "active").append("a").attr("data-toggle", "tab").attr("href", "#traffic_chart").text("Traffic");
+                tabs.append("li").attr("id", "device_info_tab").append("a").attr("data-toggle", "tab").attr("href", "#device_info").text("Link info");
+                tabs.append("li").attr("id", "profile_live_tab").append("a").attr("data-toggle", "tab").attr("href", "#profile_live").text("Profile live");
+
+                contents = d3.select("#" + id).append("div").attr("class", "tab-content");
+                contents.append("div").attr("id", "traffic_chart").attr("class", "tab-pane fade in active").append("p").attr("id", "traffic_chart_content").text("Loading ...");
+                contents.append("div").attr("id", "device_info").attr("class", "tab-pane fade ").append("p").attr("id", "device_info_content").text("Loading ...");
+                contents.append("div").attr("id", "profile_live").attr("class", "tab-pane fade").append("p").attr("id", "profile_live_content").text("Loading ...");
+            }
+            else {
+                tabs.append("li").attr("id", "device_info_tab").attr("class", "active").append("a").attr("data-toggle", "tab").attr("href", "#device_info").text("Link info");
+                //tabs.append("li").attr("id", "traffic_chart_tab").append("a").attr("data-toggle", "tab").attr("href", "#traffic_chart").text("Traffic");
+                //tabs.append("li").attr("id", "profile_live_tab").append("a").attr("data-toggle", "tab").attr("href", "#profile_live").text("Profile live");
+
+                contents = d3.select("#" + id).append("div").attr("class", "tab-content");
+                contents.append("div").attr("id", "device_info").attr("class", "tab-pane fade in active").append("p").attr("id", "device_info_content").text("Loading ...");
+            }
+        }
+        else {
+            if (nodes[current_item_index].type_node == "R") {
+                tabs.append("li").attr("id", "device_info_tab").attr("class", "active").append("a").attr("data-toggle", "tab").attr("href", "#device_info").text("Router info");
+
+                contents = d3.select("#" + id).append("div").attr("class", "tab-content");
+                contents.append("div").attr("id", "device_info").attr("class", "tab-pane fade in active").append("p").attr("id", "device_info_content").text("Loading ...");
+            }
+            else {
+                tabs.append("li").attr("id", "traffic_chart_tab").attr("class", "active").append("a").attr("data-toggle", "tab").attr("href", "#traffic_chart").text("Traffic");
+                tabs.append("li").attr("id", "device_info_tab").append("a").attr("data-toggle", "tab").attr("href", "#device_info").text("NetFlow probe info");
+                tabs.append("li").attr("id", "profile_live_tab").append("a").attr("data-toggle", "tab").attr("href", "#profile_live").text("Profile live");
+
+                contents = d3.select("#" + id).append("div").attr("class", "tab-content");
+                contents.append("div").attr("id", "traffic_chart").attr("class", "tab-pane fade in active").append("p").attr("id", "traffic_chart_content").text("Loading ...");
+                contents.append("div").attr("id", "device_info").attr("class", "tab-pane fade ").append("p").attr("id", "device_info_content").text("Loading ...");
+                contents.append("div").attr("id", "profile_live").attr("class", "tab-pane fade").append("p").attr("id", "profile_live_content").text("Loading ...");
+            }
+        }
         // mozna by slo pridat interface, profiles
 
-        contents = d3.select("#" + id).append("div").attr("class", "tab-content");
-        contents.append("div").attr("id", "device_info").attr("class", "tab-pane fade in active").append("p").attr("id", "device_info_content").text("Loading ...");
-        contents.append("div").attr("id", "traffic_chart").attr("class", "tab-pane fade").append("p").attr("id", "traffic_chart_content").text("Loading ...");
-        contents.append("div").attr("id", "profile_live").attr("class", "tab-pane fade").append("p").attr("id", "profile_live_content").text("Loading ...");
     }
 
     function load_local_variable() {
@@ -32,11 +74,11 @@ function NetTMap_chart(id, width, height) {
             links = jQuery.parseJSON(sessionStorage.links);
             current_item_index = sessionStorage.current_item_index;
             current_type = sessionStorage.current_type;
+            if ((sessionStorage.history_interval != null) && (sessionStorage.history_interval != "")) history_interval = sessionStorage.history_interval;
         } else {
             alert("Local storage isn't support");
         }
     }
-
     function save_local_variable() {
         // nacteni z HTML5 lokalniho uloziste
         if (typeof (Storage) !== "undefined") {
@@ -70,23 +112,18 @@ function NetTMap_chart(id, width, height) {
             }
         }
         else if (current_type == "L") { // jedna se o linku
-            if (links[current_item_index].node == "") // jedna se o linku mezi routery
+            if (links[current_item_index].probe == "") // jedna se o linku mezi routery
                 show_link_info(); // zobrazi info o lince
             else {  // najde uzel a zjisti token a adresu
-                for (var count = 0; count < nodes.length; count++) {
-                    if (nodes[count].name == links[current_item_index].node) {
-                        current_address = nodes[count].address;
-                        if ((nodes[count].token != "") && (nodes[count].token != null)) {
-                            current_node_index = count;
-                            get_data_profile();
-                            get_data_sensor();
-                            get_data_traffic();
-                        }
-                        else
-                            get_token();
-                        break;
-                    }
+                current_node_index = get_index_node_by_id(links[current_item_index].probe);
+                current_address = nodes[current_node_index].hostname;
+                if ((nodes[current_node_index].token != "") && (nodes[current_node_index].token != null)) {
+                    get_data_profile();
+                    get_data_sensor();
+                    get_data_traffic();
                 }
+                else
+                    get_token();                
             }
         }
     }
@@ -97,15 +134,15 @@ function NetTMap_chart(id, width, height) {
         if (current_address != null)
             host = current_address;
         else
-            host = nodes[current_item_index].address
+            host = nodes[current_item_index].hostname;
         //var host = "collector-devel.ics.muni.cz";//"147.251.14.50";////"192.168.51.145";// collector-devel.ics.muni.cz
         $.ajax({
             type: "POST",
             url: "https://" + host + "/resources/oAuth/token",
             contentType: "application/x-www-form-urlencoded",
             data: {
-                "username": "rest",// UCO
-                "password": "r3st&ful",// sekundarni heslo
+                "username": "nettmap",// UCO
+                "password": "N3tTM4p&h3sl0",// sekundarni heslo
                 "client_id": "invea-tech",
                 "grant_type": "password"
             },
@@ -136,12 +173,6 @@ function NetTMap_chart(id, width, height) {
 
     // vrati pocatecni casovy udaji zaznamu provozu ze sondy s ohledem na nastavenou konstantu obnovy
     function get_start_dateTime() {
-        var refresh_time = null;
-        if (typeof (Storage) !== "undefined") {
-            history_interval = sessionStorage.history_interval;
-        } else {
-            alert("Local storage isn't support");
-        }
         var start_time;
         if (history_interval == null) // defaultni hodnota je jeden den
             start_time = new Date(new Date().setDate(new Date().getDate() - 1));
@@ -149,7 +180,6 @@ function NetTMap_chart(id, width, height) {
             start_time = new Date(new Date() - history_interval);
         return start_time.toJSON().slice(0, 10) + ' ' + start_time.toJSON().slice(11, 16);
     }
-
     // vrati casovy udaj pro posledni zaznam datam provozu ze sondy
     function get_end_dateTime() {
         return new Date().toJSON().slice(0, 10) + ' ' + new Date().toJSON().slice(11, 16);
@@ -160,7 +190,7 @@ function NetTMap_chart(id, width, height) {
         if (current_address != null)
             host = current_address;
         else
-            host = nodes[current_item_index].address
+            host = nodes[current_item_index].hostname;
 
         if (nodes[current_node_index].token != "") current_token = nodes[current_node_index].token;
 
@@ -190,13 +220,12 @@ function NetTMap_chart(id, width, height) {
             },
         });
     }
-
     function get_data_sensor() {
         var host = "";
         if (current_address != null)
             host = current_address;
         else
-            host = nodes[current_item_index].address
+            host = nodes[current_item_index].hostname;
 
         if (nodes[current_node_index].token != "") current_token = nodes[current_node_index].token;
 
@@ -205,7 +234,6 @@ function NetTMap_chart(id, width, height) {
             url: "https://" + host + "/rest/fcc/device", // typ zobrazovaneho grafu
             headers: { "Authorization": "bearer " + current_token },
             success: function (msg) {
-                // na obj je aplikovan json,ktery byl nacten
                 parse_data_device(msg);
             },
             error: function (a, b, err) {
@@ -215,13 +243,12 @@ function NetTMap_chart(id, width, height) {
             },
         });
     }
-
     function get_data_profile() {
         var host = "";
         if (current_address != null)
             host = current_address;
         else
-            host = nodes[current_item_index].address
+            host = nodes[current_item_index].hostname;
 
         if (nodes[current_node_index].token != "") current_token = nodes[current_node_index].token;
 
@@ -231,7 +258,6 @@ function NetTMap_chart(id, width, height) {
             headers: { "Authorization": "bearer " + current_token },
             data: { id: "live" },
             success: function (msg) {
-                // na obj je aplikovan json,ktery byl nacten
                 parse_data_profile(msg);
             },
             error: function (a, b, err) {
@@ -254,11 +280,15 @@ function NetTMap_chart(id, width, height) {
 
         var row = info_table.append("tr");
         row.append("td").text("Router name: ");
-        row.append("td").text(nodes[current_item_index].name);
+        row.append("td").text(nodes[current_item_index].hostname);
 
         row = info_table.append("tr");
         row.append("td").text("Description: ");
         row.append("td").text(nodes[current_item_index].description);
+
+        row = info_table.append("tr");
+        row.append("td").text("Address: ");
+        row.append("td").text(nodes[current_item_index].address);
 
         row = info_table.append("tr");
         row.append("td").text("Longitude: ");
@@ -268,7 +298,6 @@ function NetTMap_chart(id, width, height) {
         row.append("td").text("Latitude: ");
         row.append("td").text(nodes[current_item_index].lat);
     }
-
     function show_link_info() {
         d3.selectAll("#traffic_chart_content").remove();
         var info_table = d3.selectAll("#traffic_chart").append("p").attr("id", "traffic_chart_content").text("No data traffic");
@@ -365,25 +394,14 @@ function NetTMap_chart(id, width, height) {
         row1.append("td").text(formatSizeUnits(data.dataDiskUsage.usage));
 
     }
-
     // parsuje a zobrazuje json data s provozem site
     function parse_data_traffic(data) {
         d3.selectAll("#traffic_chart_content").remove();
-        var channel_name;
-        if (current_type == 'L') {
-            for (var count = 0; count < links.length; count++) {
-                if ((links[count].source.name == links[current_item_index].source.name) &&
-                    (links[count].target.name == links[current_item_index].target.name) &&
-                    (links[count].channel != links[current_item_index].channel))
-                    channel_name = links[count].channel;
-            }
-        }
-        
 
         for (var count_result = 0; count_result < data.length; count_result++) {
             if (current_type == 'L') {
-                if ((links[current_item_index].channel != data[count_result].channel.name) &&
-                    (channel_name != data[count_result].channel.name))
+                if ((links[current_item_index].channel1 != data[count_result].channel.name) &&
+                    (links[current_item_index].channel2 != data[count_result].channel.name))
                     continue;
             }
 
@@ -476,7 +494,6 @@ function NetTMap_chart(id, width, height) {
             });
         }
     }
-
     // parsuje a zobrazi json data o profile live ze sondy
     function parse_data_profile(data) {
         last_time = data.end;
