@@ -1,0 +1,67 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "geometry": {
+        "type": "Point",
+        "coordinates": [ 16.612972, 49.196153 ]
+      },
+      "properties": {
+        "hostname": "Brno",
+        "id": "0",
+        "type_node": "R",
+        "description": "Brnensku router",
+        "address": "Botanicka"
+      },
+      "type": "Feature"
+    },
+    {
+      "geometry": {
+        "type": "Point",
+        "coordinates": [ 14.420251, 50.087442 ]
+      },
+      "properties": {
+        "hostname": "Praha",
+        "id": "1",
+        "type_node": "R",
+        "description": "Prazky router",
+        "address": "Vaclavak"
+      },
+      "type": "Feature"
+    },
+    {
+      "geometry": {
+        "type": "Point",
+        "coordinates": [ 15.495666, 49.013079 ]
+      },
+      "properties": {
+        "hostname": "flowmon-cps-cesnet.mgmt.ics.muni.cz",
+        "id": "2",
+        "type_node": "P",
+        "description": "Sonda",
+        "address": "Breclav"
+      },
+      "type": "Feature"
+    },
+    {
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [ 16.612972, 49.196153 ],
+          [ 14.420251, 50.087442 ]
+        ]
+      },
+      "properties": {
+        "source": "0",
+        "id": "0",
+        "target": "1",
+        "channel1": "127.0.0.1 (flowmon-cps-cesnet.mgmt.ics.muni.cz), p3000",
+        "channel2": "127.0.0.1 (flowmon-cps-cesnet.mgmt.ics.muni.cz)",
+        "speed": "10000",
+        "probe": "2",
+        "name": "Brno - Praha"
+      },
+      "type": "Feature"
+    }
+  ]
+}

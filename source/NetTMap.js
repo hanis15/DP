@@ -430,6 +430,7 @@ function NetTMap_module() {
         var x_data = [];
         var y_data = [];
 
+        nodes_feature = jQuery.parseJSON('[' + composition_nodes() + ']');
         for (var count = 0; count < nodes_feature.length; count++) {    
             x_data.push(nodes_feature[count].geometry.coordinates[0]);
             y_data.push(nodes_feature[count].geometry.coordinates[1]);
@@ -450,7 +451,7 @@ function NetTMap_module() {
             "opacity": 1
         };
 
-        all_feature = nodes_feature.concat(links_feature);
+        all_feature = nodes_feature.concat(jQuery.parseJSON('[' + composition_links_map() + ']'));
 
         // vlozeni uzlu do mapy jako obrazky
         var geoJsonLayer = L.geoJson(all_feature, {
@@ -476,10 +477,10 @@ function NetTMap_module() {
         // pridani uzlum ID + index v seznamu uzlu
         geoJsonLayer.eachLayer(function (layer) {
             if (layer.feature.geometry.type == 'LineString')
-                layer._path.id = 'link_' + layer.feature.properties.index;
+                layer._path.id = 'link_' + layer.feature.properties.id;
             else {
-                layer._icon.id = 'node_' + layer.feature.properties.index;
-                layer._icon.title = layer.feature.properties.name;
+                layer._icon.id = 'node_' + layer.feature.properties.id;
+                layer._icon.title = layer.feature.properties.hostname;
             }
         });
        
@@ -492,12 +493,12 @@ function NetTMap_module() {
             // najdu odpovidajici linku pro aktualni feature
             if (e.popup._source.feature.geometry.type == "LineString") {
                 current_type = 'L';
-                current_item_index = e.popup._source.feature.properties.index;
+                current_item_index = e.popup._source.feature.properties.id;
             }
             else {
                 current_type = 'N';
                 for (var count = 0; count < nodes.length; count++) {
-                    if (e.popup._source.feature.properties.name == nodes[count].name) {
+                    if (e.popup._source.feature.properties.id == nodes[count].id) {
                         current_item_index = count;
                         break;
                     }
@@ -856,7 +857,7 @@ function NetTMap_module() {
             update_all_tables();
             document.getElementById('file_name_label').innerHTML = 'File: ---';
 
-            alert = d3.select('#body').insert('div', ":first-child").attr('class', 'alert alert-danger alert-position').attr("id", "danger_alert");
+            alert = d3.select('body').insert('div', ":first-child").attr('class', 'alert alert-danger alert-position').attr("id", "danger_alert");
             alert.append("button").attr("type", "button").attr("class", "close").attr("data-dismiss", "alert");
             $("#danger_alert button").html('<i class="fa fa-times" />');
             alert.append("p").text("Topology was deleted.");
@@ -898,12 +899,12 @@ function NetTMap_module() {
             table_row.attr("id", "link_" + links[count].id);
             table_row.append("td").text(links[count].name);
             table_row.append("td").text(function () { return (links[count].speed / 1000) + 'G'; });
-            table_row.append("td").text(nodes[parseInt(links[count].source)].hostname);
-            table_row.append("td").text(nodes[parseInt(links[count].target)].hostname);
+            table_row.append("td").text(nodes[get_index_node_by_id(links[count].source)].hostname);
+            table_row.append("td").text(nodes[get_index_node_by_id(links[count].target)].hostname);
             if (links[count].probe == "")
                 table_row.append("td");
             else
-                table_row.append("td").text(nodes[parseInt(links[count].probe)].hostname);
+                table_row.append("td").text(nodes[get_index_node_by_id(links[count].probe)].hostname);
             table_row.append("td").text(links[count].channel1);
             table_row.append("td").text(links[count].channel2);
             action_td = table_row.append("td").attr("class", "col-md-1").attr("align", "center").append("div").attr("class", "btn-group");
@@ -1001,6 +1002,16 @@ function NetTMap_module() {
     }
 
     // funkce pro praci s links, nodes, tables
+    function get_index_node_by_id(id) {
+        for (var count = 0; count < nodes.length; count++) {
+            if (nodes[count].id == id) return count;
+        }
+    }
+    function get_index_link_by_id(id) {
+        for (var count = 0; count < links.length; count++) {
+            if (links[count].id == id) return count;
+        }
+    }
     function get_new_id_link() {
         new_id = links_count;
         links_count += 1;
@@ -1045,26 +1056,15 @@ function NetTMap_module() {
                 node.long = data.features[count].geometry.coordinates[0];
                 node.lat = data.features[count].geometry.coordinates[1];
                 nodes.push(node);
-                nodes_feature.push(data.features[count]);
+                //nodes_feature.push(data.features[count]);
             }
             else {
                 links.push(data.features[count].properties);
-                links_feature.push(data.features[count]);
-            }
-        }
-
-        for (count = 0; count < links.length; count++) {
-            links[count].index = count;
-            for (n_count = 0; n_count < nodes.length; n_count++) {
-                if (links[count].source == nodes[n_count].name)
-                    links[count].source = n_count;
-                if (links[count].target == nodes[n_count].name)
-                    links[count].target = n_count;
+                //links_feature.push(data.features[count]);
             }
         }
 
         for (count = 0; count < nodes.length; count++) {
-            nodes[count].index = count;
             nodes[count].token = '';
         }
         update_all_tables();
@@ -1290,11 +1290,10 @@ function NetTMap_module() {
         update_all_tables();
     }
 
-    function create_file() {
-        content = '{ "type": "FeatureCollection", "features": ['; // start
-        curr_node = "";
 
+    function composition_nodes() {
         // uklada uzly
+        var content = '';
         for (count = 0; count < nodes.length; count++) {
             curr_node = '{ "geometry": { "type": "Point", "coordinates": [ '
                         + nodes[count].long + ', ' + nodes[count].lat + ' ]},';
@@ -1307,42 +1306,27 @@ function NetTMap_module() {
             if (count != nodes.length - 1) { curr_node += ','; }
             content += curr_node;
         }
+        return content;
+    }
+    function composition_links_map() {
+        var content = '';
+        
+        for (var count = 0; count < links.length; count++) {
+            var tmp_index = get_index_node_by_id(links[count].source);
+            var source_coordinates = '[ ' + nodes[tmp_index].long + ', ' + nodes[tmp_index].lat + ' ]';
 
-        if (links.length != 0) { content += ','; }
-
-        // uklada linky
-        for (count = 0; count < links.length; count++) {
-            source_coordinates = "";
-            for (s_count = 0; s_count < nodes.length; s_count++) {
-                if (nodes[s_count].id == links[count].source) {
-                    source_coordinates = '[ ' + nodes[s_count].long + ', ' + nodes[s_count].lat + ' ]';
-                    break;
-                }
-            }
-
-            dest_coordinates = "";
-            for (d_count = 0; d_count < nodes.length; d_count++) {
-                if (nodes[d_count].id == links[count].target) {
-                    dest_coordinates = '[ ' + nodes[d_count].long + ', ' + nodes[d_count].lat + ' ]';
-                    break;
-                }
-            }
-
+            tmp_index = get_index_node_by_id(links[count].target);
+            var dest_coordinates = '[ ' + nodes[tmp_index].long + ', ' + nodes[tmp_index].lat + ' ]';
+            
             if (links[count].probe != '') { // linka spojuje 2 uzly -> je na ni sonda
-                var probe_index = 0;
-                for (p_count = 0; p_count < nodes.length; p_count++) {
-                    if ((nodes[p_count].id == links[count].probe) && (nodes[p_count].type_node == 'S')) {
-                        probe_index = p_count;
-                        break;
-                    }
-                }
-
+                var probe_index = get_index_node_by_id(links[count].probe);
                 var probe_coordinates = '[' + nodes[probe_index].long + ', ' + nodes[probe_index].lat + ' ]';
 
                 // vytvorim 2 linky
                 curr_node = '{ "geometry": { "type": "LineString", "coordinates": [ ' + source_coordinates + ', ' + probe_coordinates + ' ]},';
                 curr_node += '"properties": { "source": "' + links[count].source
-                            + '", "target": "' + nodes[probe_index].hostname
+                            + '", "id": "' + links[count].id
+                            + '", "target": "' + nodes[probe_index].id
                             + '", "channel1": "' + links[count].channel1
                             + '", "channel2": "' + links[count].channel2
                             + '", "speed": "' + links[count].speed
@@ -1352,7 +1336,8 @@ function NetTMap_module() {
                 content += curr_node;
 
                 curr_node = '{ "geometry": { "type": "LineString", "coordinates": [ ' + probe_coordinates + ', ' + dest_coordinates + ' ]},';
-                curr_node += '"properties": { "source": "' + nodes[probe_index].hostname
+                curr_node += '"properties": { "source": "' + nodes[probe_index].id
+                            + '", "id": "' + links[count].id
                             + '", "target": "' + links[count].target
                             + '", "channel1": "' + links[count].channel1
                             + '", "channel2": "' + links[count].channel2
@@ -1366,17 +1351,51 @@ function NetTMap_module() {
             else {
                 curr_node = '{ "geometry": { "type": "LineString", "coordinates": [ ' + source_coordinates + ', ' + dest_coordinates + ' ]},';
                 curr_node += '"properties": { "source": "' + links[count].source
+                            + '", "id": "' + links[count].id
                             + '", "target": "' + links[count].target
                             + '", "channel1": "' + links[count].channel1
                             + '", "channel2": "' + links[count].channel2
                             + '", "speed": "' + links[count].speed
-                            + '", "node": "' + links[count].probe
+                            + '", "probe": "' + links[count].probe
                             + '", "name": "' + links[count].name + '"},';
                 curr_node += '"type": "Feature" }';
                 if (count != links.length - 1) { curr_node += ','; }
                 content += curr_node;
             }
         }
+        return content;
+    }
+    function composition_links_export() {
+        var content = '';
+
+        for (var count = 0; count < links.length; count++) {
+            var tmp_index = get_index_node_by_id(links[count].source);
+            var source_coordinates = '[ ' + nodes[tmp_index].long + ', ' + nodes[tmp_index].lat + ' ]';
+
+            var tmp_index = get_index_node_by_id(links[count].target);
+            var dest_coordinates = '[ ' + nodes[tmp_index].long + ', ' + nodes[tmp_index].lat + ' ]';
+
+            curr_node = '{ "geometry": { "type": "LineString", "coordinates": [ ' + source_coordinates + ', ' + dest_coordinates + ' ]},';
+            curr_node += '"properties": { "source": "' + links[count].source
+                        + '", "id": "' + links[count].id
+                        + '", "target": "' + links[count].target
+                        + '", "channel1": "' + links[count].channel1
+                        + '", "channel2": "' + links[count].channel2
+                        + '", "speed": "' + links[count].speed
+                        + '", "probe": "' + links[count].probe
+                        + '", "name": "' + links[count].name + '"},';
+            curr_node += '"type": "Feature" }';
+            if (count != links.length - 1) { curr_node += ','; }
+            content += curr_node;
+        }
+        return content;
+    }
+    function create_file() {
+        content = '{ "type": "FeatureCollection", "features": ['; // start
+
+        content += composition_nodes();
+        if (links.length != 0) { content += ','; }
+        content += composition_links_export();
         content += ']}';    // end
         var blob = new Blob([content], { type: "application/json" });
         var url = URL.createObjectURL(blob);
