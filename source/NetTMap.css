@@ -11,6 +11,11 @@ svg {
   height: 500px;
 }
 
+.alert-position {
+    position: absolute;
+    width: 100%;
+    top: 50px;
+}
 
 .ui-tooltip, .qtip{
     position: absolute;
@@ -43,6 +48,10 @@ form input.error {
     display: block;
     width: 90%;
     table-layout: fixed;
+}
+
+.alert{
+    display: none;
 }
 
 .axis {

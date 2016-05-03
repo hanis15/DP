@@ -28,16 +28,19 @@ function NetTMap_module() {
     var input_form;                         // hlavicka stranky - zobrazuje se nad grafem
     var color_spectrum_block;               // paticka stranky - zobrazuje se pod grafem
     var color_spectrum_scale;               // barevna skala pro zobrazeni vytizeni linky
+
     var nodes = [];                         // pole vsech nactenych uzlu
-    var nodes_count;                        // citac uzlu - pouziva se pro jednoznacnou identifikaci uzlu
+    var nodes_count = 0;                    // citac uzlu - pouziva se pro jednoznacnou identifikaci uzlu
     var links = [];                         // pole vsech nactenych linek
-    var links_count;                        // citac linek - pouziva se pro jednoznacnou identifikaci linek
+    var links_count = 0;                    // citac linek - pouziva se pro jednoznacnou identifikaci linek
     var nodes_feature = [];                 // geoJson uzlu
     var links_feature = [];                 // geoJson linek
     var current_type;                       // urcuje typ zobrazovanych dat v popup ('L' = linka, 'N' = uzel)
     var current_item_index;                 // index prenaseny do popup, urcuje index v danem poli
     var refresh_time = '0';                 // interval po kterem se maji update stavu linek
-    var history_interval;
+    var history_interval = '0';
+    var source_file_name = '';              // nazev nahraneho souboru
+
     var last_time_update;                   // posledni cas refresh
 
     var path_hw_type = 'probe_type.json'; // cesta k souboru s typem hardware sond
@@ -46,7 +49,6 @@ function NetTMap_module() {
     var type_action;                        // udava jake akce se maji provest pro danny dialog ('new', 'edit')
 
     var zoom;                               // urcuje uroven zoom na mape
-    var raw_json = '';                      // nezpracovany obsah souboru
 // ------------------------------------------------------------------------------------------------------------
     // verejne funkce
     this.initialize = init_graph;
@@ -58,6 +60,10 @@ function NetTMap_module() {
 
     this.save_link = save_link;
     this.prepare_link_form = prepare_link;
+
+    this.save_link_probe = save_link_probe;
+    this.prepare_link_probe_form = prepare_link_probe;
+    this.load_channel_name = load_channel_name;
     
     // inicializuje box pro zobrazeni grafu / mapy
     function init_graph(i, type, w, h) {
@@ -133,14 +139,15 @@ function NetTMap_module() {
 
     // ziska z adresy v uzlu pristupovy token
     function get_token(node_index) {
-        var host = nodes[node_index].address
+        var host = nodes[node_index].hostname;
+        document.body.style.cursor = 'wait';
         $.ajax({
             type: "POST",
             url: "https://" + host + "/resources/oAuth/token",
             contentType: "application/x-www-form-urlencoded",
             data: {
-                "username": "rest",// UCO
-                "password": "r3st&ful",// sekundarni heslo
+                "username": "nettmap",// UCO
+                "password": "N3tTM4p&h3sl0",// sekundarni heslo
                 "client_id": "invea-tech",
                 "grant_type": "password"
             },
@@ -149,18 +156,25 @@ function NetTMap_module() {
                 token = msg.access_token;
                 nodes[node_index].token = msg.access_token;
                 nodes[node_index].token_refresh = msg.refresh_token;
-                save_local_variable();
-                get_data_traffic(token, node_index);
+                if (type_visual_data == 'configure') {
+                    get_channel_name(token, node_index);
+                }
+                else {
+                    save_local_variable();
+                    get_data_traffic(token, node_index);
+                }
             },
 
             error: function (a, b, err) {
                 console.log(err);
+                document.body.style.cursor = 'default';
             },
         });
     }
     // ziska data o provozu
     function get_data_traffic(token, node_index) {
-        var host = nodes[node_index].address;
+        var host = nodes[node_index].hostname;
+        document.body.style.cursor = 'wait';
         $.ajax({
             type: "GET",
             url: "https://" + host + "/rest/fmc/analysis/chart", // typ zobrazovaneho grafu
@@ -179,9 +193,11 @@ function NetTMap_module() {
             success: function (msg) {
                 // na obj je aplikovan json,ktery byl nacten
                 parse_data_traffic(msg, node_index);
+                document.body.style.cursor = 'default';
             },
             error: function (a, b, err) {
                 console.log(err);
+                document.body.style.cursor = 'default';
             },
         });
     }
@@ -202,6 +218,27 @@ function NetTMap_module() {
             }
         }
     }
+    // ziska jmena vsech channel na dane sonde - pro list boxy v konfiguraci
+    function get_channel_name(token, node_index) {
+        var host = nodes[node_index].hostname;
+        document.body.style.cursor = 'wait';
+        $.ajax({
+            type: "GET",
+            url: "https://" + host + "/rest/fmc/profiles/id", // typ zobrazovaneho grafu
+            headers: { "Authorization": "bearer " + token },
+            data: { id: "live" },
+            success: function (msg) {
+                // na obj je aplikovan json,ktery byl nacten
+                insert_channel_name(msg, node_index);
+                document.body.style.cursor = 'default';
+            },
+            error: function (a, b, err) {
+                console.log(err);
+                document.body.style.cursor = 'default';
+            },
+        });
+    }
+
 
     // projde vsechny uzly a provede refresh dat - refresh
     function refresh_links() {
@@ -574,21 +611,7 @@ function NetTMap_module() {
     function new_setting() {
         load_local_variable();
         default_input_form = d3.select('#' + id).append("table").style("width", width + 'px').attr("id", "settings_content");
-        row1 = default_input_form.append("tr");
-        row1.append("td").append("p").text("File: ");
-        row1.append("td").attr("align", "left")
-                            .append("button")
-                            .attr("id", "input_geo_json_button")
-                            .text("Load file")
-                            .attr("onclick", "$('#input_geo_json_file').trigger('click');")
-                            .attr("class", "btn-primary");
-        row1.append("input")
-            .attr("type", "file")
-            .attr("id", "input_geo_json_file")
-            .style("display", "none");
-                            
-        
-        default_input_form.append("br");
+
         row1 = default_input_form.append("tr");
         row1.append("td").append("p").text("History interval: ");
         history_time_select = row1.append("td").attr("align", "left").append("select")
@@ -616,25 +639,11 @@ function NetTMap_module() {
         if (history_interval != "0") document.getElementById("history_time_input").value = history_interval;
         document.getElementById("refresh_time_input").value = refresh_time;
 
-        document.getElementById('input_geo_json_file')
-            .addEventListener('change', readSingleFile, false);
         document.getElementById('save_setting_button')
             .addEventListener('click', save_setting, false);
 
     }
 
-    function readSingleFile(e) {
-        var file = e.target.files[0];
-        d3.select("#input_geo_json_button").text(file.name);
-        if (!file) {
-            return;
-        }
-        var reader = new FileReader();
-        reader.onload = function (e) {
-            raw_json = jQuery.parseJSON(e.target.result);
-        };
-        reader.readAsText(file);
-    }
     
     // inicializuje lokalni promenne, inicializuje lokalni pamet
     function init_local_variables() {
@@ -648,6 +657,7 @@ function NetTMap_module() {
             sessionStorage.history_interval = "0";
             sessionStorage.nodes_count = "0";
             sessionStorage.links_count = "0";
+            sessionStorage.source_file_name = "";
             nodes = [];
             links = [];
             nodes_feature = [];
@@ -656,6 +666,7 @@ function NetTMap_module() {
             current_type = "";
             refresh_time = '0';
             history_interval = '0';
+            source_file_name = "";
         } else {
             alert("Local storage isn't support");
         }
@@ -674,6 +685,7 @@ function NetTMap_module() {
             if ((sessionStorage.current_type != null) && (sessionStorage.current_type != "")) current_type = sessionStorage.current_type;
             if ((sessionStorage.refresh_time != null) && (sessionStorage.refresh_time != "")) refresh_time = sessionStorage.refresh_time;
             if ((sessionStorage.history_interval != null) && (sessionStorage.history_interval != "")) history_interval = sessionStorage.history_interval;
+            if ((sessionStorage.source_file_name != null) && (sessionStorage.source_file_name != "")) source_file_name = sessionStorage.source_file_name;
         } else {
             alert("Local storage isn't support");
         }
@@ -691,19 +703,340 @@ function NetTMap_module() {
             sessionStorage.current_item_index = current_item_index;
             sessionStorage.refresh_time = refresh_time;
             sessionStorage.history_interval = history_interval;
+            sessionStorage.source_file_name = source_file_name;
         }
         else {
             alert("Local storage isn't support");
         }
-
+        /*
+        navigator.webkitTemporaryStorage.queryUsageAndQuota(
+        function (usedBytes, grantedBytes) {
+                console.log('we are using ', usedBytes, ' of ', grantedBytes, 'bytes');
+            },
+            function (e) { console.log('Error', e); }
+        );*/
     }
 
+
+    function save_setting() {
+        refresh_time = document.getElementById("refresh_time_input").value;
+        history_interval = document.getElementById("history_time_input").value;
+        save_local_variable();
+    }
+// ------------------------------------------------------------------------------------------------------------
+    // funkce pro zobrazeni formularu ke konfiguraci geoJson souboru
+    function new_configure_file() {
+        load_local_variable();
+        if (type_visual_data == 'configure')
+            create_main_form();
+        else
+            create_probe_form();
+    }
+    // vytvoreni formularu pro vkladani uzlu, linek, tabulky s existujicimi linkami, uzly
+    function create_main_form() {
+        tables = d3.select('#' + id).append("div").attr("id", "tables_block");
+        head = tables.append("table").attr("class", "table").append("tr");
+        head.append("th").append("h1").text("Topology configuration");
+        head = head.append("th").style("width", "30px");
+        head.append("button").attr("type", "button").attr("class", "btn btn-primary")
+            .attr("id", "load_file_button").attr("title", "Load file with topology");
+        head.append("input")
+            .attr("type", "file")
+            .attr("id", "input_geo_json_file")
+            .style("display", "none");
+
+        $("#load_file_button").html('<i class="fa fa-upload" />&nbsp Load file');
+        head.append('span').attr('width', $('#load_file_button').width() + 'px').attr("class", "label label-default").attr("id", "file_name_label")
+            .text("File: " + (((source_file_name == "") || (source_file_name == 'undefined')) ? "---" : source_file_name));
+        document.getElementById('load_file_button').addEventListener('click', function () { $('#input_geo_json_file').trigger('click'); }, false);
+        document.getElementById('input_geo_json_file').addEventListener('change', load_file, false);
+
+        // -------------------------------------------------------------------------------------------------------------------
+        // tabulka pro zobrazeni linek
+        head = tables.append("table").append("tr");
+        head.append("th").append("h2").text("Links");
+        head.append("th").style("width", "20px");
+        head.append("th").append("a").attr("href", "template/link.html").attr("class", "btn btn-success btn-sm")
+            .attr("data-toggle", "modal").attr("data-target", "#detailModal").attr("id", "add_link_button").attr("title", "New link");
+        $("#add_link_button").html('<i class="fa fa-plus fa-fw" />');
+        title_link = tables
+             .append("table")
+             .attr("class", "table table-hover")
+             .attr("id", "link_setting_result")
+             .attr("border", "1");
+        table_head = title_link.append("thead").attr("class", "thead-inverse").append("tr");
+        table_head.append("th").text("Name");
+        table_head.append("th").text("Speed");
+        table_head.append("th").text("Source router");
+        table_head.append("th").text("Target router");
+        table_head.append("th").text("NetFlow probe");
+        table_head.append("th").text("Channel 1");
+        table_head.append("th").text("Channel 2");
+        table_head.append("th").text("Actions");
+
+        // -------------------------------------------------------------------------------------------------------------------
+        // tabulka pro zobrazeni sond
+        head = tables.append("table").append("tr");
+        head.append("th").append("h2").text("NetFlow probe");
+        head.append("th").style("width", "20px");
+        head.append("th").append("a").attr("href", "template/probe.html").attr("class", "btn btn-success btn-sm")
+            .attr("data-toggle", "modal").attr("data-target", "#detailModal").attr("id", "add_probe_button").attr("title", "New NetFlow probe");
+        $("#add_probe_button").html('<i class="fa fa-plus fa-fw" />');
+        title = tables
+            .append("table")
+            .attr("class", "table table-hover")
+            .attr("id", "probe_setting_result")
+            .attr("border", "1");
+        table_head = title.append("thead").append("tr");
+        table_head.append("th").text("Hostname");
+        table_head.append("th").text("Longitude");
+        table_head.append("th").text("Latitude");
+        table_head.append("th").text("Address");
+        table_head.append("th").text("Description");
+        table_head.append("th").text("Actions");
+
+        // -------------------------------------------------------------------------------------------------------------------
+        // tabulka pro zobrazeni routeru
+        head = tables.append("table").append("tr");
+        head.append("th").append("h2").text("Routers");
+        head.append("th").style("width", "20px");
+        head.append("th").append("a").attr("href", "template/router.html").attr("class", "btn btn-success btn-sm")
+            .attr("data-toggle", "modal").attr("data-target", "#detailModal").attr("id", "add_router_button").attr("title", "New router");
+        $("#add_router_button").html('<i class="fa fa-plus fa-fw" />');
+
+        title = tables
+            .append("table")
+            .attr("class", "table table-hover")
+            .attr("id", "router_setting_result")
+            .attr("border", "1");
+            //.attr("width", $("#input_form_router").width());
+        table_head = title.append("thead").append("tr");
+        table_head.append("th").text("Name");
+        table_head.append("th").text("Longitude");
+        table_head.append("th").text("Latitude");
+        table_head.append("th").text("Address");
+        table_head.append("th").text("Description");
+        table_head.append("th").text("Actions");
+
+        // -------------------------------------------------------------------------------------------------------------------
+        // tlacitko pro vytvoreni exportu, ulozeni nastaveni
+        tables.append("hr");
+        button_div = tables.append("div").attr("id", "button_block").attr("class", "btn-toolbar");
+
+        button_div.append("button").attr("type", "button").attr("class", "btn btn-primary").attr('data-dismiss', 'alert')
+            .attr("id", "save_settings_button").attr("title", "Save settings");
+        $("#save_settings_button").html('<i class="fa fa-floppy-o" />&nbsp Save');
+        document.getElementById('save_settings_button').addEventListener('click', function () {
+            save_local_variable();
+
+            alert = d3.select('body').insert('div').attr('class', 'alert alert-success alert-position').attr("id", "success_alert");
+            alert.append("button").attr("type", "button").attr("class", "close").attr("data-dismiss", "alert");
+            $("#success_alert button").html('<i class="fa fa-times" />');
+            alert.append("p").text("Success. Topology was saved.");
+
+            $('#success_alert').show();
+            $("#success_alert").fadeTo(2000, 500).slideUp(500, function () {
+                $("#success_alert").alert('close');
+            });
+
+        }, false);
+
+        button_div.append("button").attr("type", "button").attr("class", "btn btn-secondary")
+            .attr("id", "save_file_button").attr("title", "Create file and download it");
+        $("#save_file_button").html('<i class="fa fa-download" />&nbsp Save file');
+        document.getElementById('save_file_button').addEventListener('click', function () {
+            create_file();
+        }, false);
+
+        button_div.append("button").attr("type", "button").attr("class", "btn btn-danger")
+            .attr("id", "clear_data_button").attr("title", "Permanent remove all data");
+        $("#clear_data_button").html('<i class="fa fa-trash-o" />&nbsp Clear all');
+        document.getElementById('clear_data_button').addEventListener('click', function () {
+            init_local_variables();
+            update_all_tables();
+            document.getElementById('file_name_label').innerHTML = 'File: ---';
+
+            alert = d3.select('#body').insert('div', ":first-child").attr('class', 'alert alert-danger alert-position').attr("id", "danger_alert");
+            alert.append("button").attr("type", "button").attr("class", "close").attr("data-dismiss", "alert");
+            $("#danger_alert button").html('<i class="fa fa-times" />');
+            alert.append("p").text("Topology was deleted.");
+
+            $('#danger_alert').show();
+            $("#danger_alert").fadeTo(2000, 500).slideUp(500, function () {
+                $("#danger_alert").alert('close');
+            });
+        }, false);
+
+        update_all_tables();
+
+        // odebrani nactenych dat po skryti modal dialogu
+        $(document).on('hidden.bs.modal', function (e) {
+            $(e.target).removeData('bs.modal');
+            type_action = '';
+            current_item_index = '';
+        });
+
+        // nastaveni parametru pro naplneni modal dialogu
+        $(document).on('show.bs.modal', function (e) {
+            var id_part = [];
+            if (e.relatedTarget.id.indexOf('add') != -1)
+                type_action = 'new';
+            else {
+                id_part = e.relatedTarget.id.split("_");
+                type_action = 'detail';
+                current_item_index = id_part[3];
+            }
+        });
+    }
+    function update_table_link() {
+        table = d3.select("#link_setting_result");
+        table.selectAll("tbody").remove();
+
+        table_body = table.append("tbody");
+        for (var count = 0; count < links.length; count++) {
+            table_row = table_body.append("tr").attr("scope", "row");
+            table_row.attr("id", "link_" + links[count].id);
+            table_row.append("td").text(links[count].name);
+            table_row.append("td").text(function () { return (links[count].speed / 1000) + 'G'; });
+            table_row.append("td").text(nodes[parseInt(links[count].source)].hostname);
+            table_row.append("td").text(nodes[parseInt(links[count].target)].hostname);
+            if (links[count].probe == "")
+                table_row.append("td");
+            else
+                table_row.append("td").text(nodes[parseInt(links[count].probe)].hostname);
+            table_row.append("td").text(links[count].channel1);
+            table_row.append("td").text(links[count].channel2);
+            action_td = table_row.append("td").attr("class", "col-md-1").attr("align", "center").append("div").attr("class", "btn-group");
+            if (links[count].probe == "") {
+                action_td.append("button") // pridani sondy
+                    .attr("href", "template/link_probe.html").attr("data-toggle", "modal").attr("data-target", "#detailModal")
+                    .attr("class", "btn btn-xs btn-success").attr("title", "Add NetFlow probe").attr("id", "link_probe1_btn_" + links[count].id);
+                $("#link_probe1_btn_" + links[count].id).html('<i class="fa fa-plug fa-fw" id="link_probe1_icon_' + links[count].id + '"></>');
+            }
+            else {
+                action_td.append("button") // pridani sondy
+                    .attr("type", "button").attr("class", "btn btn-xs btn-warning").attr("title", "Remove NetFlow probe").attr("id", "link_probe2_btn_" + links[count].id);
+                $("#link_probe2_btn_" + links[count].id).html('<i class="fa fa-eraser fa-fw" id="link_prob2_icon_' + links[count].id + '"></>');
+                document.getElementById('link_probe2_btn_' + links[count].id).addEventListener('click', function (d) {
+                    unmount_link_probe(d.target.id);
+                }, false);
+            }
+            action_td.append("button")  // detail linky
+                .attr("href", "template/link.html").attr("data-toggle", "modal").attr("data-target", "#detailModal")
+                .attr("class", "btn btn-xs btn-info").attr("title", "Info about link").attr("id", "link_info_btn_" + links[count].id);
+            $("#link_info_btn_" + links[count].id).html('<i class="fa fa-pencil-square-o fa-fw" id="link_info_icon_' + links[count].id + '"></>');
+
+            action_td.append("button")  // smazani linky
+                .attr("type", "button")
+                .attr("class", "btn btn-xs btn-danger")
+                .attr("title", "Delete link")
+                .attr("id", "link_del_btn_" + links[count].id);
+            $("#link_del_btn_" + links[count].id).html('<i class="fa fa-trash-o fa-fw" id="link_del_icon_' + links[count].id + '"></>');
+            document.getElementById("link_del_btn_" + links[count].id).addEventListener('click', function (d) {
+                delete_link(d.target.id);
+            }, false);
+        }
+    }
+    function update_table_probe() {
+        //update_list_node();
+        table = d3.select("#probe_setting_result");
+        table.selectAll("tbody").remove();
+
+        table_body = table.append("tbody");
+        for (count = 0; count < nodes.length; count++) {
+            if (nodes[count].type_node == 'R') continue;
+            table_row = table_body.append("tr");
+            table_row.attr("id", "probe_" + nodes[count].id);
+            table_row.append("td").text(nodes[count].hostname);
+            table_row.append("td").text(nodes[count].long);
+            table_row.append("td").text(nodes[count].lat);
+            table_row.append("td").text(nodes[count].address);
+            table_row.append("td").text(nodes[count].description);
+            action_td = table_row.append("td").attr("class", "col-md-1").attr("align", "center").append("div").attr("class", "btn-group");
+
+            action_td.append("a")  // detail sondy
+                .attr("href", "template/probe.html").attr("data-toggle", "modal").attr("data-target", "#detailModal")
+                .attr("class", "btn btn-xs btn-info").attr("title", "Info about NetFlow probe").attr("id", "probe_info_btn_" + nodes[count].id);
+            $("#probe_info_btn_" + nodes[count].id).html('<i class="fa fa-pencil-square-o fa-fw"></>');
+
+            action_td.append("button")  // smazani sondy
+                .attr("type", "button")
+                .attr("class", "btn btn-xs btn-danger")
+                .attr("title", "Delete NetFlow probe")
+                .attr("id", "probe_del_btn_" + nodes[count].id);
+            $("#probe_del_btn_" + nodes[count].id).html('<i class="fa fa-minus fa-fw" id="probe_del_icon_' + nodes[count].id + '"></>');
+            document.getElementById("probe_del_btn_" + nodes[count].id).addEventListener('click', function (d) { delete_node(d.target.id); }, false);
+        }
+    }
+    function update_table_router() {
+        //update_list_node();
+        table = d3.select("#router_setting_result");
+        table.selectAll("tbody").remove();
+
+        table_body = table.append("tbody");
+        for (count = 0; count < nodes.length; count++) {
+            if (nodes[count].type_node == 'P') continue;
+            table_row = table_body.append("tr");
+            table_row.attr("id", "router_" + nodes[count].id);
+            table_row.append("td").text(nodes[count].hostname);
+            table_row.append("td").text(nodes[count].long);
+            table_row.append("td").text(nodes[count].lat);
+            table_row.append("td").text(nodes[count].address);
+            table_row.append("td").text(nodes[count].description);
+            action_td = table_row.append("td").attr("class", "col-md-1").attr("align", "center").append("div").attr("class", "btn-group");
+
+            action_td.append("a")  // detail routeru
+                .attr("href", "template/router.html").attr("data-toggle", "modal").attr("data-target", "#detailModal")
+                .attr("class", "btn btn-xs btn-info").attr("title", "Info about router").attr("id", "router_info_btn_" + nodes[count].id);
+            $("#router_info_btn_" + nodes[count].id).html('<i class="fa fa-pencil-square-o fa-fw"></>');
+
+            action_td.append("button")  // smazani routeru
+                .attr("type", "button")
+                .attr("class", "btn btn-xs btn-danger")
+                .attr("title", "Delete router")
+                .attr("id", "router_del_btn_" + nodes[count].id);
+            $("#router_del_btn_" + nodes[count].id).html('<i class="fa fa-minus fa-fw" id="router_del_icon_' + nodes[count].id + '"></>');
+            document.getElementById("router_del_btn_" + nodes[count].id).addEventListener('click', function (d) { delete_node(d.target.id); }, false);
+        }
+    }
+
+    // funkce pro praci s links, nodes, tables
+    function get_new_id_link() {
+        new_id = links_count;
+        links_count += 1;
+        return new_id;
+    }
+    function get_new_id_node() {
+        new_id = nodes_count;
+        nodes_count += 1;
+        return new_id;
+    }
+    function update_all_tables() {
+        update_table_link();
+        update_table_router();
+        update_table_probe();
+    }
+
+    function load_file(e) {
+        var file = e.target.files[0];
+        source_file_name = file.name;
+        d3.select("#file_name_label").text('File: ' + file.name);
+        if (!file) {
+            return;
+        }
+        var reader = new FileReader();
+        reader.onload = function (e) {
+            parse_geoJson(jQuery.parseJSON(e.target.result));
+        };
+        reader.readAsText(file);
+    }
     // nacte geoJson file, ulozi do interni struktury, ulozi do lokalni pameti
     function parse_geoJson(data) {
         // pokud se pouze inicializuje zobrazeni
         if (data == '') return;
-
+        tmp = source_file_name;
         init_local_variables();
+        source_file_name = tmp;
 
         // prevod z geoJson do force reprezentace
         for (count = 0; count < data.features.length; count++) {
@@ -734,289 +1067,13 @@ function NetTMap_module() {
             nodes[count].index = count;
             nodes[count].token = '';
         }
-
-        save_local_variable();
-    }
-
-    function save_setting() {
-        parse_geoJson(raw_json);
-        refresh_time = document.getElementById("refresh_time_input").value;
-        history_interval = document.getElementById("history_time_input").value;
-        save_local_variable();
-    }
-// ------------------------------------------------------------------------------------------------------------
-    // funkce pro zobrazeni formularu ke konfiguraci geoJson souboru
-    function new_configure_file() {
-        load_local_variable();
-        if (type_visual_data == 'configure')
-            create_main_form();
-        else
-            create_probe_form();
-    }
-    // vytvoreni formularu pro vkladani uzlu, linek, tabulky s existujicimi linkami, uzly
-    function create_main_form() {
-        tables = d3.select('#' + id).append("div").attr("id", "tables_block");
-
-        // -------------------------------------------------------------------------------------------------------------------
-        // tabulka pro zobrazeni linek
-        head = tables.append("table").append("tr");
-        head.append("th").append("h2").text("Links");
-        head.append("th").style("width", "20px");
-        head.append("th").append("a").attr("href", "template/link.html").attr("class", "btn btn-success btn-sm")
-            .attr("data-toggle", "modal").attr("data-target", "#detailModal").attr("id", "add_link_button").attr("title", "New link");
-        $("#add_link_button").html('<i class="fa fa-plus fa-fw" />');
-        title_link = tables
-             .append("table")
-             .attr("class", "table table-hover")
-             .attr("id", "link_setting_result")
-             .attr("border", "1");
-        table_head = title_link.append("thead").append("tr");
-        table_head.append("th").text("Name");
-        table_head.append("th").text("Speed");
-        table_head.append("th").text("Source router");
-        table_head.append("th").text("Target router");
-        table_head.append("th").text("Channel 1");
-        table_head.append("th").text("Channel 2");
-        table_head.append("th").text("Actions");
-
-        update_table_link();
-
-        // -------------------------------------------------------------------------------------------------------------------
-        // tabulka pro zobrazeni sond
-        head = tables.append("table").append("tr");
-        head.append("th").append("h2").text("NetFlow probe");
-        head.append("th").style("width", "20px");
-        head.append("th").append("a").attr("href", "template/probe.html").attr("class", "btn btn-success btn-sm")
-            .attr("data-toggle", "modal").attr("data-target", "#detailModal").attr("id", "add_probe_button").attr("title", "New NetFlow probe");
-        $("#add_probe_button").html('<i class="fa fa-plus fa-fw" />');
-        title = tables
-            .append("table")
-            .attr("class", "table table-hover")
-            .attr("id", "probe_setting_result")
-            .attr("border", "1");
-        table_head = title.append("thead").append("tr");
-        table_head.append("th").text("Hostname");
-        table_head.append("th").text("Longitude");
-        table_head.append("th").text("Latitude");
-        table_head.append("th").text("Address");
-        table_head.append("th").text("Description");
-        table_head.append("th").text("Actions");
-
-        update_table_probe();
-        // -------------------------------------------------------------------------------------------------------------------
-        // tabulka pro zobrazeni routeru
-        head = tables.append("table").append("tr");
-        head.append("th").append("h2").text("Routers");
-        head.append("th").style("width", "20px");
-        head.append("th").append("a").attr("href", "template/router.html").attr("class", "btn btn-success btn-sm")
-            .attr("data-toggle", "modal").attr("data-target", "#detailModal").attr("id", "add_router_button").attr("title", "New router");
-        $("#add_router_button").html('<i class="fa fa-plus fa-fw" />');
-
-        title = tables
-            .append("table")
-            .attr("class", "table table-hover")
-            .attr("id", "router_setting_result")
-            .attr("border", "1");
-            //.attr("width", $("#input_form_router").width());
-        table_head = title.append("thead").append("tr");
-        table_head.append("th").text("Name");
-        table_head.append("th").text("Longitude");
-        table_head.append("th").text("Latitude");
-        table_head.append("th").text("Address");
-        table_head.append("th").text("Description");
-        table_head.append("th").text("Actions");
-
-        update_table_router();
-        // -------------------------------------------------------------------------------------------------------------------
-        // tlacitko pro vytvoreni exportu, ulozeni nastaveni
-        tables.append("hr");
-        button_div =tables.append("div").attr("id", "button_block").attr("class", "btn-toolbar");
-
-        button_div.append("button").attr("type", "button").attr("class", "btn btn-primary")
-            .attr("id", "save_settings_button").attr("title", "Save settings");
-        $("#save_settings_button").html('<i class="fa fa-floppy-o" />&nbsp Save');
-        document.getElementById('save_settings_button').addEventListener('click', save_local_variable, false);
-
-        button_div.append("button").attr("type", "button").attr("class", "btn btn-secondary")
-            .attr("id", "save_file_button").attr("title", "Create file and download it");
-        $("#save_file_button").html('<i class="fa fa-download" />&nbsp Save file');
-        document.getElementById('save_file_button').addEventListener('click', create_file, false);
-
-        // odebrani nactenych dat po skryti modal dialogu
-        $(document).on('hidden.bs.modal', function (e) {
-            $(e.target).removeData('bs.modal');
-            type_action = '';
-            current_item_index = '';
-        });
-
-        // nastaveni parametru pro naplneni modal dialogu
-        $(document).on('show.bs.modal', function (e) {
-            var id_part = [];
-            if (e.relatedTarget.id.indexOf('add') != -1)
-                type_action = 'new';
-            else {
-                id_part = e.relatedTarget.id.split("_");
-                type_action = 'detail';
-                current_item_index = id_part[3];
-            }
-        });
-    }
-    function update_table_link() {
-        table = d3.select("#link_setting_result");
-        table.selectAll("tbody").remove();
-
-        table_body = table.append("tbody");
-        for (var count = 0; count < links.length; count++) {
-            table_row = table_body.append("tr");
-            table_row.attr("id", "link_" + count);
-            table_row.append("td").text(links[count].name);
-            table_row.append("td").text(function () { return (links[count].speed / 1000) + 'G'; });
-            table_row.append("td").text(links[count].source);
-            table_row.append("td").text(links[count].target);
-            table_row.append("td").text(links[count].channel1);
-            table_row.append("td").text(links[count].channel2);
-            action_td = table_row.append("td").attr("align", "center").append("div").attr("class", "btn-group");
-            action_td.append("button") // pridani sondy
-                .attr("type", "button")
-                .attr("class", "btn btn-xs btn-warning")
-                .attr("title", "Add NetFlow probe")
-                .attr("id", "link_probe_btn_" + count);
-            $("#link_probe_btn_" + count).html('<i class="fa fa-plug fa-fw"></>');
-
-            action_td.append("button")  // detail linky
-                .attr("href", "template/link.html").attr("data-toggle", "modal").attr("data-target", "#detailModal")
-                .attr("class", "btn btn-xs btn-info").attr("title", "Info about link").attr("id", "link_info_btn_" + count);
-            $("#link_info_btn_" + count).html('<i class="fa fa-info fa-fw"></>');
-
-            action_td.append("button")  // smazani linky
-                .attr("type", "button")
-                .attr("class", "btn btn-xs btn-danger")
-                .attr("title", "Delete link")
-                .attr("id", "link_" + count + "_del");
-            $("#link_" + count + "_del").html('<i class="fa fa-minus fa-fw"></>');
-            document.getElementById("link_" + count + "_del").addEventListener('click', function (d) { delete_link(d.target.id); }, false);
-
-            $("#link_probe_btn_" + count).qtip({
-                content: {
-                    button: 'Close',
-                    title: function (event, api) {
-                        local_id = api.elements.target.attr("id");
-                        my_id = local_id.split("_");
-                        if (typeof (Storage) !== "undefined") {
-                            sessionStorage.curr_link_index = my_id[2];
-                        } else {
-                            alert("Local storage isn't support");
-                        }
-                        return api.elements.target.attr("title");
-                    },
-                    text: function () { return '<iframe height="430" width="820" src="template/probe.html" />'; }//'Loading...',
-                },
-                show: {
-                    solo: true,
-                    event: 'click',
-                    modal: {
-                        on: false,
-                        effect: true,
-                        blur: true,
-                        escape: true
-                    }
-                },
-                hide: {
-                    fixed: true,
-                    event: 'unfocus'
-                },
-                position: {
-                    my: 'center',
-                    at: 'center',
-                    target: $(window),
-                    adjust: {
-                        screen: true
-                    }
-                },
-                style: {
-                    classes: 'qtip-bootstrap',
-                    width: 860,
-                    height: 490
-                },
-                events: {
-                    toggle: function (event, api) {
-                        if (event.type == 'tooltipshow')
-                            save_local_variable();
-                        if (event.type == 'tooltiphide')
-                            update_table_node();
-                    }
-                }
-            });
-        }
-    }
-    function update_table_probe() {
-        //update_list_node();
-        table = d3.select("#probe_setting_result");
-        table.selectAll("tbody").remove();
-
-        table_body = table.append("tbody");
-        for (count = 0; count < nodes.length; count++) {
-            if (nodes[count].type_node == 'R') continue;
-            table_row = table_body.append("tr");
-            table_row.attr("id", "probe_" + count);
-            table_row.append("td").text(nodes[count].hostname);
-            table_row.append("td").text(nodes[count].long);
-            table_row.append("td").text(nodes[count].lat);
-            table_row.append("td").text(nodes[count].address);
-            table_row.append("td").text(nodes[count].description);
-            action_td = table_row.append("td").attr("align", "center").append("div").attr("class", "btn-group");
-
-            action_td.append("a")  // detail sondy
-                .attr("href", "template/probe.html").attr("data-toggle", "modal").attr("data-target", "#detailModal")
-                .attr("class", "btn btn-xs btn-info").attr("title", "Info about NetFlow probe").attr("id", "probe_info_btn_" + count);
-            $("#probe_info_btn_" + count).html('<i class="fa fa-info fa-fw"></>');
-
-            action_td.append("button")  // smazani sondy
-                .attr("type", "button")
-                .attr("class", "btn btn-xs btn-danger")
-                .attr("title", "Delete NetFlow probe")
-                .attr("id", "probe_del_btn_" + count);
-            $("#probe_del_btn_" + count).html('<i class="fa fa-minus fa-fw"></>');
-            document.getElementById("probe_del_btn_" + count).addEventListener('click', function (d) { delete_probe(d.target.id); }, false);
-        }
-    }
-    function update_table_router() {
-        //update_list_node();
-        table = d3.select("#router_setting_result");
-        table.selectAll("tbody").remove();
-
-        table_body = table.append("tbody");
-        for (count = 0; count < nodes.length; count++) {
-            if (nodes[count].type_node == 'P') continue;
-            table_row = table_body.append("tr");
-            table_row.attr("id", "router_" + count);
-            table_row.append("td").text(nodes[count].hostname);
-            table_row.append("td").text(nodes[count].long);
-            table_row.append("td").text(nodes[count].lat);
-            table_row.append("td").text(nodes[count].address);
-            table_row.append("td").text(nodes[count].description);
-            action_td = table_row.append("td").attr("align", "center").append("div").attr("class", "btn-group");
-
-            action_td.append("a")  // detail routeru
-                .attr("href", "template/router.html").attr("data-toggle", "modal").attr("data-target", "#detailModal")
-                .attr("class", "btn btn-xs btn-info").attr("title", "Info about router").attr("id", "router_info_btn_" + count);
-            $("#router_info_btn_" + count).html('<i class="fa fa-info fa-fw"></>');
-
-            action_td.append("button")  // smazani routeru
-                .attr("type", "button")
-                .attr("class", "btn btn-xs btn-danger")
-                .attr("title", "Delete router")
-                .attr("id", "router_del_btn_" + count);
-            $("#router_del_btn_" + count).html('<i class="fa fa-minus fa-fw"></>');
-            document.getElementById("router_del_btn_" + count).addEventListener('click', function (d) { delete_router(d.target.id); }, false);
-        }
+        update_all_tables();
     }
 
     function create_file() {
-
+        null;
     }
 
-    // predvyplni formular pro editaci
     function prepare_router() {
         if (type_action == 'detail') {
             document.getElementById('modal_title').innerHTML = 'Detail router';
@@ -1027,22 +1084,28 @@ function NetTMap_module() {
             document.getElementById('latitude').value = nodes[current_item_index].lat;
         }
     }
-    // podle ulozenych nastaveni rozhodnu zda se router vytvori nebo jen upravi
     function save_router() {
+        id = '';
+        if (type_action == 'new')
+            id = get_new_id_node();
+        else
+            id = current_item_index;
         hostname = document.getElementById("name_router").value;
         latitude = document.getElementById("latitude").value;
         longitude = document.getElementById("longitude").value;
-        type_node = "R";//document.getElementById("type_node").value;
+        type_node = "R";
         address = document.getElementById("address").value;
         description = document.getElementById("description").value;
 
         node = {
-            name: hostname,
+            id: id,
+            hostname: hostname,
             lat: latitude,
             long: longitude,
             type_node: type_node,
             address: address,
-            description: description
+            description: description,
+            token: ''
         };
         if (type_action == 'new')
             nodes.push(node);
@@ -1051,10 +1114,9 @@ function NetTMap_module() {
 
         $('#detailModal').modal('toggle');
 
-        update_table_router();
+        update_all_tables();
     }
 
-    // predvyplni formular pro editaci
     function prepare_probe() {
         if (type_action == 'detail') {
             document.getElementById('modal_title').innerHTML = 'Detail probe';
@@ -1065,22 +1127,28 @@ function NetTMap_module() {
             document.getElementById('latitude').value = nodes[current_item_index].lat;
         }
     }
-
     function save_probe() {
+        id = '';
+        if (type_action == 'new')
+            id = get_new_id_node();
+        else
+            id = current_item_index;
         hostname = document.getElementById("hostname_probe").value;
         latitude = document.getElementById("latitude").value;
         longitude = document.getElementById("longitude").value;
-        type_node = "P";//document.getElementById("type_node").value;
+        type_node = "P";
         address = document.getElementById("address").value;
         description = document.getElementById("description").value;
 
         node = {
-            name: hostname,
+            id: id,
+            hostname: hostname,
             lat: latitude,
             long: longitude,
             type_node: type_node,
             address: address,
-            description: description
+            description: description,
+            token: ''
         };
         if (type_action == 'new')
             nodes.push(node);
@@ -1089,22 +1157,45 @@ function NetTMap_module() {
 
         $('#detailModal').modal('toggle');
 
-        update_table_probe();
+        update_all_tables();
     }
 
-    // predvyplni formular pro editaci
+    function update_list_router() {
+        source_node_box = d3.select("#source_router");
+        target_node_box = d3.select("#target_router");
+        source_node_box.selectAll("option").remove();
+        target_node_box.selectAll("option").remove();
+
+        source_node_box.append("option").attr("value", "").text("");
+        target_node_box.append("option").attr("value", "").text("");
+
+        for (count = 0; count < nodes.length; count++) {
+            if (nodes[count].type_node == 'R') {
+                source_node_box.append("option").attr("value", nodes[count].id).text(nodes[count].hostname);
+                target_node_box.append("option").attr("value", nodes[count].id).text(nodes[count].hostname);
+            }
+        }
+    }
     function prepare_link() {
+        // predvyplneni list boxu pro routery
+        update_list_router();
+
         if (type_action == 'detail') {
             document.getElementById('modal_title').innerHTML = 'Detail link';
             document.getElementById('name_link').value = links[current_item_index].name;
             document.getElementById('description').value = links[current_item_index].description;
-            document.getElementById('source_router').value = links[current_item_index].source_router;
-            document.getElementById('target_router').value = links[current_item_index].target_router;
-            document.getElementById('speed_link').value = links[current_item_index].speed_link;
+            document.getElementById('source_router').value = links[current_item_index].source;
+            document.getElementById('target_router').value = links[current_item_index].target;
+            document.getElementById('speed_link').value = links[current_item_index].speed;
         }
     }
-
     function save_link() {
+        id = '';
+        if (type_action == 'new')
+            id = get_new_id_link();
+        else
+            id = current_item_index;
+
         name_link = document.getElementById("name_link").value;
         description = document.getElementById("description").value;
         source = document.getElementById("source_router").value;
@@ -1114,6 +1205,7 @@ function NetTMap_module() {
         channel2 = '';
 
         link = {
+            id: id,
             source: source,
             speed: speed_link,
             channel1: channel1,
@@ -1129,10 +1221,77 @@ function NetTMap_module() {
         else
             links[current_item_index] = link;
 
+        // uzavreni modalniho okna
         $('#detailModal').modal('toggle');
 
-        update_table_link();
+        update_all_tables();
 
+    }
+
+    function insert_channel_name(data, node_index) {
+        channel1 = d3.select("#channel1_select");
+        channel2 = d3.select("#channel2_select");
+        channel1.selectAll("option").remove();
+        channel2.selectAll("option").remove();
+
+        channel1.append("option").attr("value", "").text("");
+        channel2.append("option").attr("value", "").text("");
+
+        for (count = 0; count < data.channels.length; count++) {
+            channel1.append("option").attr("value", data.channels[count].name).text(data.channels[count].name);
+            channel2.append("option").attr("value", data.channels[count].name).text(data.channels[count].name);
+        }
+    }
+    function update_list_probe() {
+        probe_list_box = d3.select("#probe_link_select");
+        probe_list_box.selectAll("option").remove();
+        probe_list_box.append("option").attr("value", "").text("");
+
+        for (count = 0; count < nodes.length; count++) {
+            if (nodes[count].type_node == 'P') {
+                probe_list_box.append("option").attr("value", nodes[count].id).text(nodes[count].hostname);
+            }
+        }
+    }
+    function prepare_link_probe() {
+        update_list_probe();
+    }
+    function load_channel_name() {
+        if (document.getElementById('probe_link_select').value == '') return;
+        id_probe = parseInt(document.getElementById('probe_link_select').value);
+        if (nodes[id_probe].token == '') {
+            get_token(id_probe);
+        }
+        else {
+            get_channel_name(nodes[id_probe].token, id_probe);
+        }
+    }
+    function save_link_probe() {
+        links[current_item_index].probe = document.getElementById('probe_link_select').value;
+        links[current_item_index].channel1 = document.getElementById('channel1_select').value;
+        links[current_item_index].channel2 = document.getElementById('channel2_select').value;
+
+        update_all_tables();
+
+        // uzavreni modalniho okna
+        $('#detailModal').modal('toggle');
+    }
+    function unmount_link_probe(id) {
+        par_par = id.split('_');
+        links[parseInt(par_par[3])].probe = '';
+        links[parseInt(par_par[3])].channel1 = '';
+        links[parseInt(par_par[3])].channel2 = '';
+        update_all_tables();
+    }
+    function delete_node(id) {
+        par_par = id.split('_');
+        nodes.splice(parseInt(par_par[3]), 1);
+        update_all_tables();
+    }
+    function delete_link(id) {
+        par_par = id.split('_');
+        links.splice(parseInt(par_par[3]), 1);
+        update_all_tables();
     }
 // ------------------------------------------------------------------------------------------------------------
 }
