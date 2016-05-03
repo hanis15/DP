@@ -1,0 +1,132 @@
+﻿{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "geometry": {
+        "type": "Point",
+        "coordinates": [ 89, 98 ]
+      },
+      "properties": {
+        "hostname": "fi_muni",
+        "id": "0",
+        "type_node": "R",
+        "description": "botanicka",
+        "address": "botanicka 2"
+      },
+      "type": "Feature"
+    },
+    {
+      "geometry": {
+        "type": "Point",
+        "coordinates": [ 989, 09 ]
+      },
+      "properties": {
+        "hostname": "esf_muni",
+        "id": "1",
+        "type_node": "R",
+        "description": "tesla",
+        "address": "lipova"
+      },
+      "type": "Feature"
+    },
+    {
+      "geometry": {
+        "type": "Point",
+        "coordinates": [ 98, 07 ]
+      },
+      "properties": {
+        "hostname": "phil_muni",
+        "id": "2",
+        "type_node": "R",
+        "description": "filozoficka",
+        "address": "ceska"
+      },
+      "type": "Feature"
+    },
+    {
+      "geometry": {
+        "type": "Point",
+        "coordinates": [ 80, 09 ]
+      },
+      "properties": {
+        "hostname": "flowmon-cps-cesnet.mgmt.ics.muni.cz",
+        "id": "3",
+        "type_node": "P",
+        "description": "filozoficka-fi sonda",
+        "address": "botanicka"
+      },
+      "type": "Feature"
+    },
+    {
+      "geometry": {
+        "type": "Point",
+        "coordinates": [ 9, 9 ]
+      },
+      "properties": {
+        "hostname": "flowmon-ics-cesnet-test.mgmt.ics.muni.cz",
+        "id": "4",
+        "type_node": "P",
+        "description": "esf-informatika sonda",
+        "address": "lipova"
+      },
+      "type": "Feature"
+    },
+    {
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [ 89, 98 ],
+          [ 98, 07 ]
+        ]
+      },
+      "properties": {
+        "source": "0",
+        "target": "2",
+        "channel1": "",
+        "channel2": "",
+        "speed": "1000",
+        "node": "",
+        "name": "phil-fi"
+      },
+      "type": "Feature"
+    },
+    {
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [ 989, 09 ],
+          [ 89, 98 ]
+        ]
+      },
+      "properties": {
+        "source": "1",
+        "target": "fi_muni",
+        "channel1": "127.0.0.1 (flowmon-cps-cesnet.mgmt.ics.muni.cz), p3000",
+        "channel2": "127.0.0.1 (flowmon-cps-cesnet.mgmt.ics.muni.cz)",
+        "speed": "10000",
+        "probe": "3",
+        "name": "esf-fi"
+      },
+      "type": "Feature"
+    },
+    {
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [ 89, 98 ],
+          [ 89, 98 ]
+        ]
+      },
+      "properties": {
+        "source": "fi_muni",
+        "target": "0",
+        "channel1": "127.0.0.1 (flowmon-cps-cesnet.mgmt.ics.muni.cz), p3000",
+        "channel2": "127.0.0.1 (flowmon-cps-cesnet.mgmt.ics.muni.cz)",
+        "speed": "10000",
+        "probe": "3",
+        "name": "esf-fi"
+      },
+      "type": "Feature"
+    }
+  ]
+}

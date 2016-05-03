@@ -1070,10 +1070,6 @@ function NetTMap_module() {
         update_all_tables();
     }
 
-    function create_file() {
-        null;
-    }
-
     function prepare_router() {
         if (type_action == 'detail') {
             document.getElementById('modal_title').innerHTML = 'Detail router';
@@ -1293,5 +1289,105 @@ function NetTMap_module() {
         links.splice(parseInt(par_par[3]), 1);
         update_all_tables();
     }
+
+    function create_file() {
+        content = '{ "type": "FeatureCollection", "features": ['; // start
+        curr_node = "";
+
+        // uklada uzly
+        for (count = 0; count < nodes.length; count++) {
+            curr_node = '{ "geometry": { "type": "Point", "coordinates": [ '
+                        + nodes[count].long + ', ' + nodes[count].lat + ' ]},';
+            curr_node += '"properties": { "hostname": "' + nodes[count].hostname
+                      + '", "id": "' + nodes[count].id
+                      + '", "type_node": "' + nodes[count].type_node
+                      + '", "description": "' + nodes[count].description
+                      + '", "address": "' + nodes[count].address + '"},';
+            curr_node += '"type": "Feature" }';
+            if (count != nodes.length - 1) { curr_node += ','; }
+            content += curr_node;
+        }
+
+        if (links.length != 0) { content += ','; }
+
+        // uklada linky
+        for (count = 0; count < links.length; count++) {
+            source_coordinates = "";
+            for (s_count = 0; s_count < nodes.length; s_count++) {
+                if (nodes[s_count].id == links[count].source) {
+                    source_coordinates = '[ ' + nodes[s_count].long + ', ' + nodes[s_count].lat + ' ]';
+                    break;
+                }
+            }
+
+            dest_coordinates = "";
+            for (d_count = 0; d_count < nodes.length; d_count++) {
+                if (nodes[d_count].id == links[count].target) {
+                    dest_coordinates = '[ ' + nodes[d_count].long + ', ' + nodes[d_count].lat + ' ]';
+                    break;
+                }
+            }
+
+            if (links[count].probe != '') { // linka spojuje 2 uzly -> je na ni sonda
+                var probe_index = 0;
+                for (p_count = 0; p_count < nodes.length; p_count++) {
+                    if ((nodes[p_count].id == links[count].probe) && (nodes[p_count].type_node == 'S')) {
+                        probe_index = p_count;
+                        break;
+                    }
+                }
+
+                var probe_coordinates = '[' + nodes[probe_index].long + ', ' + nodes[probe_index].lat + ' ]';
+
+                // vytvorim 2 linky
+                curr_node = '{ "geometry": { "type": "LineString", "coordinates": [ ' + source_coordinates + ', ' + probe_coordinates + ' ]},';
+                curr_node += '"properties": { "source": "' + links[count].source
+                            + '", "target": "' + nodes[probe_index].hostname
+                            + '", "channel1": "' + links[count].channel1
+                            + '", "channel2": "' + links[count].channel2
+                            + '", "speed": "' + links[count].speed
+                            + '", "probe": "' + links[count].probe
+                            + '", "name": "' + links[count].name + '"},';
+                curr_node += '"type": "Feature" },';
+                content += curr_node;
+
+                curr_node = '{ "geometry": { "type": "LineString", "coordinates": [ ' + probe_coordinates + ', ' + dest_coordinates + ' ]},';
+                curr_node += '"properties": { "source": "' + nodes[probe_index].hostname
+                            + '", "target": "' + links[count].target
+                            + '", "channel1": "' + links[count].channel1
+                            + '", "channel2": "' + links[count].channel2
+                            + '", "speed": "' + links[count].speed
+                            + '", "probe": "' + links[count].probe
+                            + '", "name": "' + links[count].name + '"},';
+                curr_node += '"type": "Feature" }';
+                if (count != links.length - 1) { curr_node += ','; }
+                content += curr_node;
+            }
+            else {
+                curr_node = '{ "geometry": { "type": "LineString", "coordinates": [ ' + source_coordinates + ', ' + dest_coordinates + ' ]},';
+                curr_node += '"properties": { "source": "' + links[count].source
+                            + '", "target": "' + links[count].target
+                            + '", "channel1": "' + links[count].channel1
+                            + '", "channel2": "' + links[count].channel2
+                            + '", "speed": "' + links[count].speed
+                            + '", "node": "' + links[count].probe
+                            + '", "name": "' + links[count].name + '"},';
+                curr_node += '"type": "Feature" }';
+                if (count != links.length - 1) { curr_node += ','; }
+                content += curr_node;
+            }
+        }
+        content += ']}';    // end
+        var blob = new Blob([content], { type: "application/json" });
+        var url = URL.createObjectURL(blob);
+
+        var a = document.createElement('a');
+        a.download = "backup.geo.json";
+        a.href = url;
+        a.id = 'save_to_local_a';
+        document.getElementById('button_block').appendChild(a);
+        document.getElementById('save_to_local_a').click();
+    }
+
 // ------------------------------------------------------------------------------------------------------------
 }
