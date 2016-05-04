@@ -55,17 +55,115 @@
         </div> <!-- /.modal-dialog -->
     </div> <!-- /.modal -->
 
-        <!-- Obsah stranky -->
-        <!--<div class="container">-->
-        <div id="configure"></div>
-        <script>
-            var id = "configure";
+    <!-- Obsah stranky -->
+    <!--<div class="container">-->
+    <div id="configure">
+        <div id="tables_block">
+            <table class="table">
+                <tr>
+                    <th><h1>Topology configuration</h1></th>
+                    <th width="30px">
+                        <button class="btn btn-primary" id="load_file_button" title="Load file with topology"><i class="fa fa-upload"></i>&nbsp; Load file</button>
+                        <input type="file" id="input_geo_json_file" style="display: none;"/>
+                        <span class="label label-default" id="file_name_label"></span>
+                    </th>
+                </tr>
+            </table>
+            <table>
+                <tr>
+                    <td><h2>Links:</h2></td>
+                    <td width="20px"></td>
+                    <td>
+                        <a href="template/link.html" class="btn btn-success btn-sm" data-toggle="modal" data-target="#detailModal" id="add_link_button" title="New link">
+                            <i class="fa fa-plus fa-fw"></i>
+                        </a>
+                    </td>
+                </tr>
+            </table>
+            <table class="table table-hover" id="link_setting_result" border="1">
+                <thead class="thead-inverse">
+                    <tr>
+                        <th>Name</th>
+                        <th>Speed</th>
+                        <th>Source router</th>
+                        <th>Target router</th>
+                        <th>NetFlow probe</th>
+                        <th>Channel 1</th>
+                        <th>Channel 2</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+            </table>
+            <table>
+                <tr>
+                    <td>
+                        <h2>NetFlow probe</h2>
+                    </td>
+                    <td width="20px"></td>
+                    <td>
+                        <a href="template/probe.html" class="btn btn-success btn-sm" data-toggle="modal" data-target="#detailModal" id="add_probe_button" title="New NetFlow probe">
+                            <i class="fa fa-plus fa-fw"></i>
+                        </a>
+                    </td>
+                </tr>
+            </table>
+            <table class="table table-hover" id="probe_setting_result" border="1">
+                <thead>
+                    <tr>
+                        <th>Hostname</th>
+                        <th>Longitude</th>
+                        <th>Latitude</th>
+                        <th>Address</th>
+                        <th>Description</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+            </table>
+            <table>
+                <tr>
+                    <td><h2>Routers</h2></td>
+                    <td width="20px"></td>
+                    <td>
+                        <a href="template/router.html" class="btn btn-success btn-sm" data-toggle="modal" data-target="#detailModal" id="add_router_button" title="New router">
+                            <i class="fa fa-plus fa-fw"></i>
+                        </a>
+                    </td>
+                </tr>
+            </table>
+            <table class="table table-hover" id="router_setting_result" border="1">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Longitude</th>
+                        <th>Latitude</th>
+                        <th>Address</th>
+                        <th>Description</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+            </table>
+            <hr />
+            <div id="button_block" class="btn-toolbar">
+                <button type="button" class="btn btn-primary" data-dissmiss="alert" id="save_settings_button" title="Save settings">
+                    <i class="fa fa-floppy-o"></i>&nbsp; Save
+                </button>
+                <button type="button" class="btn btn-secondary" id="save_file_button" title="Create file and download it">
+                    <i class="fa fa-download"></i>&nbsp; Save file
+                </button>
+                <button type="button" class="btn btn-danger" id="clear_data_button" title="Permanent remove all data">
+                    <i class="fa fa-trash-o"></i>&nbsp; Clear all
+                </button>
+            </div>
+        </div>
+    </div>
+    <script>
+        var id = "configure";
 
-            //var geoSetting = NetTMap_setting.getInstance();
-            var map_graph = NetTMap.getInstance();
-            map_graph.initialize(id, "configure");
+        //var geoSetting = NetTMap_setting.getInstance();
+        var map_graph = NetTMap.getInstance();
+        map_graph.initialize(id, "configure");
 
-       </script>
+    </script>
 
     <!--</div>-->
 </body>

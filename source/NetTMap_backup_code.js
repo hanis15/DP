@@ -86,10 +86,12 @@ function NetTMap_module() {
         //d3.select('#' + id).append("p").attr("align", "right").attr("id", "last_refresh_time_label").text("Last refresh: ---");
 
         if (type.toLowerCase() == 'graph') {
+            create_info_refresh_block()
             type_visual_data = type.toLowerCase();
             new_graph();
         }
         else if (type.toLowerCase() == 'map') {
+            create_info_refresh_block();
             type_visual_data = type.toLowerCase();
             d3.select('#' + id).append("div").attr("id", "map_canvas");
             // nastaveni velikosti
@@ -111,55 +113,38 @@ function NetTMap_module() {
     }
 
 // ------------------------------------------------------------------------------------------------------------
-    // provede update labelu s poslednim update time refresh
-    function refresh_bad() {
-        var refresh_block = d3.select('#refresh_time_btn');
-        if (refresh_block[0] == '') return;
-            refresh_block.attr("class", "btn btn-danger");
-        document.getElementById('refresh_time_btn').innerHTML("Don't refreshed &nbsp;<i class='fa fa-exclamation-triangle fa-fw'></i>");
+    function create_info_refresh_block() {
+        var refresh_block = d3.select('#refresh_time_block');
+        if (refresh_block[0] != '') {
+            refresh_block.append("button").attr("type", "button").attr("class", "btn btn-secondary");
+        }
     }
-    function refresh_succes(time) {
-        var refresh_block = d3.select('#refresh_time_btn');
-        if (refresh_block[0] != '') return;
-
-        var curr_time = new Date(Date(time));
-        var output_time = '' + ((curr_time.getHours() < 10) ? '0' + curr_time.getHours() : curr_time.getHours())
+    // provede update labelu s poslednim update time refresh
+    function update_last_time_update(time) {
+        console.log(new Date(time));
+        var curr_time = new Date(time);
+        d3.select('#last_refresh_time_label').text("Last refresh: "
+                    + ((curr_time.getHours() < 10) ? '0' + curr_time.getHours() : curr_time.getHours())
                     + ':'
                     + ((curr_time.getMinutes() < 10) ? '0' + curr_time.getMinutes() : curr_time.getMinutes())
-                    + ':' 
-                    + ((curr_time.getSeconds() < 10) ? '0' + curr_time.getSeconds() : curr_time.getSeconds());
+                    + ':' + curr_time.getSeconds());
+    }
 
-        refresh_block.attr("class", "btn btn-success");
-        document.getElementById('refresh_time_btn').innerHTML = "Last refresh: " + output_time + " &nbsp;<i class='fa fa-check fa-fw'></i>";
-    }
-    function refresh_working() {
-        var refresh_block = d3.select('#refresh_time_btn');
-        if (refresh_block[0] == '') return;
-        refresh_block.attr("class", "btn btn-primary");
-        document.getElementById('refresh_time_btn').innerHTML("Refresh &nbsp;<i class='fa fa-refresh fa-fw fa-spin'></i>");
-    }
-    
     // vrati pocatecni casovy udaji zaznamu provozu ze sondy s ohledem na nastavenou konstantu obnovy
     function get_start_dateTime() {
         var refresh_time = null;
         var start_time = new Date(new Date() - 600000); // default hodnota = 10 minut
-        var month = ((start_time.getMonth() + 1) < 10) ? '0' + (start_time.getMonth() + 1) : (start_time.getMonth() + 1);
-        var day = (start_time.getDate() < 10) ? '0' + start_time.getDate() : start_time.getDate();
-        console.log("Start: " + start_time.getFullYear() + '-' + month + '-' + day + ' ' + start_time.toTimeString().slice(0, 5));
-        return start_time.getFullYear() + '-' + month + '-' + day + ' ' + start_time.toTimeString().slice(0, 5);
+        console.log("Start: " + start_time.toJSON().slice(0, 10) + ' ' + start_time.toJSON().slice(11, 16));
+        return start_time.toJSON().slice(0, 10) + ' ' + start_time.toJSON().slice(11, 16);
     }
     // vrati casovy udaj pro posledni zaznam datam provozu ze sondy
     function get_end_dateTime() {
-        var time = new Date();
-        var month = ((time.getMonth() + 1) < 10) ? '0' + (time.getMonth() + 1) : (time.getMonth() + 1);
-        var day = (time.getDate() < 10) ? '0' + time.getDate() : time.getDate();
-        console.log("End: " + time.getFullYear() + '-' + month + '-' + day + ' ' + time.toTimeString().slice(0, 5));
-        return time.getFullYear() + '-' + month + '-' + day + ' ' + time.toTimeString().slice(0, 5);
+        console.log("End: " + new Date().toJSON().slice(0, 10) + ' ' + new Date().toJSON().slice(11, 16));
+        return new Date().toJSON().slice(0, 10) + ' ' + new Date().toJSON().slice(11, 16);
     }
 
     // ziska z adresy v uzlu pristupovy token
     function get_token(node_index) {
-        refresh_working();
         var host = nodes[node_index].hostname;
         document.body.style.cursor = 'wait';
         $.ajax({
@@ -189,13 +174,11 @@ function NetTMap_module() {
             error: function (a, b, err) {
                 console.log(err);
                 document.body.style.cursor = 'default';
-                refresh_bad();
             },
         });
     }
     // ziska data o provozu
     function get_data_traffic(token, node_index) {
-        refresh_working();
         var host = nodes[node_index].hostname;
         document.body.style.cursor = 'wait';
         $.ajax({
@@ -221,34 +204,25 @@ function NetTMap_module() {
             error: function (a, b, err) {
                 console.log(err);
                 document.body.style.cursor = 'default';
-                refresh_bad();
             },
         });
     }
     // ziska aktualni data pro dany uzel - refresh
-
-    function search_data_traffic_by_channel(data, name) {
-        var result = []; // [time, data]
-        for (var count_result = 0; count_result < data.length; count_result++) {
-            // preskocim channels kterych se to netyka
-            if (name == data[count_result].channel.name) {
-                result = data[count_result].values[data[count_result].values.length - 1];
-                break;
-            }
-        }
-        return result;
-    }
     function parse_data_traffic(data, node_index) {
-        var time;
         for (var count = 0; count < links.length; count++) {
-            if (links[count].probe != '') {
-                ch1 = search_data_traffic_by_channel(data, links[count].channel1);
-                ch2 = search_data_traffic_by_channel(data, links[count].channel2);
-                time = ch1[0];
-                update_link(count, ch1, ch2);
+            if (nodes[node_index].name == links[count].node) {
+                for (var count_result = 0; count_result < data.length; count_result++) {
+                    // preskocim channels kterych se to netyka
+                    if (links[count].source_channel != data[count_result].channel.name)
+                        continue;
+
+                    // aktualni data = stav linky
+                    //var x_data = data[count_result].values[0][0];
+                    update_link(count, data[count_result].values[data[count_result].values.length - 1][1]);
+                    update_last_time_update(data[count_result].values[data[count_result].values.length - 1][0]);
+                }
             }
         }
-        refresh_succes(time);
     }
     // ziska jmena vsech channel na dane sonde - pro list boxy v konfiguraci
     function get_channel_name(token, node_index) {
@@ -285,20 +259,13 @@ function NetTMap_module() {
         if (refresh_time != "0") window.setTimeout(refresh_links, refresh_time);
     }
     // provede update linky podle ziskanych dat - refresh
-    function update_link(link_index, data1, data2) {
-        console.log("index: " + links[link_index].id + ', data1: ' + data1 + ', data2: ' + data2);
-        var result1;
-        var result2;
-        result1 = (links[link_index].speed) / data1[1];
-        result2 = (links[link_index].speed) / data2[1];
-        if (result1 < 0) result1 *= -1;
-        if (result2 < 0) result2 *= -1;
-        console.log('result1: ' + result1 * 100 + ', result2: ' + result2 * 100);
+    function update_link(link_index, data) {
+        console.log("index: " + link_index + ', data: ' + data);
+        var result;
+        result = (links[link_index].speed) / data;
+        console.log('result: ' + result * 100);
 
-        if (result1 > result2)
-            d3.select("#link_" + links[link_index].id).attr("stroke", color_spectrum_scale(result1 * 100));
-        else
-            d3.select("#link_" + links[link_index].id).attr("stroke", color_spectrum_scale(result2 * 100));
+        d3.select("#link_" + link_index).attr("stroke", color_spectrum_scale(result * 100))
     }
 // ------------------------------------------------------------------------------------------------------------
     // funkce pro zobrazeni grafu = NetTMap GRAPH
@@ -531,7 +498,7 @@ function NetTMap_module() {
             // najdu odpovidajici linku pro aktualni feature
             if (e.popup._source.feature.geometry.type == "LineString") {
                 current_type = 'L';
-                current_item_index = get_index_link_by_id(e.popup._source.feature.properties.id);
+                current_item_index = e.popup._source.feature.properties.id;
             }
             else {
                 current_type = 'N';
@@ -644,11 +611,38 @@ function NetTMap_module() {
     // listbox s refresh time, history interval
     function new_setting() {
         load_local_variable();
+        d3.select('#' + id).append("h1").text("Application settings");
+
+        default_input_form = d3.select('#' + id).append("table").attr("class", "table table-hover").attr("id", "settings_content").append("tbody");
+
+        row1 = default_input_form.append("tr");
+        row1.append("td").append("p").text("History interval: ");
+        history_time_select = row1.append("td").attr("align", "left").append("select").attr("class", "form-control")
+                            .attr("id", "history_time_input").attr("name", "history_time_input");
+        history_time_select.append("option").attr("value", "86400000").text("1 day");
+        history_time_select.append("option").attr("value", "43200000").text("12 hours");
+
+        row1 = default_input_form.append("tr");
+        row1.append("td").append("p").text("Refresh time: ");
+        refresh_time_form = row1.append("td").attr("align", "left").append("select").attr("class", "form-control")
+                            .attr("id", "refresh_time_input").attr("name", "refresh_time_input");
+        refresh_time_form.append("option").attr("value", "0").text("Doesn't refreshed");
+        refresh_time_form.append("option").attr("value", "30000").text("30 seconds");
+        refresh_time_form.append("option").attr("value", "60000").text("1 minute");
+        refresh_time_form.append("option").attr("value", "300000").text("5 minutes");
+        refresh_time_form.append("option").attr("value", "600000").text("10 minutes");
+
+        row1 = d3.select('#settings_content').append("tr");
+        row1.append("td");
+        row1.append("td").attr("align", "right")
+                  .append("button").attr("type", "button").attr("class", "btn btn-primary").attr("id", "save_setting_button");
+
 
         if (history_interval != "0") document.getElementById("history_time_input").value = history_interval;
         document.getElementById("refresh_time_input").value = refresh_time;
 
-        document.getElementById('save_settings_button').addEventListener('click', function () {
+        $("#save_setting_button").html('<i class="fa fa-floppy-o" />&nbsp Save');
+        document.getElementById('save_setting_button').addEventListener('click', function () {
             save_setting();
 
             alert = d3.select('body').insert('div').attr('class', 'alert alert-success alert-position').attr("id", "success_alert");
@@ -660,6 +654,7 @@ function NetTMap_module() {
             $("#success_alert").fadeTo(2000, 500).slideUp(500, function () {
                 $("#success_alert").alert('close');
             });
+
         }, false);
 
     }
@@ -740,13 +735,98 @@ function NetTMap_module() {
     }
     // vytvoreni formularu pro vkladani uzlu, linek, tabulky s existujicimi linkami, uzly
     function create_main_form() {
-        d3.select('#file_name_label').attr('width', $('#load_file_button').width() + 'px')
+        tables = d3.select('#' + id).append("div").attr("id", "tables_block");
+        head = tables.append("table").attr("class", "table").append("tr");
+        head.append("th").append("h1").text("Topology configuration");
+        head = head.append("th").style("width", "30px");
+        head.append("button").attr("type", "button").attr("class", "btn btn-primary")
+            .attr("id", "load_file_button").attr("title", "Load file with topology");
+        head.append("input")
+            .attr("type", "file")
+            .attr("id", "input_geo_json_file")
+            .style("display", "none");
+
+        $("#load_file_button").html('<i class="fa fa-upload" />&nbsp Load file');
+        head.append('span').attr('width', $('#load_file_button').width() + 'px').attr("class", "label label-default").attr("id", "file_name_label")
             .text("File: " + (((source_file_name == "") || (source_file_name == 'undefined')) ? "---" : source_file_name));
         document.getElementById('load_file_button').addEventListener('click', function () { $('#input_geo_json_file').trigger('click'); }, false);
         document.getElementById('input_geo_json_file').addEventListener('change', load_file, false);
 
         // -------------------------------------------------------------------------------------------------------------------
+        // tabulka pro zobrazeni linek
+        head = tables.append("table").append("tr");
+        head.append("th").append("h2").text("Links");
+        head.append("th").style("width", "20px");
+        head.append("th").append("a").attr("href", "template/link.html").attr("class", "btn btn-success btn-sm")
+            .attr("data-toggle", "modal").attr("data-target", "#detailModal").attr("id", "add_link_button").attr("title", "New link");
+        $("#add_link_button").html('<i class="fa fa-plus fa-fw" />');
+        title_link = tables
+             .append("table")
+             .attr("class", "table table-hover")
+             .attr("id", "link_setting_result")
+             .attr("border", "1");
+        table_head = title_link.append("thead").attr("class", "thead-inverse").append("tr");
+        table_head.append("th").text("Name");
+        table_head.append("th").text("Speed");
+        table_head.append("th").text("Source router");
+        table_head.append("th").text("Target router");
+        table_head.append("th").text("NetFlow probe");
+        table_head.append("th").text("Channel 1");
+        table_head.append("th").text("Channel 2");
+        table_head.append("th").text("Actions");
+
+        // -------------------------------------------------------------------------------------------------------------------
+        // tabulka pro zobrazeni sond
+        head = tables.append("table").append("tr");
+        head.append("th").append("h2").text("NetFlow probe");
+        head.append("th").style("width", "20px");
+        head.append("th").append("a").attr("href", "template/probe.html").attr("class", "btn btn-success btn-sm")
+            .attr("data-toggle", "modal").attr("data-target", "#detailModal").attr("id", "add_probe_button").attr("title", "New NetFlow probe");
+        $("#add_probe_button").html('<i class="fa fa-plus fa-fw" />');
+        title = tables
+            .append("table")
+            .attr("class", "table table-hover")
+            .attr("id", "probe_setting_result")
+            .attr("border", "1");
+        table_head = title.append("thead").append("tr");
+        table_head.append("th").text("Hostname");
+        table_head.append("th").text("Longitude");
+        table_head.append("th").text("Latitude");
+        table_head.append("th").text("Address");
+        table_head.append("th").text("Description");
+        table_head.append("th").text("Actions");
+
+        // -------------------------------------------------------------------------------------------------------------------
+        // tabulka pro zobrazeni routeru
+        head = tables.append("table").append("tr");
+        head.append("th").append("h2").text("Routers");
+        head.append("th").style("width", "20px");
+        head.append("th").append("a").attr("href", "template/router.html").attr("class", "btn btn-success btn-sm")
+            .attr("data-toggle", "modal").attr("data-target", "#detailModal").attr("id", "add_router_button").attr("title", "New router");
+        $("#add_router_button").html('<i class="fa fa-plus fa-fw" />');
+
+        title = tables
+            .append("table")
+            .attr("class", "table table-hover")
+            .attr("id", "router_setting_result")
+            .attr("border", "1");
+            //.attr("width", $("#input_form_router").width());
+        table_head = title.append("thead").append("tr");
+        table_head.append("th").text("Name");
+        table_head.append("th").text("Longitude");
+        table_head.append("th").text("Latitude");
+        table_head.append("th").text("Address");
+        table_head.append("th").text("Description");
+        table_head.append("th").text("Actions");
+
+        // -------------------------------------------------------------------------------------------------------------------
         // tlacitko pro vytvoreni exportu, ulozeni nastaveni
+        tables.append("hr");
+        button_div = tables.append("div").attr("id", "button_block").attr("class", "btn-toolbar");
+
+        button_div.append("button").attr("type", "button").attr("class", "btn btn-primary").attr('data-dismiss', 'alert')
+            .attr("id", "save_settings_button").attr("title", "Save settings");
+        $("#save_settings_button").html('<i class="fa fa-floppy-o" />&nbsp Save');
         document.getElementById('save_settings_button').addEventListener('click', function () {
             save_local_variable();
 
@@ -759,10 +839,19 @@ function NetTMap_module() {
             $("#success_alert").fadeTo(2000, 500).slideUp(500, function () {
                 $("#success_alert").alert('close');
             });
+
         }, false);
+
+        button_div.append("button").attr("type", "button").attr("class", "btn btn-secondary")
+            .attr("id", "save_file_button").attr("title", "Create file and download it");
+        $("#save_file_button").html('<i class="fa fa-download" />&nbsp Save file');
         document.getElementById('save_file_button').addEventListener('click', function () {
             create_file();
         }, false);
+
+        button_div.append("button").attr("type", "button").attr("class", "btn btn-danger")
+            .attr("id", "clear_data_button").attr("title", "Permanent remove all data");
+        $("#clear_data_button").html('<i class="fa fa-trash-o" />&nbsp Clear all');
         document.getElementById('clear_data_button').addEventListener('click', function () {
             init_local_variables();
             update_all_tables();
@@ -1236,7 +1325,7 @@ function NetTMap_module() {
                 // vytvorim 2 linky
                 curr_node = '{ "geometry": { "type": "LineString", "coordinates": [ ' + source_coordinates + ', ' + probe_coordinates + ' ]},';
                 curr_node += '"properties": { "source": "' + links[count].source
-                            + '", "id": "' + links[count].id + 'a'
+                            + '", "id": "' + links[count].id
                             + '", "target": "' + nodes[probe_index].id
                             + '", "channel1": "' + links[count].channel1
                             + '", "channel2": "' + links[count].channel2
@@ -1248,7 +1337,7 @@ function NetTMap_module() {
 
                 curr_node = '{ "geometry": { "type": "LineString", "coordinates": [ ' + probe_coordinates + ', ' + dest_coordinates + ' ]},';
                 curr_node += '"properties": { "source": "' + nodes[probe_index].id
-                            + '", "id": "' + links[count].id + 'b'
+                            + '", "id": "' + links[count].id
                             + '", "target": "' + links[count].target
                             + '", "channel1": "' + links[count].channel1
                             + '", "channel2": "' + links[count].channel2

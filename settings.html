@@ -47,19 +47,58 @@
         </div>
     </nav>
 
-        <!-- Obsah stranky -->
-        <div class="container">
-            <div id="my_setting"></div>
-            <script>
-                var id = "my_setting";
-                var width = 600;
-                var height = 600;
+    <!-- Obsah stranky -->
+    <div class="container">
+        <div id="my_setting">
+            <h1>Application settings</h1>
 
-                var map_graph = NetTMap.getInstance();
-                map_graph.initialize(id, "setting", width, height);
-            </script>
+            <table class="table tabl-hover" id="settings_content">
+                <tbody>
+                    <tr>
+                        <td>
+                            <p>History interval:</p>
+                        </td>
+                        <td>
+                            <select class="form-control" id="history_time_input" name="history_time_input">
+                                <option value="86400000">1 day</option>
+                                <option value="43200000">12 hours</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <p>Refresh time:</p>
+                        </td>
+                        <td>
+                            <select class="form-control" id="refresh_time_input" name="refresh_time_input">
+                                <option value="0">Doesn't refreshed</option>
+                                <option value="30000">30 seconds</option>
+                                <option value="60000">1 minute</option>
+                                <option value="300000">5 minutes</option>
+                                <option value="600000">10 minutes</option>
+                            </select>
+                        </td>
+                    </tr>
+                </tbody>
+                <tr>
+                    <td></td>
+                    <td align="right">
+                        <button type="button" class="btn btn-primary" id="save_settings_button"><i class="fa fa-floppy-o"></i>&nbsp; Save</button>
+                     </td>
+                </tr>
+            </table>
+
 
         </div>
+        <script>
+            var id = "my_setting";
+            var width = 600;
+            var height = 600;
+
+            var map_graph = NetTMap.getInstance();
+            map_graph.initialize(id, "setting", width, height);
+        </script>
+
     </div>
 </body>
 </html>
