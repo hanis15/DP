@@ -86,10 +86,12 @@ function NetTMap_module() {
         //d3.select('#' + id).append("p").attr("align", "right").attr("id", "last_refresh_time_label").text("Last refresh: ---");
 
         if (type.toLowerCase() == 'graph') {
+            create_info_refresh_block()
             type_visual_data = type.toLowerCase();
             new_graph();
         }
         else if (type.toLowerCase() == 'map') {
+            create_info_refresh_block();
             type_visual_data = type.toLowerCase();
             d3.select('#' + id).append("div").attr("id", "map_canvas");
             // nastaveni velikosti
@@ -101,7 +103,7 @@ function NetTMap_module() {
             type_visual_data = type.toLowerCase();
             new_setting();
         }
-        else if ((type.toLowerCase() == 'configure') || (type.toLowerCase() == 'configure-probe')) { 
+        else if (type.toLowerCase() == 'configure') { 
             type_visual_data = type.toLowerCase();
             new_configure_file();
         }
@@ -111,6 +113,12 @@ function NetTMap_module() {
     }
 
 // ------------------------------------------------------------------------------------------------------------
+    function create_info_refresh_block() {
+        var refresh_block = d3.select('#refresh_time_block');
+        if (refresh_block[0] != '') {
+            refresh_block.append("button").attr("type", "button").attr("class", "btn btn-secondary");
+        }
+    }
     // provede update labelu s poslednim update time refresh
     function update_last_time_update(time) {
         console.log(new Date(time));
@@ -603,37 +611,51 @@ function NetTMap_module() {
     // listbox s refresh time, history interval
     function new_setting() {
         load_local_variable();
-        default_input_form = d3.select('#' + id).append("table").style("width", width + 'px').attr("id", "settings_content");
+        d3.select('#' + id).append("h1").text("Application settings");
+
+        default_input_form = d3.select('#' + id).append("table").attr("class", "table table-hover").attr("id", "settings_content").append("tbody");
 
         row1 = default_input_form.append("tr");
         row1.append("td").append("p").text("History interval: ");
-        history_time_select = row1.append("td").attr("align", "left").append("select")
+        history_time_select = row1.append("td").attr("align", "left").append("select").attr("class", "form-control")
                             .attr("id", "history_time_input").attr("name", "history_time_input");
         history_time_select.append("option").attr("value", "86400000").text("1 day");
         history_time_select.append("option").attr("value", "43200000").text("12 hours");
 
         row1 = default_input_form.append("tr");
         row1.append("td").append("p").text("Refresh time: ");
-        refresh_time_form = row1.append("td").attr("align", "left").append("select")
+        refresh_time_form = row1.append("td").attr("align", "left").append("select").attr("class", "form-control")
                             .attr("id", "refresh_time_input").attr("name", "refresh_time_input");
         refresh_time_form.append("option").attr("value", "0").text("Doesn't refreshed");
         refresh_time_form.append("option").attr("value", "30000").text("30 seconds");
         refresh_time_form.append("option").attr("value", "60000").text("1 minute");
         refresh_time_form.append("option").attr("value", "300000").text("5 minutes");
         refresh_time_form.append("option").attr("value", "600000").text("10 minutes");
-        document.getElementById("refresh_time_input").value = "300000";
 
-        row1 = default_input_form.append("tr");
+        row1 = d3.select('#settings_content').append("tr");
         row1.append("td");
-        row1.append("td").attr("align", "right").attr("id", "save_setting_button")
-                  .append("input").attr("type", "submit").attr("value", "Save").attr("class", "btn-success");
+        row1.append("td").attr("align", "right")
+                  .append("button").attr("type", "button").attr("class", "btn btn-primary").attr("id", "save_setting_button");
 
 
         if (history_interval != "0") document.getElementById("history_time_input").value = history_interval;
         document.getElementById("refresh_time_input").value = refresh_time;
 
-        document.getElementById('save_setting_button')
-            .addEventListener('click', save_setting, false);
+        $("#save_setting_button").html('<i class="fa fa-floppy-o" />&nbsp Save');
+        document.getElementById('save_setting_button').addEventListener('click', function () {
+            save_setting();
+
+            alert = d3.select('body').insert('div').attr('class', 'alert alert-success alert-position').attr("id", "success_alert");
+            alert.append("button").attr("type", "button").attr("class", "close").attr("data-dismiss", "alert");
+            $("#success_alert button").html('<i class="fa fa-times" />');
+            alert.append("p").text("Success. Settings was saved.");
+
+            $('#success_alert').show();
+            $("#success_alert").fadeTo(2000, 500).slideUp(500, function () {
+                $("#success_alert").alert('close');
+            });
+
+        }, false);
 
     }
 
@@ -643,20 +665,17 @@ function NetTMap_module() {
         if (typeof (Storage) !== "undefined") {
             sessionStorage.nodes = "";
             sessionStorage.links = "";
-            sessionStorage.current_item_index = "";
-            sessionStorage.current_type = "";
-            sessionStorage.refresh_time = "0";
-            sessionStorage.history_interval = "0";
-            sessionStorage.nodes_count = "0";
-            sessionStorage.links_count = "0";
-            sessionStorage.source_file_name = "";
             nodes = [];
             links = [];
-            current_item_index = "";
-            current_type = "";
-            refresh_time = '0';
-            history_interval = '0';
-            source_file_name = "";
+            sessionStorage.current_item_index = current_item_index = "";
+            sessionStorage.current_type = current_type = "";
+            // pouzije se defaultni hodnota 5 min. pokud neni jiz nastavena jina
+            if ((sessionStorage.refresh_time == null) || (sessionStorage.refresh_time == "")) refresh_time = sessionStorage.refresh_time = "300000";
+            // pouzije se defaulni hodnota 1 den pokud neni jiz nastavana jina
+            if ((sessionStorage.history_interval == null) || (sessionStorage.history_interval == "")) history_interval = sessionStorage.history_interval = "86400000";
+            sessionStorage.nodes_count = "0";
+            sessionStorage.links_count = "0";
+            sessionStorage.source_file_name = source_file_name = "";
         } else {
             alert("Local storage isn't support");
         }
@@ -712,10 +731,7 @@ function NetTMap_module() {
     // funkce pro zobrazeni formularu ke konfiguraci geoJson souboru
     function new_configure_file() {
         load_local_variable();
-        if (type_visual_data == 'configure')
-            create_main_form();
-        else
-            create_probe_form();
+        create_main_form();
     }
     // vytvoreni formularu pro vkladani uzlu, linek, tabulky s existujicimi linkami, uzly
     function create_main_form() {

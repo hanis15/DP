@@ -9,7 +9,7 @@ function NetTMap_chart(id, width, height) {
     var current_address;
     var current_token;
     var current_node_index; // pokud se jedna o linku, musim najit sondu
-    var history_interval = '86400000';
+    var history_interval;
 
     function get_index_node_by_id(id) {
         for (var count = 0; count < nodes.length; count++) {
@@ -28,7 +28,7 @@ function NetTMap_chart(id, width, height) {
         if (current_type == 'L') {
             if (links[current_item_index].probe != '') { // linka + sonda
                 tabs.append("li").attr("id", "traffic_chart_tab").attr("class", "active").append("a").attr("data-toggle", "tab").attr("href", "#traffic_chart").text("Traffic");
-                tabs.append("li").attr("id", "device_info_tab").append("a").attr("data-toggle", "tab").attr("href", "#device_info").text("Link info");
+                tabs.append("li").attr("id", "device_info_tab").append("a").attr("data-toggle", "tab").attr("href", "#device_info").text("NetFlow probe info");
                 tabs.append("li").attr("id", "profile_live_tab").append("a").attr("data-toggle", "tab").attr("href", "#profile_live").text("Profile live");
 
                 contents = d3.select("#" + id).append("div").attr("class", "tab-content");
@@ -269,17 +269,11 @@ function NetTMap_chart(id, width, height) {
     }
 
     function show_router_info() {
-        d3.selectAll("#traffic_chart_content").remove();
-        var info_table = d3.selectAll("#traffic_chart").append("p").attr("id", "traffic_chart_content").text("No data traffic");
-
-        d3.selectAll("#profile_live_content").remove();
-        info_table = d3.selectAll("#profile_live").append("p").attr("id", "profile_live_content").text("No data for profile live");
-
         d3.selectAll("#device_info_content").remove();
-        info_table = d3.selectAll("#device_info").append("table").attr("id", "device_info_content").attr("class", "table borderless");
+        var info_table = d3.selectAll("#device_info").append("table").attr("id", "device_info_content").attr("class", "table borderless").append("tbody");
 
         var row = info_table.append("tr");
-        row.append("td").text("Router name: ");
+        row.append("td").text("Hostname: ");
         row.append("td").text(nodes[current_item_index].hostname);
 
         row = info_table.append("tr");
@@ -299,14 +293,8 @@ function NetTMap_chart(id, width, height) {
         row.append("td").text(nodes[current_item_index].lat);
     }
     function show_link_info() {
-        d3.selectAll("#traffic_chart_content").remove();
-        var info_table = d3.selectAll("#traffic_chart").append("p").attr("id", "traffic_chart_content").text("No data traffic");
-
-        d3.selectAll("#profile_live_content").remove();
-        var info_table = d3.selectAll("#profile_live").append("p").attr("id", "profile_live_content").text("No data for profile live");
-
         d3.selectAll("#device_info_content").remove();
-        var info_table = d3.selectAll("#device_info").append("table").attr("id", "device_info_content").attr("class", "table borderless");
+        var info_table = d3.selectAll("#device_info").append("table").attr("id", "device_info_content").attr("class", "table borderless").append("tbody");
 
         var row = info_table.append("tr");
         row.append("td").text("Link name: ");
@@ -339,7 +327,7 @@ function NetTMap_chart(id, width, height) {
     // parsuje a zobrazuje prichozi json data s informacemi o zarizeni
     function parse_data_device(data) {
         d3.selectAll("#device_info_content").remove();
-        var info_table = d3.selectAll("#device_info").append("table").attr("id", "device_info_content").attr("class", "table borderless");
+        var info_table = d3.selectAll("#device_info").append("table").attr("id", "device_info_content").attr("class", "table borderless").append("tbody");
 
         var row1 = info_table.append("tr");
         row1.append("td").text("Device name: ");
@@ -499,7 +487,7 @@ function NetTMap_chart(id, width, height) {
         last_time = data.end;
         d3.selectAll("#profile_live_content").remove();
         d3.selectAll("#profile_live_content").remove();
-        var info_table = d3.selectAll("#profile_live").append("table").attr("id", "profile_live_content").attr("class", "table borderless");
+        var info_table = d3.selectAll("#profile_live").append("table").attr("id", "profile_live_content").attr("class", "table borderless").append("tbody");
 
         var row1 = info_table.append("tr");
         row1.append("td").text("Device name: ");
